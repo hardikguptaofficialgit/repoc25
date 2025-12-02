@@ -91,6 +91,12 @@ const topLocations: TopLocation[] = [
         colors:
             "bg-rose-100 text-rose-600 hover:bg-rose-200 dark:bg-rose-900/30 dark:text-rose-400",
     },
+    {
+        name: "Seminar Halls",
+        icon: Theater,
+        colors:
+            "bg-purple-100 text-purple-600 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-400",
+    },
 ];
 
 export default topLocations;

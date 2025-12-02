@@ -2,17 +2,30 @@ import MiniSearch, { SearchResult } from "minisearch";
 import { POI } from "~/types/poi";
 
 interface POIProperties {
-  id: number;
+  id?: string | number;
   name: string;
-  type: string;
-  floor: number;
+  type?: string;
+  category?: string;
+  floor?: number;
+  level_id?: number;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  metadata: Record<string, any>;
-  building_id: string;
+  metadata?: Record<string, any>;
+  building_id?: string;
+  [key: string]: any; // Allow additional properties
 }
 
 export interface POIFeature extends GeoJSON.Feature<GeoJSON.Point> {
   properties: POIProperties;
+}
+
+// Type for the flattened POI data stored in MiniSearch
+interface StoredPOI {
+  id: string | number;
+  name: string;
+  type?: string;
+  category?: string;
+  geometry: GeoJSON.Point;
+  [key: string]: any;
 }
 
 /**
@@ -34,6 +47,7 @@ export class IndoorGeocoder {
 
     const flattenPOIs = pois.map((feature: POIFeature) => ({
       ...feature.properties,
+      id: feature.id, // Include the feature's id for MiniSearch
       geometry: feature.geometry,
     }));
 
@@ -52,7 +66,7 @@ export class IndoorGeocoder {
     if (results.length === 0) {
       throw new Error("No results found.");
     }
-    const topResult = results[0];
+    const topResult = results[0] as unknown as StoredPOI;
     return {
       id: topResult.id,
       name: topResult.name,
@@ -89,11 +103,14 @@ export class IndoorGeocoder {
       cutoffIndex > 0 ? results.slice(0, cutoffIndex) : results.slice(0, 5);
 
     return relevantResults
-      .map((result) => ({
-        id: result.id,
-        name: result.name,
-        coordinates: result.geometry.coordinates,
-      }))
+      .map((result) => {
+        const stored = result as unknown as StoredPOI;
+        return {
+          id: stored.id,
+          name: stored.name,
+          coordinates: stored.geometry.coordinates,
+        };
+      })
       .slice(0, maxResults);
   }
 

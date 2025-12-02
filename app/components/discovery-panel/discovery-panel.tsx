@@ -22,9 +22,14 @@ export default function DiscoveryPanel() {
   const { indoorDirections } = useDirections(map);
   const indoorGeocoder = useIndoorGeocoder();
 
-  indoorDirections?.loadMapData(
-    building.indoor_routes as GeoJSON.FeatureCollection,
-  );
+  // Load indoor routes data if available
+  useEffect(() => {
+    if (indoorDirections && building.indoor_routes) {
+      indoorDirections.loadMapData(
+        building.indoor_routes as GeoJSON.FeatureCollection,
+      );
+    }
+  }, [indoorDirections]);
 
   const navigateToPOI = useCallback(
     (coordinates: GeoJSON.Position) => {
