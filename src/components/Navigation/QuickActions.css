@@ -1,0 +1,163 @@
+.quick-actions-container {
+    background: #121212;
+    border: 1px solid #2A2A2A;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+}
+
+/* ===============================
+   HEADER & TITLE
+   =============================== */
+.quick-actions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 14px;
+    user-select: none;
+}
+
+.quick-actions-container.collapsed .quick-actions-header {
+    margin-bottom: 0;
+}
+
+.quick-actions-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin: 0;
+
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+}
+
+.toggle-icon {
+    color: #6A6A6A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.15s ease;
+}
+
+.quick-actions-header:hover .toggle-icon {
+    color: #FFFFFF;
+}
+
+/* ===============================
+   ANIMATION
+   =============================== */
+.animate-in {
+    animation: gridFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes gridFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-8px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ===============================
+   GRID
+   =============================== */
+.quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+/* ===============================
+   BUTTON
+   =============================== */
+.quick-action-button {
+    --action-color: #D34509;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+
+    padding: 14px 10px;
+
+    background: #0F0F0F;
+    border: 1px solid #2A2A2A;
+    border-radius: 12px;
+
+    cursor: pointer;
+    color: #FFFFFF;
+
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+/* hover = intent, not jump */
+.quick-action-button:hover:not(:disabled) {
+    background: rgba(211, 69, 9, 0.08);
+    border-color: var(--action-color);
+}
+
+/* ===============================
+   DISABLED
+   =============================== */
+.quick-action-button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+/* ===============================
+   ICON
+   =============================== */
+.quick-action-button .action-icon {
+    color: var(--action-color);
+    transition: color 0.15s ease;
+}
+
+.quick-action-button:hover:not(:disabled) .action-icon {
+    color: #FFFFFF;
+}
+
+/* ===============================
+   LABEL
+   =============================== */
+.quick-action-button .action-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+
+    color: #9A9A9A;
+    transition: color 0.15s ease;
+}
+
+.quick-action-button:hover:not(:disabled) .action-label {
+    color: #FFFFFF;
+}
+
+/* ===============================
+   MOBILE
+   =============================== */
+@media (max-width: 768px) {
+    .quick-actions-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .quick-action-button {
+        padding: 12px 8px;
+    }
+
+    .quick-action-button .action-label {
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .quick-actions-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

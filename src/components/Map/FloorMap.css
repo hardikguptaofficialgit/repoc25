@@ -1,0 +1,338 @@
+/* Container */
+.floor-map-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 600px;
+  background: #000000;
+  border-radius: 16px;
+  overflow: hidden;
+  /* Ensure it creates a stacking context but doesn't hide the App button if that button is outside */
+}
+
+.floor-map-container.fullscreen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 990;
+  /* high but below App button if App button is 1000? No, full screen should probably be top. */
+  background: #000000;
+}
+
+.fullscreen-close {
+  background: rgba(211, 74, 9, 0.9);
+}
+
+.fullscreen-close:hover {
+  background: #D34A09;
+}
+
+/* If fullscreen, we want map to be on top of EVERYTHING. 
+   But the "View Mode" button is in App.jsx. 
+   If map covers App.jsx, the button is hidden. 
+   The user needs to be able to exit fullscreen or editor mode. 
+   Fullscreen exit is handled by map controls. 
+   Editor mode exit is the App button. 
+   If fullscreen, maybe we rely on the internal maximize/minimize button.
+*/
+
+/* UI Header (New controls bar) */
+.map-ui-header {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: auto;
+  display: flex;
+  gap: 12px;
+  z-index: 150;
+}
+
+.ui-group {
+  display: flex;
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 4px;
+  gap: 4px;
+}
+
+.ui-group button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #737373;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ui-group button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.ui-group button.active {
+  background: linear-gradient(135deg, #D34A09, #D8830D);
+  color: #fff;
+}
+
+/* Editor Toolbar (Left side tools) */
+.map-editor-toolbar {
+  position: absolute;
+  top: 80px;
+  /* Moved down to avoid overlapping the 'View Mode' button */
+  left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 150;
+  background: rgba(10, 10, 10, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  backdrop-filter: blur(8px);
+  width: 140px;
+}
+
+.toolbar-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: #525252;
+  margin-bottom: 4px;
+  letter-spacing: 0.05em;
+}
+
+.map-editor-toolbar button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 12px;
+  background: rgba(30, 30, 30, 0.5);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: #A3A3A3;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.map-editor-toolbar button:hover {
+  background: rgba(211, 74, 9, 0.2);
+  color: #fff;
+  border-color: rgba(211, 74, 9, 0.4);
+}
+
+.map-editor-toolbar button.active {
+  background: linear-gradient(135deg, #D34A09, #D8830D);
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(211, 74, 9, 0.3);
+}
+
+/* Tool Options (Sub-menu inside toolbar) */
+.tool-options {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.tool-options select {
+  width: 100%;
+  background: #000;
+  border: 1px solid #333;
+  color: #fff;
+  font-size: 11px;
+  padding: 6px;
+  border-radius: 6px;
+  outline: none;
+  cursor: pointer;
+}
+
+/* Editor Properties Panel (Floating) */
+.editor-properties-panel {
+  position: absolute;
+  top: 80px;
+  /* Aligned with toolbar vertically */
+  left: 170px;
+  /* To the right of the toolbar */
+  width: 260px;
+  background: rgba(10, 10, 10, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 16px;
+  z-index: 150;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  animation: slideIn 0.2s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 8px;
+}
+
+.panel-header span {
+  color: #fff;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.panel-header button {
+  background: none;
+  border: none;
+  color: #737373;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}
+
+.panel-header button:hover {
+  color: #fff;
+}
+
+.panel-row {
+  margin-bottom: 12px;
+}
+
+.panel-row label {
+  display: block;
+  color: #737373;
+  font-size: 10px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+}
+
+.panel-row input,
+.panel-row select {
+  width: 100%;
+  background: #171717;
+  border: 1px solid #333;
+  color: white;
+  padding: 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  outline: none;
+}
+
+.panel-row input:focus,
+.panel-row select:focus {
+  border-color: #D34A09;
+}
+
+.panel-row.coords {
+  display: flex;
+  gap: 8px;
+}
+
+.delete-btn {
+  width: 100%;
+  background: rgba(239, 68, 68, 0.1);
+  color: #EF4444;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 12px;
+  transition: all 0.2s;
+}
+
+.delete-btn:hover {
+  background: #EF4444;
+  color: white;
+}
+
+.disabled-input {
+  opacity: 0.5;
+  cursor: not-allowed;
+  font-family: monospace;
+  color: #737373 !important;
+}
+
+/* Legend */
+.map-legend-colored {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(10, 10, 10, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+
+.legend-row {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #A3A3A3;
+  font-weight: 500;
+}
+
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .map-ui-header {
+    top: 10px;
+    right: 10px;
+  }
+
+  .map-editor-toolbar {
+    top: 70px;
+    left: 10px;
+    width: 120px;
+  }
+
+  .editor-properties-panel {
+    left: 140px;
+    width: 200px;
+  }
+}

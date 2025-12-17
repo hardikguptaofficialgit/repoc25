@@ -1,0 +1,223 @@
+.route-info-container {
+    background: #121212;
+    border: 1px solid #2A2A2A;
+    border-radius: 16px;
+    padding: 16px;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+}
+
+/* ===============================
+   SUMMARY
+   =============================== */
+.route-summary {
+    margin-bottom: 14px;
+}
+
+.route-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.route-title {
+    font-size: 15px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #D34B09 0%, #D7860C 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ===============================
+   BADGES
+   =============================== */
+.route-badges {
+    display: flex;
+    gap: 8px;
+}
+
+.route-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 5px 10px;
+    border-radius: 14px;
+
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* distance */
+.distance-badge {
+    background: linear-gradient(135deg,
+            rgba(211, 75, 9, 0.22),
+            rgba(215, 134, 12, 0.22));
+    color: #FFD6A0;
+}
+
+/* time */
+.time-badge {
+    background: linear-gradient(135deg,
+            rgba(211, 75, 9, 0.22),
+            rgba(215, 134, 12, 0.22));
+    color: #FFD6A0;
+}
+
+/* ===============================
+   ENDPOINTS
+   =============================== */
+.route-endpoints {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    padding: 14px;
+    background: #0F0F0F;
+    border-radius: 12px;
+}
+
+.endpoint {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.endpoint-icon {
+    width: 36px;
+    height: 36px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+    flex-shrink: 0;
+
+    background: linear-gradient(135deg, #D34B09, #D7860C);
+    color: #FFFFFF;
+}
+
+/* start / end share gradient, difference is label */
+.start-icon,
+.end-icon {
+    background: linear-gradient(135deg, #D34B09, #D7860C);
+    color: #FFFFFF;
+}
+
+.endpoint-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.endpoint-label {
+    font-size: 10px;
+    font-weight: 600;
+    color: #8A8A8A;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+
+.endpoint-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #FFFFFF;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.route-arrow {
+    color: #5A5A5A;
+    flex-shrink: 0;
+}
+
+/* ===============================
+   DIRECTIONS
+   =============================== */
+.directions-list {
+    border-top: 1px solid #2A2A2A;
+    padding-top: 14px;
+}
+
+.directions-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 10px;
+
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.direction-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    padding: 10px 0;
+    border-bottom: 1px solid #242424;
+}
+
+.direction-item:last-child {
+    border-bottom: none;
+}
+
+/* step */
+.step-number {
+    width: 26px;
+    height: 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: linear-gradient(135deg, #D34B09, #D7860C);
+    color: #FFFFFF;
+    border-radius: 50%;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.direction-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.direction-icon {
+    color: #B0B0B0;
+    flex-shrink: 0;
+}
+
+.direction-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #E5E5E5;
+}
+
+/* ===============================
+   MOBILE
+   =============================== */
+@media (max-width: 768px) {
+    .route-endpoints {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .route-arrow {
+        transform: rotate(90deg);
+    }
+
+    .route-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
