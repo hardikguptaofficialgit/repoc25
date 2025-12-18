@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
-import { Stage, Layer, Rect, Circle, Line, Text, Group } from 'react-konva';
+import { Stage, Layer, Rect, Circle, Line, Text, Group, Image } from 'react-konva';
 import { nodes as initialNodes, edges as initialEdges } from '../../data/buildingData';
-import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, Maximize, Minimize, X, Plus, Trash2, Link, MousePointer } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, Maximize, Minimize, X, Plus, Trash2, Link, MousePointer, Upload, Trash } from 'lucide-react';
 import './FloorMap.css';
 
 // -----------------------------------------------------------------------------
@@ -181,6 +181,8 @@ const FloorMap = ({
     const [selectedNode, setSelectedNode] = useState(null);
     const [hoveredNode, setHoveredNode] = useState(null);
     const [floorPlanImage, setFloorPlanImage] = useState(null);
+    const [bgImageObj, setBgImageObj] = useState(null);
+    const [bgImageOpacity, setBgImageOpacity] = useState(0.5);
     const [showGrid, setShowGrid] = useState(editorMode);
     const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -193,10 +195,26 @@ const FloorMap = ({
 
     const containerRef = useRef(null);
     const stageRef = useRef(null);
+    const fileInputRef = useRef(null);
 
     // -----------------------------------------------------------------------------
-    // MapNode Component
+    // Effects
     // -----------------------------------------------------------------------------
+
+    // Load background image
+    useEffect(() => {
+        if (floorPlanImage) {
+            const img = new window.Image();
+            img.src = floorPlanImage;
+            img.onload = () => {
+                setBgImageObj(img);
+            };
+        } else {
+            setBgImageObj(null);
+        }
+    }, [floorPlanImage]);
+
+    // Resize observer
     useEffect(() => {
         const resizeObserver = new ResizeObserver(entries => {
             for (let entry of entries) {
@@ -308,6 +326,35 @@ const FloorMap = ({
         navigator.clipboard.writeText(data).then(() => alert("Data copied to clipboard"));
     };
 
+    const handleImageUpload = (e) => {
+        const file = e.target.files?.[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setFloorPlanImage(event.target.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleRemoveImage = () => {
+        setFloorPlanImage(null);
+        setBgImageObj(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    const handleClearAll = () => {
+        if (window.confirm('Are you sure you want to delete ALL nodes and edges? This cannot be undone.')) {
+            setNodes({});
+            setEdges([]);
+            setSelectedNode(null);
+            setConnectingFrom(null);
+            setTempLineEnd(null);
+        }
+    };
+
     // Define PALETTE here, as it's used in MapNode and FloorMap
     const PALETTE = {
         blockA: '#60A5FA',       // Blue
@@ -361,6 +408,7 @@ const FloorMap = ({
                     <div className="ui-group">
                         <button onClick={() => setShowGrid(!showGrid)} className={showGrid ? 'active' : ''}><Grid3X3 size={18} /></button>
                         <button onClick={exportData} title="Copy Data"><Download size={18} /></button>
+                        <button onClick={handleClearAll} title="Delete All Nodes" style={{ color: '#EF4444' }}><Trash2 size={18} /></button>
                     </div>
                 )}
             </div>
@@ -373,6 +421,38 @@ const FloorMap = ({
                     <button className={editorTool === 'addNode' ? 'active' : ''} onClick={() => setEditorTool('addNode')}><Plus size={16} /> Add Node</button>
                     <button className={editorTool === 'connect' ? 'active' : ''} onClick={() => setEditorTool('connect')}><Link size={16} /> Connect</button>
                     <button className={editorTool === 'delete' ? 'active' : ''} onClick={() => setEditorTool('delete')}><Trash2 size={16} /> Delete</button>
+
+                    <div className="toolbar-label" style={{ marginTop: '12px' }}>BACKGROUND</div>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        style={{ display: 'none' }}
+                    />
+                    <button onClick={() => fileInputRef.current?.click()}>
+                        <Upload size={16} /> {floorPlanImage ? 'Change' : 'Upload'}
+                    </button>
+                    {floorPlanImage && (
+                        <>
+                            <button onClick={handleRemoveImage} style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444' }}>
+                                <Trash size={16} /> Remove
+                            </button>
+                            <div className="tool-options">
+                                <div className="toolbar-label">OPACITY</div>
+                                <input
+                                    type="range"
+                                    min="0"
+                                    max="1"
+                                    step="0.1"
+                                    value={bgImageOpacity}
+                                    onChange={(e) => setBgImageOpacity(parseFloat(e.target.value))}
+                                    style={{ width: '100%' }}
+                                />
+                            </div>
+                        </>
+                    )}
+
                     {editorTool === 'addNode' && (
                         <div className="tool-options">
                             <div className="toolbar-label">NODE TYPE</div>
@@ -493,6 +573,14 @@ const FloorMap = ({
             >
                 <Layer listening={false}>
                     <Rect width={2000} height={2000} fill="#000000" x={-500} y={-500} />
+                    {bgImageObj && (
+                        <Image
+                            image={bgImageObj}
+                            x={0}
+                            y={0}
+                            opacity={bgImageOpacity}
+                        />
+                    )}
                     {renderedGrid}
                 </Layer>
                 <Layer>

@@ -157,6 +157,36 @@
   cursor: pointer;
 }
 
+.tool-options input[type="range"] {
+  width: 100%;
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.tool-options input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, #D34A09, #D8830D);
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.tool-options input[type="range"]::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: linear-gradient(135deg, #D34A09, #D8830D);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
 /* Editor Properties Panel (Floating) */
 .editor-properties-panel {
   position: absolute;
