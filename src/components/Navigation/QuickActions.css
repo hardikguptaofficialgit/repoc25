@@ -1,9 +1,48 @@
 .quick-actions-container {
-    background: #121212;
-    border: 1px solid #2A2A2A;
-    border-radius: 16px;
-    padding: 16px;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+    width: 100%;
+}
+
+/* ===============================
+   CAMPUS OVERVIEW SECTION
+   =============================== */
+.campus-overview-section {
+    margin-bottom: 24px;
+    padding: 0 4px;
+}
+
+.overview-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.overview-stat {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 12px;
+    border-radius: var(--radius-md);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent-primary);
+}
+
+.stat-label {
+    font-size: 10px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
 /* ===============================
@@ -16,6 +55,7 @@
     cursor: pointer;
     margin-bottom: 14px;
     user-select: none;
+    padding: 0 4px;
 }
 
 .quick-actions-container.collapsed .quick-actions-header {
@@ -24,42 +64,41 @@
 
 .quick-actions-title {
     font-size: 11px;
-    font-weight: 700;
-    color: #FFFFFF;
+    font-weight: 600;
+    color: var(--text-secondary);
     margin: 0;
-
     text-transform: uppercase;
-    letter-spacing: 0.6px;
+    letter-spacing: 0.05em;
 }
 
 .toggle-icon {
-    color: #6A6A6A;
+    color: var(--text-muted);
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: color 0.15s ease;
+    transition: color 0.2s ease;
 }
 
 .quick-actions-header:hover .toggle-icon {
-    color: #FFFFFF;
+    color: var(--text-primary);
 }
 
 /* ===============================
    ANIMATION
    =============================== */
 .animate-in {
-    animation: gridFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: gridFadeIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 @keyframes gridFadeIn {
     from {
         opacity: 0;
-        transform: translateY(-8px) scale(0.98);
+        transform: translateY(10px);
     }
 
     to {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: translateY(0);
     }
 }
 
@@ -82,32 +121,38 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 8px;
+    padding: 16px 12px;
 
-    padding: 14px 10px;
-
-    background: #0F0F0F;
-    border: 1px solid #2A2A2A;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: var(--radius-md);
 
     cursor: pointer;
-    color: #FFFFFF;
+    color: var(--text-primary);
+    position: relative;
+    overflow: hidden;
 
-    transition: background 0.15s ease, border-color 0.15s ease;
+    transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
-/* hover = intent, not jump */
+/* Hover Effect */
 .quick-action-button:hover:not(:disabled) {
-    background: rgba(211, 69, 9, 0.08);
+    background: rgba(255, 255, 255, 0.06);
     border-color: var(--action-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* ===============================
-   DISABLED
-   =============================== */
+.quick-action-button:active:not(:disabled) {
+    transform: scale(0.98);
+}
+
+/* Disabled State */
 .quick-action-button:disabled {
-    opacity: 0.35;
+    opacity: 0.4;
     cursor: not-allowed;
+    background: rgba(255, 255, 255, 0.01);
 }
 
 /* ===============================
@@ -115,11 +160,18 @@
    =============================== */
 .quick-action-button .action-icon {
     color: var(--action-color);
-    transition: color 0.15s ease;
+    transition: color 0.2s ease, transform 0.2s ease, filter 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 0 12px var(--action-color)) brightness(1.5);
+    /* Always glowing and brighter */
 }
 
 .quick-action-button:hover:not(:disabled) .action-icon {
-    color: #FFFFFF;
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 20px var(--action-color)) brightness(1.8);
+    /* Enhanced glow on hover */
 }
 
 /* ===============================
@@ -129,13 +181,12 @@
     font-size: 11px;
     font-weight: 600;
     text-align: center;
-
-    color: #9A9A9A;
+    color: var(--text-secondary);
     transition: color 0.15s ease;
 }
 
 .quick-action-button:hover:not(:disabled) .action-label {
-    color: #FFFFFF;
+    color: var(--text-primary);
 }
 
 /* ===============================
@@ -148,16 +199,12 @@
     }
 
     .quick-action-button {
-        padding: 12px 8px;
+        padding: 12px 6px;
+        gap: 6px;
     }
 
     .quick-action-button .action-label {
         font-size: 10px;
-    }
-}
-
-@media (max-width: 480px) {
-    .quick-actions-grid {
-        grid-template-columns: repeat(2, 1fr);
+        line-height: 1.2;
     }
 }
