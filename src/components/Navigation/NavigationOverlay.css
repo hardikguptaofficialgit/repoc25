@@ -12,6 +12,13 @@
     justify-content: center;
 }
 
+
+
+.nav-back-btn {
+    display: none;
+    /* Hide back button - not needed */
+}
+
 .nav-card {
     background: rgba(22, 22, 22, 0.95);
     backdrop-filter: blur(20px);
@@ -154,7 +161,7 @@
     background: #059669;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 1024px) {
     .nav-overlay-container {
         bottom: 16px;
         width: 92%;
@@ -182,5 +189,11 @@
     .nav-controls {
         padding-left: 6px;
         gap: 4px;
+        /* Show prev/next controls on mobile */
+    }
+
+    .nav-back-btn {
+        display: none;
+        /* Hide back button on mobile */
     }
 }

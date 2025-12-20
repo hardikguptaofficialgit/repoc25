@@ -13,7 +13,7 @@ import {
 import { generateNavigationInstructions } from '../../utils/navigationInstructions';
 import './NavigationOverlay.css';
 
-const NavigationOverlay = ({ path }) => {
+const NavigationOverlay = ({ path, onBack }) => {
     const [instructions, setInstructions] = useState([]);
     const [currentStep, setCurrentStep] = useState(0);
 
@@ -59,6 +59,13 @@ const NavigationOverlay = ({ path }) => {
 
     return (
         <div className="nav-overlay-container">
+            {/* Floating Back Button (Mobile Only) */}
+            {onBack && (
+                <button className="nav-back-btn" onClick={onBack} title="Exit Navigation">
+                    <ChevronLeft size={24} />
+                </button>
+            )}
+
             <div className={`nav-card ${step.type}`}>
                 <div className="nav-progress">
                     <div

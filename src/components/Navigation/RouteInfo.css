@@ -1,32 +1,89 @@
 .route-info-container {
-    background: #121212;
-    border: 1px solid #2A2A2A;
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 16px;
     padding: 16px;
     box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    /* Fill the scroll container */
+    animation: slideUpFade 0.4s ease-out forwards;
+}
+
+/* Mobile: Remove card styling to fill width */
+@media (max-width: 1024px) {
+    .route-info-container {
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        padding: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .navigation-actions {
+        padding: 0 0 16px 0;
+        /* Remove horizontal padding */
+        margin-top: 16px;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    .start-nav-btn {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+    }
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ===============================
-   SUMMARY
+   HEADER & SUMMARY
    =============================== */
 .route-summary {
-    margin-bottom: 14px;
+    margin-bottom: 1px;
 }
 
 .route-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
+    align-items: flex-start;
+    cursor: pointer;
+    user-select: none;
+}
+
+.header-left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
 
 .route-title {
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
-    background: linear-gradient(135deg, #D34B09 0%, #D7860C 100%);
+    background: var(--accent-gradient);
+    background-clip: text;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    margin: 0;
 }
 
 /* ===============================
@@ -35,189 +92,266 @@
 .route-badges {
     display: flex;
     gap: 8px;
+    margin-top: 2px;
 }
 
 .route-badge {
     display: flex;
     align-items: center;
-    gap: 6px;
-
-    padding: 5px 10px;
-    border-radius: 14px;
-
-    font-size: 12px;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
     font-weight: 600;
 }
 
 /* distance */
 .distance-badge {
-    background: linear-gradient(135deg,
-            rgba(211, 75, 9, 0.22),
-            rgba(215, 134, 12, 0.22));
-    color: #FFD6A0;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-secondary);
+    border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* time */
 .time-badge {
-    background: linear-gradient(135deg,
-            rgba(211, 75, 9, 0.22),
-            rgba(215, 134, 12, 0.22));
-    color: #FFD6A0;
+    background: rgba(211, 75, 9, 0.15);
+    color: var(--accent-primary);
+    border: 1px solid rgba(211, 75, 9, 0.2);
 }
 
-/* ===============================
-   ENDPOINTS
-   =============================== */
-.route-endpoints {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-
-    padding: 14px;
-    background: #0F0F0F;
-    border-radius: 12px;
-}
-
-.endpoint {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-}
-
-.endpoint-icon {
-    width: 36px;
-    height: 36px;
-
+.expand-btn {
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    border-radius: 50%;
-    flex-shrink: 0;
-
-    background: linear-gradient(135deg, #D34B09, #D7860C);
-    color: #FFFFFF;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-/* start / end share gradient, difference is label */
-.start-icon,
-.end-icon {
-    background: linear-gradient(135deg, #D34B09, #D7860C);
-    color: #FFFFFF;
-}
-
-.endpoint-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-}
-
-.endpoint-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: #8A8A8A;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-}
-
-.endpoint-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: #FFFFFF;
-
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.route-arrow {
-    color: #5A5A5A;
-    flex-shrink: 0;
+.expand-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
 }
 
 /* ===============================
-   DIRECTIONS
+   DIRECTIONS LIST
    =============================== */
 .directions-list {
-    border-top: 1px solid #2A2A2A;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     padding-top: 14px;
+    margin-top: 14px;
 }
 
 .directions-title {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
-    color: #FFFFFF;
-    margin-bottom: 10px;
-
+    color: var(--text-muted);
+    margin-bottom: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.05em;
 }
 
 .direction-item {
     display: flex;
-    align-items: flex-start;
     gap: 12px;
-
-    padding: 10px 0;
-    border-bottom: 1px solid #242424;
+    position: relative;
+    padding-bottom: 0;
+    margin-bottom: 0;
 }
 
-.direction-item:last-child {
-    border-bottom: none;
-}
-
-/* step */
-.step-number {
-    width: 26px;
-    height: 26px;
-
+/* Step Indicator (Number + Line) */
+.step-indicator {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-
-    background: linear-gradient(135deg, #D34B09, #D7860C);
-    color: #FFFFFF;
-    border-radius: 50%;
-
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.direction-content {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
-}
-
-.direction-icon {
-    color: #B0B0B0;
+    width: 24px;
     flex-shrink: 0;
 }
 
-.direction-text {
-    font-size: 13px;
-    font-weight: 500;
-    color: #E5E5E5;
+.step-number {
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    position: relative;
 }
 
-/* ===============================
-   MOBILE
-   =============================== */
-@media (max-width: 768px) {
-    .route-endpoints {
-        flex-direction: column;
-        gap: 10px;
+.step-line {
+    width: 1px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
+    flex: 1;
+    margin-top: -1px;
+    /* Connect smoothly */
+    margin-bottom: -1px;
+    min-height: 24px;
+}
+
+/* Hide line for last item handled by JS usually, but here flex takes care */
+
+/* Content */
+.direction-content {
+    display: flex;
+    align-items: flex-start;
+    /* Align icon top with text */
+    gap: 12px;
+    flex: 1;
+    padding-bottom: 16px;
+}
+
+.direction-icon-wrapper {
+    color: var(--text-muted);
+    margin-top: 1px;
+    transition: color 0.2s;
+}
+
+/* Highlight start/end icons */
+.type-start .direction-icon-wrapper {
+    color: #10B981;
+}
+
+/* Green */
+.type-arrive .direction-icon-wrapper {
+    color: #F59E0B;
+}
+
+/* Amber */
+.type-stairs .direction-icon-wrapper {
+    color: #8B5CF6;
+}
+
+/* Purple */
+.type-lift .direction-icon-wrapper {
+    color: #3B82F6;
+}
+
+/* Blue */
+
+.direction-text {
+    font-size: 13px;
+    color: var(--text-primary);
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+/* Navigation Actions */
+.navigation-actions {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: flex-start;
+    /* Left alignment */
+}
+
+/* Start Navigation Button */
+.start-nav-btn {
+    width: 100%;
+    max-width: 320px;
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
+    transition: all 0.2s;
+    box-sizing: border-box;
+    margin-left: 40px;
+    /* Shifted more to the right */
+}
+
+/* Hover & Active States */
+.start-nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+}
+
+.start-nav-btn:active {
+    transform: translateY(0);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 480px) {
+    .start-nav-btn {
+        max-width: 260px;
+        font-size: 14px;
+        padding: 8px 14px;
+        margin-left: 24px;
+        /* Slightly smaller shift on mobile */
+    }
+}
+
+/* Animation - Page Slide Effect */
+.animate-slide-down {
+    animation: slideInRight 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(20px);
     }
 
-    .route-arrow {
-        transform: rotate(90deg);
+    to {
+        opacity: 1;
+        transform: translateX(0);
     }
+}
 
-    .route-header {
-        flex-direction: column;
-        align-items: flex-start;
-    }
+/* High Contrast Override */
+.high-contrast .route-info-container {
+    background: #000000;
+    border: 2px solid #FFFFFF;
+}
+
+.high-contrast .route-title {
+    -webkit-text-fill-color: #FFFF00;
+    background: none;
+    color: #FFFF00;
+}
+
+.high-contrast .distance-badge,
+.high-contrast .time-badge {
+    background: #000;
+    border: 1px solid #FFF;
+    color: #FFF;
+}
+
+.high-contrast .step-number {
+    background: #000;
+    border: 2px solid #FFF;
+    color: #FFF;
+    font-weight: bold;
+}
+
+.high-contrast .step-line {
+    background: #FFF;
+    width: 2px;
+}
+
+.high-contrast .direction-icon-wrapper {
+    color: #FFFF00 !important;
+}
+
+.high-contrast .direction-text {
+    color: #FFF;
 }
