@@ -360,7 +360,14 @@ function App() {
         >
           <Edit3 size={20} />
         </button>
+<<<<<<< HEAD
+
+         
+
+      </div>
+=======
       </div> */}
+>>>>>>> d99c3b88e01284855915b41a5c2c16e1f80056d4
 
       {/* --- Fullscreen Map --- */}
       <div className="map-fullscreen">
