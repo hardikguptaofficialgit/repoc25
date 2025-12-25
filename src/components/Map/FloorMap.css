@@ -349,29 +349,6 @@
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
 }
 
-@media (max-width: 1024px) {
-  .map-ui-header {
-    display: none;
-    /* Hide zoom/fullscreen controls on mobile */
-  }
-
-  .map-legend-colored {
-    display: none;
-    /* Hide legend on mobile to maximize map space */
-  }
-
-  .map-editor-toolbar {
-    top: 70px;
-    left: 10px;
-    width: 120px;
-  }
-
-  .editor-properties-panel {
-    left: 140px;
-    width: 200px;
-  }
-}
-
 @media (max-width: 768px) {
   .map-ui-header {
     top: 10px;

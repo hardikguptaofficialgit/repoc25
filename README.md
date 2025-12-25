@@ -1,1 +1,1 @@
-react app campus navigation for Campus 25
+react app campus navigation

@@ -6,9 +6,8 @@ import QuickActions from './components/Navigation/QuickActions';
 import NavigationOverlay from './components/Navigation/NavigationOverlay';
 import { buildGraph } from './utils/graphBuilder';
 import { findShortestPath, findNearestPOI } from './utils/pathfinding';
-import { generateRouteInstructions } from './utils/navigation';
 import { nodes, poiCategories } from './data/buildingData';
-import { ArrowUpDown, Edit3, Eye, Menu, ChevronLeft, MapPin } from 'lucide-react';
+import { ArrowUpDown, Trash2, Edit3, Eye, Menu, ChevronLeft } from 'lucide-react';
 import './App.css';
 
 function App() {
@@ -19,30 +18,16 @@ function App() {
   const [selectedEnd, setSelectedEnd] = useState(null);
   const [path, setPath] = useState([]);
   const [distance, setDistance] = useState(0);
-  const [instructions, setInstructions] = useState([]);
   const [error, setError] = useState('');
-  const [isNavigating, setIsNavigating] = useState(false);
 
   const [editorMode, setEditorMode] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [highContrast, setHighContrast] = useState(false);
 
-  // Initial Graph Build
   useEffect(() => {
     const builtGraph = buildGraph();
     setGraph(builtGraph);
   }, []);
 
-  // Update body class for high contrast
-  useEffect(() => {
-    if (highContrast) {
-      document.body.classList.add('high-contrast');
-    } else {
-      document.body.classList.remove('high-contrast');
-    }
-  }, [highContrast]);
-
-  // Recalculate route when start/end changes
   useEffect(() => {
     if (selectedStart && selectedEnd && graph) {
       calculateRoute(selectedStart.id, selectedEnd.id);
@@ -52,9 +37,7 @@ function App() {
   const toggleEditorMode = () => {
     const newEditorState = !editorMode;
     setEditorMode(newEditorState);
-    if (newEditorState) {
-      setSidebarOpen(false);
-    }
+    setSidebarOpen(!newEditorState);
   };
 
   const calculateRoute = (startId, endId) => {
@@ -64,18 +47,10 @@ function App() {
       setError(result.error);
       setPath([]);
       setDistance(0);
-      setInstructions([]);
     } else {
       setPath(result.path);
       setDistance(result.distance);
       setError('');
-
-      const newInstructions = generateRouteInstructions(result.path, nodes);
-      setInstructions(newInstructions);
-
-      // Show preview first, don't auto-collapse sidebar yet
-      setIsNavigating(false);
-      setSidebarOpen(true);
     }
   };
 
@@ -129,13 +104,6 @@ function App() {
       setPath(result.path);
       setDistance(result.distance);
       setError('');
-
-      const newInstructions = generateRouteInstructions(result.path, nodes);
-      setInstructions(newInstructions);
-
-      if (window.innerWidth <= 1024) {
-        setSidebarOpen(false); // Peek mode
-      }
     }
   };
 
@@ -155,7 +123,6 @@ function App() {
     setSelectedEnd(null);
     setPath([]);
     setDistance(0);
-    setInstructions([]);
     setError('');
   };
 
@@ -163,7 +130,6 @@ function App() {
     if (editorMode) return;
     if (node.type === 'corridor') return;
 
-    // Open sidebar to show details/context (Desktop only mostly, or expand on mobile)
     setSidebarOpen(true);
 
     const location = { id: nodeId, label: node.label, type: node.type };
@@ -173,7 +139,7 @@ function App() {
       return;
     }
     if (selectedStart.id === nodeId) {
-      setError('Start and destination cannot be the same');
+      setError('Start and destination cannot be the same location');
       setTimeout(() => setError(''), 3000);
       return;
     }
@@ -181,7 +147,6 @@ function App() {
       handleEndSelect(location);
       return;
     }
-    // Deselect if clicking same end node
     if (selectedEnd.id === nodeId) {
       setSelectedEnd(null);
       setEndLocation('');
@@ -191,185 +156,120 @@ function App() {
     }
   };
 
-  // Determine current page state - simplified to 2 pages
-  // Page 1: Campus Overview & Quick Navigate
-  // Page 2: Route Steps & Navigation (combined)
-  const currentPage = !selectedEnd ? 1 : 2;
-
-  const handleStartNavigation = () => {
-    setIsNavigating(true);
-    if (window.innerWidth <= 1024) {
-      setSidebarOpen(false); // Close sidebar to focus on map/overlay
-    }
-  };
-
-  const handleBackToPage1 = () => {
-    handleClearRoute();
-    setSidebarOpen(true);
-  };
-
   return (
-    <div className={`app page-${currentPage}`}>
+    <div className="app">
 
-      {/* --- 1. Independent Floating Toggle Button (Desktop/Mobile) --- */}
+      {/* --- 1. Independent Floating Toggle Button --- */}
+      {/* detached from the sidebar structure */}
       <div className={`floating-menu-trigger ${!sidebarOpen && !editorMode ? 'visible' : ''}`}>
         <button
           className="glass-btn"
           onClick={() => setSidebarOpen(true)}
           title="Open Navigation"
         >
-          <Menu size={20} />
+          <Menu size={24} />
         </button>
       </div>
 
-      {/* --- 2. Sidebar / Bottom Sheet Wrapper --- */}
-      <div className={`sidebar-wrapper ${sidebarOpen ? 'expanded' : 'closed'} ui-page-${currentPage}`}>
+      {/* --- 2. Detached Sidebar Wrapper --- */}
+      <div className={`sidebar-wrapper ${sidebarOpen ? 'open' : 'closed'}`}>
 
         {/* Container 1: Header & Search (Top Island) */}
         <div className="panel-card header-island">
+
           <div className="sidebar-header">
             <div className="brand">
-              <div className="brand-icon">
-                <MapPin size={18} />
-              </div>
-              <div className="brand-text">
-                <h1>Campus 25</h1>
-              </div>
+              <h1>KIIT Campus 25</h1>
             </div>
-            {currentPage === 1 ? (
-              <button className="close-sidebar-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
-                <ChevronLeft size={20} />
+            <button className="close-btn-mini" onClick={() => setSidebarOpen(false)}>
+              <ChevronLeft size={20} />
+            </button>
+          </div>
+
+          <div className="search-section">
+            <div className="search-group">
+              <label className="search-label">
+                <div className="dot start-dot"></div> Start
+              </label>
+              <SearchBar
+                value={startLocation}
+                onChange={setStartLocation}
+                onSelect={handleStartSelect}
+                placeholder="Starting point..."
+              />
+            </div>
+
+            <div className="connector-gap">
+              <button
+                className="swap-button-floating"
+                onClick={handleSwapLocations}
+                disabled={!selectedStart || !selectedEnd}
+              >
+                <ArrowUpDown size={14} />
               </button>
-            ) : (
-              <button className="clear-text-btn" onClick={handleBackToPage1}>
-                <ChevronLeft size={16} /> Back
+            </div>
+
+            <div className="search-group">
+              <label className="search-label">
+                <div className="dot end-dot"></div> End
+              </label>
+              <SearchBar
+                value={endLocation}
+                onChange={setEndLocation}
+                onSelect={handleEndSelect}
+                placeholder="Destination..."
+              />
+            </div>
+
+            {error && (
+              <div className="error-message">
+                <span className="error-icon">⚠</span> {error}
+              </div>
+            )}
+
+            {(selectedStart || selectedEnd) && (
+              <button className="clear-route-link" onClick={handleClearRoute}>
+                Clear Route
               </button>
             )}
           </div>
-
-          {currentPage === 1 ? (
-            <div className="search-section">
-              <div className="search-group">
-                <div className="search-label-row">
-                  <div className="dot-indicator dot-start"></div>
-                  <span>Start Location</span>
-                </div>
-                <SearchBar
-                  value={startLocation}
-                  onChange={(val) => {
-                    setStartLocation(val);
-                    if (path.length > 0) setPath([]);
-                  }}
-                  onSelect={handleStartSelect}
-                  placeholder="Search start point..."
-                />
-              </div>
-
-              <div className="swap-container">
-                <button
-                  className="swap-btn"
-                  onClick={handleSwapLocations}
-                  disabled={!selectedStart || !selectedEnd}
-                  title="Swap locations"
-                >
-                  <ArrowUpDown size={14} />
-                </button>
-              </div>
-
-              <div className="search-group">
-                <div className="search-label-row">
-                  <div className="dot-indicator dot-end"></div>
-                  <span>Destination</span>
-                </div>
-                <SearchBar
-                  value={endLocation}
-                  onChange={(val) => {
-                    setEndLocation(val);
-                    if (path.length > 0) setPath([]);
-                  }}
-                  onSelect={handleEndSelect}
-                  placeholder="Search destination..."
-                />
-              </div>
-
-              {error && (
-                <div className="error-banner">
-                  <span className="error-icon">⚠</span> {error}
-                </div>
-              )}
-            </div>
-          ) : (
-            /* PAGE 2 & 3 HEADER */
-            <div className="search-section animate-in">
-              <div className="route-header-compact">
-                <div className="route-points">
-                  <div className="point-row">
-                    <div className="dot-indicator dot-start"></div>
-                    <span className="point-label">{startLocation}</span>
-                  </div>
-                  <div className="connector-line"></div>
-                  <div className="point-row">
-                    <div className="dot-indicator dot-end"></div>
-                    <span className="point-label">{endLocation}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Container 2: Actions & Results (Scrollable Island) */}
+        {/* Container 2: Actions & Results (Bottom Island) */}
+        {/* Only show this container if there's content to show, or always show QuickActions */}
         <div className="panel-card action-island">
-          <div className="scroll-container">
-            {currentPage === 1 ? (
-              <QuickActions
-                key="actions"
-                onQuickAction={handleQuickAction}
-                currentLocation={selectedStart}
-              />
-            ) : (
+          <QuickActions
+            onQuickAction={handleQuickAction}
+            currentLocation={selectedStart}
+            minimized={path.length > 0}
+          />
+
+          {path.length > 0 && (
+            <>
+              <div className="divider"></div>
               <RouteInfo
-                key="route-info"
                 path={path}
-                instructions={instructions}
                 distance={distance}
                 startLabel={startLocation}
                 endLabel={endLocation}
-                isNavigating={isNavigating}
-                onStartNavigation={handleStartNavigation}
               />
-            )}
-          </div>
+            </>
+          )}
         </div>
 
       </div>
 
-      {/* Map Controls (Top Right) hidden as per user request */}
-      {/* <div className="map-controls-group">
-        <button
-          className={`glass-btn ${highContrast ? 'active' : ''}`}
-          onClick={() => setHighContrast(!highContrast)}
-          title={highContrast ? 'Disable High Contrast' : 'Enable High Contrast'}
-        >
-          <Eye size={20} />
-        </button>
+      {/* --- Editor Toggle (Top Right) --- */}
+      <div className="map-controls">
         <button
           className={`glass-btn ${editorMode ? 'active' : ''}`}
           onClick={toggleEditorMode}
           title={editorMode ? 'Exit Editor Mode' : 'Enter Editor Mode'}
         >
-          <Edit3 size={20} />
+          {editorMode ? <Eye size={20} /> : <Edit3 size={20} />}
         </button>
-<<<<<<< HEAD
-
-         
-
       </div>
-=======
-      </div> */}
->>>>>>> d99c3b88e01284855915b41a5c2c16e1f80056d4
 
-      {/* --- Fullscreen Map --- */}
       <div className="map-fullscreen">
         <FloorMap
           path={path}
@@ -378,11 +278,10 @@ function App() {
           selectedStart={selectedStart}
           selectedEnd={selectedEnd}
           editorMode={editorMode}
-          isNavigating={isNavigating}
         />
       </div>
 
-      <NavigationOverlay path={isNavigating ? path : null} onBack={null} />
+      <NavigationOverlay path={path} />
     </div>
   );
 }
