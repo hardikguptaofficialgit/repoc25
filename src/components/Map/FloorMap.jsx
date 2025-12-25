@@ -524,12 +524,29 @@ const FloorMap = ({
                             </div>
                         </>
                     )}
+<<<<<<< HEAD
+
+                    {editorTool === 'addNode' && (
+                        <div className="tool-options">
+                            <div className="toolbar-label">NODE TYPE</div>
+                            <select value={activeNodeType} onChange={(e) => setActiveNodeType(e.target.value)}>
+                                {['corridor', 'classroom', 'office', 'lab', 'lift', 'stairs', 'washroom_gents', 'washroom_ladies', 'entrance'].map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
+
+
+                    )}
+=======
+>>>>>>> d99c3b88e01284855915b41a5c2c16e1f80056d4
                 </div>
             )}
 
             {/* Editor Properties Panel */}
             {editorMode && selectedNode && nodes[selectedNode] && (
+
                 <div className="editor-properties-panel">
+
+                
                     <div className="panel-header">
                         <span>Edit Node</span>
                         <button onClick={() => setSelectedNode(null)}><X size={14} /></button>
