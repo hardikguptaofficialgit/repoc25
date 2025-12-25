@@ -5,25 +5,21 @@ import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, Maximize, Minimize, X, P
 import './FloorMap.css';
 
 // -----------------------------------------------------------------------------
-// Integrated Color Palette (Premium)
+// Color Palette System
 // -----------------------------------------------------------------------------
 const PALETTE = {
-    blockA: '#6366F1',       // Indigo
-    blockB: '#F97316',       // Orange
-    washroomG: '#0EA5E9',    // Sky Blue
-    washroomL: '#EC4899',    // Pink
-    stairs: '#10B981',       // Emerald
-    lift: '#8B5CF6',         // Violet
-    entrance: '#F59E0B',     // Amber
+    blockA: '#6366F1',       // Indigo for Block A
+    blockB: '#F97316',       // Orange for Block B
+    washroomG: '#0EA5E9',    // Sky Blue for Gents
+    washroomL: '#EC4899',    // Pink for Ladies
+    stairs: '#22C55E',       // Green
+    lift: '#A855F7',         // Purple
+    entrance: '#EAB308',     // Yellow
     office: '#F43F5E',       // Rose
-    lab: '#06B6D4',          // Cyan
-    corridor: '#404040',     // Neutral Gray
+    lab: '#14B8A6',          // Teal
+    corridor: '#404040',     // Dark Grey
     default: '#64748B',      // Slate
-    highlight: '#FFFFFF',    // White
-
-    // Node Strokes
-    strokeDefault: 'rgba(255,255,255,0.3)',
-    strokeSelected: '#FFFFFF'
+    highlight: '#FFFFFF'     // White for selection/path
 };
 
 // -----------------------------------------------------------------------------
@@ -37,7 +33,6 @@ const MapNode = memo(({
     isInPath,
     isStart,
     isEnd,
-    isDimmed,
     editorMode,
     isConnecting,
     onDrag,
@@ -50,6 +45,7 @@ const MapNode = memo(({
     // COLOR LOGIC
     const getNodeStyle = (type, label) => {
         let fill = PALETTE.default;
+        let stroke = 'rgba(255,255,255,0.2)';
         let radius = isCorridorNode ? 5 : 10;
 
         // 1. Specific Functional Types take priority
@@ -69,12 +65,11 @@ const MapNode = memo(({
             else if (firstChar === 'B') fill = PALETTE.blockB;
         }
 
-        return { fill, radius };
+        return { fill, stroke, radius };
     };
 
-    let { fill, radius } = getNodeStyle(node.type, node.label);
-    let stroke = PALETTE.strokeDefault;
-    let strokeWidth = 1.5;
+    let { fill, stroke, radius } = getNodeStyle(node.type, node.label);
+    let strokeWidth = 1;
 
     // State Overrides
     if (isInPath) {
@@ -103,7 +98,7 @@ const MapNode = memo(({
     if (isSelected) {
         stroke = '#fff';
         strokeWidth = 3;
-        radius = radius * 1.25;
+        radius = radius * 1.2;
     }
 
     if (isConnecting) {
@@ -126,9 +121,9 @@ const MapNode = memo(({
             onMouseEnter={() => onHover(nodeId)}
             onMouseLeave={onLeave}
         >
-            {/* Selection/Hover Glow */}
+            {/* Selection Glow */}
             {(isSelected || isHovered) && (
-                <Circle radius={radius + 6} fill={fill} opacity={0.25} listening={false} />
+                <Circle radius={radius + 4} fill={fill} opacity={0.3} listening={false} />
             )}
 
             <Circle
@@ -136,31 +131,27 @@ const MapNode = memo(({
                 fill={fill}
                 stroke={stroke}
                 strokeWidth={strokeWidth}
-                hitStrokeWidth={12}
+                hitStrokeWidth={10}
                 shadowColor="black"
-                shadowBlur={8}
-                shadowOpacity={0.4}
-                shadowEnabled={true}
-                opacity={isDimmed ? 0.3 : 1}
+                shadowBlur={5}
+                shadowOpacity={0.3}
+                shadowEnabled={isSelected || isHovered} // Optimization: Only shadow when active
             />
 
-            {/* Label Rendering */}
+            {/* Label Rendering (No shadow for perf) */}
             {(!isCorridorNode || editorMode) && (
                 <Text
                     text={node.label || nodeId}
                     x={-60}
-                    y={-radius - 20}
+                    y={-radius - 18}
                     width={120}
                     align="center"
                     fontSize={11}
-                    fontStyle="600"
+                    fontStyle="bold"
                     fontFamily="Inter, sans-serif"
                     fill="#FFFFFF"
-                    opacity={isDimmed ? 0.4 : 1}
+                    opacity={1}
                     listening={false}
-                    shadowColor="black"
-                    shadowBlur={2}
-                    shadowOpacity={0.8}
                 />
             )}
         </Group>
@@ -175,8 +166,7 @@ const FloorMap = ({
     onNodeClick = null,
     selectedStart = null,
     selectedEnd = null,
-    editorMode = false,
-    isNavigating = false
+    editorMode = false
 }) => {
     // Data State
     const [nodes, setNodes] = useState(initialNodes);
@@ -240,7 +230,7 @@ const FloorMap = ({
         return () => resizeObserver.disconnect();
     }, [isFullscreen]);
 
-    // Key Listeners
+    // 3. Key Listeners
     useEffect(() => {
         const handleEsc = (e) => {
             if (e.key === 'Escape') {
@@ -365,64 +355,21 @@ const FloorMap = ({
         }
     };
 
-    // Animation State
-    const [dashOffset, setDashOffset] = useState(0);
-
-    useEffect(() => {
-        let anim;
-        if (path.length > 0) {
-            const animate = () => {
-                setDashOffset(prev => prev - 1); // Move dashes
-                anim = requestAnimationFrame(animate);
-            };
-            anim = requestAnimationFrame(animate);
-
-            // Auto-Zoom to Path Logic
-            if (stageSize.width > 0 && path.length > 1) {
-                const padding = 100;
-                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-
-                path.forEach(nodeId => {
-                    const n = nodes[nodeId];
-                    if (n) {
-                        minX = Math.min(minX, n.x);
-                        maxX = Math.max(maxX, n.x);
-                        minY = Math.min(minY, n.y);
-                        maxY = Math.max(maxY, n.y);
-                    }
-                });
-
-                if (minX !== Infinity) {
-                    const width = maxX - minX + padding * 2;
-                    const height = maxY - minY + padding * 2;
-                    const centerX = minX + (maxX - minX) / 2;
-                    const centerY = minY + (maxY - minY) / 2;
-
-                    // Calculate fitting scale
-                    const fitScale = Math.min(
-                        stageSize.width / width,
-                        stageSize.height / height
-                    );
-
-                    // Clamp scale
-                    const finalScale = Math.min(Math.max(fitScale, 0.4), 2.5);
-
-                    // Calculate position to center
-                    const finalX = stageSize.width / 2 - centerX * finalScale;
-                    const finalY = stageSize.height / 2 - centerY * finalScale;
-
-                    // Animate (Basic lerp or direct set for now)
-                    // Using direct set for responsiveness
-                    setScale(finalScale);
-                    setPosition({ x: finalX, y: finalY });
-                }
-            }
-        } else {
-            setDashOffset(0);
-            // Optional: meaningful default view reset could go here
-        }
-        return () => cancelAnimationFrame(anim);
-    }, [path, stageSize, nodes, isNavigating]); // Include nodes to ensure coordinates are available
+    // Define PALETTE here, as it's used in MapNode and FloorMap
+    const PALETTE = {
+        blockA: '#60A5FA',       // Blue
+        blockB: '#F87171',       // Red
+        stairs: '#34D399',       // Green
+        lift: '#A78BFA',         // Purple
+        washroomG: '#22D3EE',    // Cyan
+        washroomL: '#F472B6',    // Pink
+        entrance: '#FACC15',     // Yellow
+        office: '#F43F5E',       // Rose
+        lab: '#14B8A6',          // Teal
+        corridor: '#FFFFFF',     // White for Corridors (Black Background)
+        default: '#94A3B8',      // Slate
+        highlight: '#FFFFFF'     // White for selection/path
+    };
 
     // Render Helpers
     const renderedEdges = edges.map((edge, i) => {
@@ -430,33 +377,14 @@ const FloorMap = ({
         if (!nodes[n1] || !nodes[n2]) return null;
         const isPathEdge = path.some((id, idx) => idx < path.length - 1 && ((id === n1 && path[idx + 1] === n2) || (id === n2 && path[idx + 1] === n1)));
 
-        let strokeColor = '#333333';
-        let strokeWidth = 1.5;
-        let opacity = 0.5;
-        let dash = null;
+        let strokeColor = '#525252'; // Visible Grey on Black
+        let strokeWidth = 2;
+        let opacity = 0.6;
 
-        if (editorMode) { strokeColor = '#555555'; opacity = 0.7; }
+        if (editorMode) { strokeColor = '#737373'; opacity = 0.8; }
+        if (isPathEdge) { strokeColor = PALETTE.highlight; strokeWidth = 4; opacity = 1; }
 
-        if (isPathEdge) {
-            strokeColor = PALETTE.highlight;
-            strokeWidth = 4;
-            opacity = 1;
-            dash = [10, 10]; // Dash pattern for flow effect
-        }
-
-        return (
-            <Line
-                key={i}
-                points={[nodes[n1].x, nodes[n1].y, nodes[n2].x, nodes[n2].y]}
-                stroke={strokeColor}
-                strokeWidth={strokeWidth}
-                opacity={opacity}
-                lineCap="round"
-                dash={isPathEdge ? dash : undefined}
-                dashOffset={isPathEdge ? dashOffset : 0}
-                onClick={() => editorMode && editorTool === 'delete' && setEdges(prev => prev.filter((_, idx) => idx !== i))}
-            />
-        );
+        return <Line key={i} points={[nodes[n1].x, nodes[n1].y, nodes[n2].x, nodes[n2].y]} stroke={strokeColor} strokeWidth={strokeWidth} opacity={opacity} lineCap="round" onClick={() => editorMode && editorTool === 'delete' && setEdges(prev => prev.filter((_, idx) => idx !== i))} />;
     });
 
     const renderedGrid = showGrid ? <Group>{Array.from({ length: 40 }).map((_, i) => <Line key={`v${i}`} points={[i * 50, -1000, i * 50, 2000]} stroke="#1e293b" strokeWidth={1} />)}{Array.from({ length: 40 }).map((_, i) => <Line key={`h${i}`} points={[-1000, i * 50, 2000, i * 50]} stroke="#1e293b" strokeWidth={1} />)}</Group> : null;
@@ -524,7 +452,6 @@ const FloorMap = ({
                             </div>
                         </>
                     )}
-<<<<<<< HEAD
 
                     {editorTool === 'addNode' && (
                         <div className="tool-options">
@@ -533,20 +460,13 @@ const FloorMap = ({
                                 {['corridor', 'classroom', 'office', 'lab', 'lift', 'stairs', 'washroom_gents', 'washroom_ladies', 'entrance'].map(t => <option key={t} value={t}>{t}</option>)}
                             </select>
                         </div>
-
-
                     )}
-=======
->>>>>>> d99c3b88e01284855915b41a5c2c16e1f80056d4
                 </div>
             )}
 
-            {/* Editor Properties Panel */}
+            {/* Editor Properties Panel (Floating) */}
             {editorMode && selectedNode && nodes[selectedNode] && (
-
                 <div className="editor-properties-panel">
-
-                
                     <div className="panel-header">
                         <span>Edit Node</span>
                         <button onClick={() => setSelectedNode(null)}><X size={14} /></button>
@@ -646,14 +566,13 @@ const FloorMap = ({
             <Stage
                 ref={stageRef} width={stageSize.width} height={stageSize.height}
                 scaleX={scale} scaleY={scale} x={position.x} y={position.y}
-                draggable={!isNavigating && (!editorMode || editorTool === 'select')}
-                onWheel={!isNavigating ? handleWheel : undefined} onClick={handleStageClick}
+                draggable={!editorMode || editorTool === 'select'}
+                onWheel={handleWheel} onClick={handleStageClick}
                 onMouseMove={(e) => { if (connectingFrom) { const pt = stageRef.current.getPointerPosition(); setTempLineEnd({ x: (pt.x - position.x) / scale, y: (pt.y - position.y) / scale }); } }}
                 onDragEnd={(e) => { if (e.target === stageRef.current) setPosition({ x: e.target.x(), y: e.target.y() }); }}
             >
                 <Layer listening={false}>
-                    {/* Dark Background */}
-                    <Rect width={2000} height={2000} fill="#050505" x={-500} y={-500} />
+                    <Rect width={2000} height={2000} fill="#000000" x={-500} y={-500} />
                     {bgImageObj && (
                         <Image
                             image={bgImageObj}
@@ -671,7 +590,6 @@ const FloorMap = ({
                         <MapNode key={id} nodeId={id} node={node}
                             isSelected={selectedNode === id} isHovered={hoveredNode === id}
                             isInPath={path.includes(id)} isStart={selectedStart?.id === id} isEnd={selectedEnd?.id === id}
-                            isDimmed={path.length > 0 && !path.includes(id)}
                             editorMode={editorMode} isConnecting={connectingFrom === id}
                             onDrag={handleNodeDrag} onClick={handleNodeClick} onHover={setHoveredNode} onLeave={handleNodeLeave}
                         />
@@ -679,7 +597,7 @@ const FloorMap = ({
                 </Layer>
             </Stage>
 
-            {/* Colored Legend (Only outside Editor Mode) */}
+            {/* Colored Legend */}
             {!editorMode && (
                 <div className="map-legend-colored">
                     <div className="legend-row">
