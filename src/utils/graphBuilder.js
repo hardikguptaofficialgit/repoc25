@@ -41,14 +41,45 @@ export function getNodesByFloor(floor) {
     Object.entries(nodes).forEach(([id, node]) => {
         let newNode = { ...node };
 
+        // Update room labels based on floor
+        if (newNode.label && newNode.label.match(/^[A-Z]-\d{3}$/)) {
+            const match = newNode.label.match(/^([A-Z])-(\d{3})$/);
+            if (match) {
+                const block = match[1];
+                const roomNumber = parseInt(match[2]);
+
+                // Update room number based on floor
+                if (floor === 0) {
+                    // Ground floor: keep original (C001, A007, etc.)
+                    newNode.label = `${block}-${roomNumber.toString().padStart(3, '0')}`;
+                } else {
+                    // Upper floors: add floor number to room number
+                    // For floor 1: C001 → C101, A007 → A107
+                    // For floor 2: C001 → C201, A007 → A207
+                    const newRoomNumber = (floor * 100) + roomNumber;
+                    newNode.label = `${block}-${newRoomNumber.toString().padStart(3, '0')}`;
+                }
+            }
+        }
+
         // Floor Logic
         if (floor > 0) {
             // 1. Remove entrances for all floors above ground
             if (newNode.type === 'entrance') return;
 
-            // 2. 1st Floor: Remove cafe and lobby
+            // 2. 1st Floor: Remove cafe and lobby, plus specific lifts and stairs
             if (floor === 1) {
                 if (newNode.type === 'cafeteria' || newNode.label.includes('LOBBY')) return;
+
+                // Remove specific nodes only for 1st floor
+                if (id === 'node_1053' || id === 'node_1054' || id === 'node_1067') return;
+
+                // Remove FACULTY LOUNGE (node_1074) for 1st floor only
+                if (id === 'node_1074') return;
+
+                // Remove specific corridor nodes to simplify path between STAIRS-12 and node_1175
+                if (id === 'node_1181' || id === 'node_1182' || id === 'node_1184' ||
+                    id === 'node_1183' || id === 'node_1176') return;
             }
 
             // 3. 2nd Floor: Convert lobby to library

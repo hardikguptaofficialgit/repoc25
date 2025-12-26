@@ -1972,6 +1972,11 @@ export const edges = [
         103
     ],
     [
+        "node_1072",
+        "node_1175",
+        92
+    ],
+    [
         "node_1186",
         "node_1074",
         89
