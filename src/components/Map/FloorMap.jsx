@@ -176,7 +176,8 @@ const FloorMap = ({
     selectedStart = null,
     selectedEnd = null,
     editorMode = false,
-    isNavigating = false
+    isNavigating = false,
+    currentFloor = 0
 }) => {
     // Data State
     const [nodes, setNodes] = useState(initialNodes);
@@ -425,9 +426,22 @@ const FloorMap = ({
     }, [path, stageSize, nodes, isNavigating]); // Include nodes to ensure coordinates are available
 
     // Render Helpers
+    // Filter nodes for current floor
+    // NOTE: Since distinct floor data (z-index) is not yet available for all nodes, 
+    // we currently show the map on ALL floors to ensure they are "accepted" and visible.
+    // Once data is tagged with 'z' or 'floor', we can re-enable strict filtering.
+    const visibleNodeIds = new Set(
+        Object.entries(nodes)
+            .map(([id]) => id)
+    );
+
     const renderedEdges = edges.map((edge, i) => {
-        const [n1, n2] = edge;
+        const [n1, n2, dist] = edge;
+        // Only render edge if BOTH nodes are visible on current floor
+        // (Or change to 'some' if you want to see connections to other floors, but usually 2D map implies both)
+        if (!visibleNodeIds.has(n1) || !visibleNodeIds.has(n2)) return null;
         if (!nodes[n1] || !nodes[n2]) return null;
+
         const isPathEdge = path.some((id, idx) => idx < path.length - 1 && ((id === n1 && path[idx + 1] === n2) || (id === n2 && path[idx + 1] === n1)));
 
         let strokeColor = '#333333';
@@ -444,18 +458,37 @@ const FloorMap = ({
             dash = [10, 10]; // Dash pattern for flow effect
         }
 
+        // Midpoint for Text
+        const midX = (nodes[n1].x + nodes[n2].x) / 2;
+        const midY = (nodes[n1].y + nodes[n2].y) / 2;
+
         return (
-            <Line
-                key={i}
-                points={[nodes[n1].x, nodes[n1].y, nodes[n2].x, nodes[n2].y]}
-                stroke={strokeColor}
-                strokeWidth={strokeWidth}
-                opacity={opacity}
-                lineCap="round"
-                dash={isPathEdge ? dash : undefined}
-                dashOffset={isPathEdge ? dashOffset : 0}
-                onClick={() => editorMode && editorTool === 'delete' && setEdges(prev => prev.filter((_, idx) => idx !== i))}
-            />
+            <Group key={i} onClick={() => editorMode && editorTool === 'delete' && setEdges(prev => prev.filter((_, idx) => idx !== i))}>
+                <Line
+                    points={[nodes[n1].x, nodes[n1].y, nodes[n2].x, nodes[n2].y]}
+                    stroke={strokeColor}
+                    strokeWidth={strokeWidth}
+                    opacity={opacity}
+                    lineCap="round"
+                    dash={isPathEdge ? dash : undefined}
+                    dashOffset={isPathEdge ? dashOffset : 0}
+                />
+
+                {/* Distance Label */}
+                <Text
+                    x={midX}
+                    y={midY}
+                    text={`${dist || Math.round(Math.sqrt(Math.pow(nodes[n2].x - nodes[n1].x, 2) + Math.pow(nodes[n2].y - nodes[n1].y, 2)))}m`}
+                    fontSize={10}
+                    fontFamily="Inter, sans-serif"
+                    fill={isPathEdge ? "#FFFFFF" : "rgba(255,255,255,0.4)"}
+                    align="center"
+                    verticalAlign="middle"
+                    offsetX={10}
+                    offsetY={5}
+                    listening={false} /* Let clicks pass through to line/group */
+                />
+            </Group>
         );
     });
 
@@ -465,8 +498,15 @@ const FloorMap = ({
         setHoveredNode(null);
     }, []);
 
+    const visibleNodes = Object.entries(nodes).filter(([_, node]) => {
+        // Show if on current floor. Assuming node.z or floor property exists, default to 0.
+        // If node.z is undefined, it's Ground Floor (0).
+        return (node.floor !== undefined ? node.floor : (node.z !== undefined ? node.z : 0)) === currentFloor;
+    });
+
     return (
         <div className={`floor-map-container ${isFullscreen ? 'fullscreen' : ''}`} ref={containerRef}>
+
 
             {/* Controls Header */}
             <div className="map-ui-header">
@@ -650,13 +690,24 @@ const FloorMap = ({
                 <Layer>
                     {renderedEdges}
                     {connectingFrom && tempLineEnd && <Line points={[nodes[connectingFrom].x, nodes[connectingFrom].y, tempLineEnd.x, tempLineEnd.y]} stroke="#fbbf24" strokeWidth={2} dash={[5, 5]} />}
-                    {Object.entries(nodes).map(([id, node]) => (
-                        <MapNode key={id} nodeId={id} node={node}
-                            isSelected={selectedNode === id} isHovered={hoveredNode === id}
-                            isInPath={path.includes(id)} isStart={selectedStart?.id === id} isEnd={selectedEnd?.id === id}
-                            isDimmed={path.length > 0 && !path.includes(id)}
-                            editorMode={editorMode} isConnecting={connectingFrom === id}
-                            onDrag={handleNodeDrag} onClick={handleNodeClick} onHover={setHoveredNode} onLeave={handleNodeLeave}
+
+                    {visibleNodes.map(([id, node]) => (
+                        <MapNode
+                            key={id}
+                            nodeId={id}
+                            node={node}
+                            isSelected={selectedNode === id}
+                            isHovered={hoveredNode === id}
+                            isInPath={path.includes(id)}
+                            isStart={selectedStart?.id === id}
+                            isEnd={selectedEnd?.id === id}
+                            isDimmed={path.length > 0 && !path.includes(id) && !selectedStart && !selectedEnd}
+                            editorMode={editorMode}
+                            isConnecting={connectingFrom === id}
+                            onDrag={handleNodeDrag}
+                            onClick={handleNodeClick}
+                            onHover={() => setHoveredNode(id)}
+                            onLeave={handleNodeLeave}
                         />
                     ))}
                 </Layer>
