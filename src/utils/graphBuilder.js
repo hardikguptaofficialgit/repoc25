@@ -76,10 +76,6 @@ export function getNodesByFloor(floor) {
 
                 // Remove FACULTY LOUNGE (node_1074) for 1st floor only
                 if (id === 'node_1074') return;
-
-                // Remove specific corridor nodes to simplify path between STAIRS-12 and node_1175
-                if (id === 'node_1181' || id === 'node_1182' || id === 'node_1184' ||
-                    id === 'node_1183' || id === 'node_1176') return;
             }
 
             // 3. 2nd Floor: Convert lobby to library
