@@ -43,11 +43,13 @@ const MapNode = memo(({
     onLeave
 }) => {
     const isCorridorNode = node.type === 'corridor';
+    const isFacilityNode = ['washroom_gents', 'washroom_ladies', 'stairs', 'lift', 'entrance', 'water_cooler', 'cafeteria', 'seating', 'gate'].includes(node.type);
 
     // SIZE & SHAPE LOGIC
     const getNodeDimensions = (type) => {
         // Returns { width, height, cornerRadius }
         if (type === 'corridor') return { width: 12, height: 12, cornerRadius: 2 };
+        if (isFacilityNode) return { width: 36, height: 36, cornerRadius: 18 }; // Circular container for facilities
         if (type === 'washroom_gents' || type === 'washroom_ladies') return { width: 40, height: 30, cornerRadius: 4 };
         if (type === 'stairs' || type === 'lift') return { width: 35, height: 35, cornerRadius: 4 };
         if (type === 'entrance' || type === 'gate') return { width: 45, height: 25, cornerRadius: 6 };
@@ -61,8 +63,13 @@ const MapNode = memo(({
         let fill = PALETTE.default;
         let stroke = 'rgba(255, 255, 255, 0.3)';
 
-        // 1. Specific Functional Types take priority
-        if (type === 'washroom_gents') fill = PALETTE.washroomG;
+        // 1. Facility nodes get black containers by default
+        if (isFacilityNode) {
+            fill = '#000000'; // Black container for facilities
+            stroke = '#FFFFFF'; // White border for facilities
+        }
+        // 2. Specific Functional Types take priority (for non-facility nodes)
+        else if (type === 'washroom_gents') fill = PALETTE.washroomG;
         else if (type === 'washroom_ladies') fill = PALETTE.washroomL;
         else if (type === 'stairs') fill = PALETTE.stairs;
         else if (type === 'lift') fill = PALETTE.lift;
@@ -72,7 +79,7 @@ const MapNode = memo(({
         else if (type === 'library') fill = PALETTE.library;
         else if (type === 'corridor') fill = PALETTE.corridor;
 
-        // 2. Block Logic (if not a special type, check Label for A/B)
+        // 3. Block Logic (if not a special type, check Label for A/B)
         else if (label) {
             const firstChar = label.trim().charAt(0).toUpperCase();
             if (firstChar === 'A') fill = PALETTE.blockA;
@@ -85,6 +92,35 @@ const MapNode = memo(({
     let { fill, stroke } = getNodeStyle(node.type, node.label);
     let { width, height, cornerRadius } = getNodeDimensions(node.type);
     let strokeWidth = 2;
+
+    // Store original facility color for selection state
+    const getFacilityCategoryColor = (type) => {
+        if (type === 'washroom_gents') return PALETTE.washroomG;
+        if (type === 'washroom_ladies') return PALETTE.washroomL;
+        if (type === 'stairs') return PALETTE.stairs;
+        if (type === 'lift') return PALETTE.lift;
+        if (type === 'entrance' || type === 'gate') return PALETTE.entrance;
+        if (type === 'water_cooler') return PALETTE.washroomG; // Using blue for water cooler
+        if (type === 'cafeteria') return PALETTE.lab; // Using teal for cafeteria
+        if (type === 'seating') return PALETTE.lift; // Using purple for seating
+        return PALETTE.default;
+    };
+
+    let iconColor = '#FFFFFF'; // Default icon color (will be overridden for facilities)
+
+    // Set facility icon colors based on category in normal view
+    if (isFacilityNode) {
+        iconColor = getFacilityCategoryColor(node.type); // Use category color for icons
+
+        // In editing mode, ensure icons are always visible with proper contrast
+        if (editorMode) {
+            // For black containers, use the category color as is (should be visible)
+            // If container is not black (due to selection/start/end states), adjust icon color for contrast
+            if (fill !== '#000000') {
+                iconColor = '#000000'; // Black icon for colored containers
+            }
+        }
+    }
 
     // State Overrides
     if (isInPath) {
@@ -104,6 +140,12 @@ const MapNode = memo(({
         width = 50;
         height = 50;
         cornerRadius = 8;
+
+        // Special handling for facility nodes when selected as start
+        if (isFacilityNode) {
+            fill = getFacilityCategoryColor(node.type); // Container fills with category color
+            iconColor = editorMode ? '#000000' : '#FFFFFF'; // Icon changes based on mode for contrast
+        }
     }
 
     if (isEnd) {
@@ -113,6 +155,12 @@ const MapNode = memo(({
         width = 50;
         height = 50;
         cornerRadius = 8;
+
+        // Special handling for facility nodes when selected as end
+        if (isFacilityNode) {
+            fill = getFacilityCategoryColor(node.type); // Container fills with category color
+            iconColor = editorMode ? '#000000' : '#FFFFFF'; // Icon changes based on mode for contrast
+        }
     }
 
     if (isSelected) {
@@ -120,6 +168,15 @@ const MapNode = memo(({
         strokeWidth = 3;
         width = width * 1.15;
         height = height * 1.15;
+
+        // Special handling for facility nodes when selected
+        if (isFacilityNode) {
+            fill = getFacilityCategoryColor(node.type); // Container fills with category color
+            iconColor = editorMode ? '#000000' : '#FFFFFF'; // Icon changes based on mode for contrast
+        } else {
+            // For regular nodes, keep the original fill color from palette
+            // Don't override with red, use the existing palette-based fill
+        }
     }
 
     if (isConnecting) {
@@ -156,22 +213,231 @@ const MapNode = memo(({
                 />
             )}
 
-            <Rect
-                x={-width / 2}
-                y={-height / 2}
-                width={width}
-                height={height}
-                cornerRadius={cornerRadius}
-                fill={fill}
-                stroke={stroke}
-                strokeWidth={strokeWidth}
-                hitStrokeWidth={10}
-                shadowColor="black"
-                shadowBlur={6}
-                shadowOpacity={0.4}
-                shadowOffsetY={2}
-                shadowEnabled={isSelected || isHovered}
-            />
+            {/* Main Node Shape - Conditional rendering for facilities vs regular nodes */}
+            {isFacilityNode ? (
+                // Circular container for facility nodes
+                <Circle
+                    x={0}
+                    y={0}
+                    radius={width / 2}
+                    fill={fill}
+                    stroke={stroke}
+                    strokeWidth={strokeWidth}
+                    hitStrokeWidth={10}
+                    shadowColor="black"
+                    shadowBlur={6}
+                    shadowOpacity={0.4}
+                    shadowOffsetY={2}
+                    shadowEnabled={isSelected || isHovered}
+                />
+            ) : (
+                // Regular rectangular nodes
+                <Rect
+                    x={-width / 2}
+                    y={-height / 2}
+                    width={width}
+                    height={height}
+                    cornerRadius={cornerRadius}
+                    fill={fill}
+                    stroke={stroke}
+                    strokeWidth={strokeWidth}
+                    hitStrokeWidth={10}
+                    shadowColor="black"
+                    shadowBlur={6}
+                    shadowOpacity={0.4}
+                    shadowOffsetY={2}
+                    shadowEnabled={isSelected || isHovered}
+                />
+            )}
+
+            {/* Icon Rendering for Facility Nodes */}
+            {isFacilityNode && (() => {
+                const iconSize = Math.min(width, height) * 0.5;
+                return (
+                    <Group>
+                        {/* ================= WASHROOM – GENTS ================= */}
+                        {node.type === 'washroom_gents' && (
+                            <Group>
+                                {/* head */}
+                                <Circle x={0} y={-iconSize * 0.45} radius={iconSize * 0.22} fill={iconColor} />
+                                {/* shoulders */}
+                                <Rect
+                                    x={-iconSize * 0.35}
+                                    y={-iconSize * 0.2}
+                                    width={iconSize * 0.7}
+                                    height={iconSize * 0.25}
+                                    cornerRadius={iconSize * 0.1}
+                                    fill={iconColor}
+                                />
+                                {/* body */}
+                                <Rect
+                                    x={-iconSize * 0.2}
+                                    y={iconSize * 0.05}
+                                    width={iconSize * 0.4}
+                                    height={iconSize * 0.45}
+                                    cornerRadius={iconSize * 0.08}
+                                    fill={iconColor}
+                                />
+                                {/* legs */}
+                                <Rect x={-iconSize * 0.18} y={iconSize * 0.5} width={iconSize * 0.14} height={iconSize * 0.28} fill={iconColor} />
+                                <Rect x={iconSize * 0.04} y={iconSize * 0.5} width={iconSize * 0.14} height={iconSize * 0.28} fill={iconColor} />
+                            </Group>
+                        )}
+
+                        {/* ================= WASHROOM – LADIES ================= */}
+                        {/* ================= WASHROOM – LADIES (SIMPLIFIED, ADJUSTED) ================= */}
+                        {node.type === 'washroom_ladies' && (
+                            <Group>
+                                {/* head */}
+                                <Circle
+                                    x={0}
+                                    y={-iconSize * 0.55}
+                                    radius={iconSize * 0.17}
+                                    fill={iconColor}
+                                />
+
+                                {/* body + skirt (shorter triangle, shifted up) */}
+                                <Line
+                                    points={[
+                                        0, -iconSize * 0.32,               // neck (up)
+                                        iconSize * 0.38, iconSize * 0.45,  // right bottom (shorter)
+                                        -iconSize * 0.38, iconSize * 0.45, // left bottom (shorter)
+                                    ]}
+                                    closed
+                                    fill={iconColor}
+                                />
+
+                                {/* left leg */}
+                                <Rect
+                                    x={-iconSize * 0.14}
+                                    y={iconSize * 0.45}
+                                    width={iconSize * 0.11}
+                                    height={iconSize * 0.32}
+                                    cornerRadius={iconSize * 0.05}
+                                    fill={iconColor}
+                                />
+
+                                {/* right leg */}
+                                <Rect
+                                    x={iconSize * 0.03}
+                                    y={iconSize * 0.45}
+                                    width={iconSize * 0.11}
+                                    height={iconSize * 0.32}
+                                    cornerRadius={iconSize * 0.05}
+                                    fill={iconColor}
+                                />
+                            </Group>
+                        )}
+
+
+                        {/* ================= STAIRS ================= */}
+                        {node.type === 'stairs' && (
+                            <Group>
+                                <Rect x={-iconSize * 0.45} y={iconSize * 0.35} width={iconSize * 0.9} height={iconSize * 0.15} fill={iconColor} />
+                                <Rect x={-iconSize * 0.15} y={iconSize * 0.1} width={iconSize * 0.6} height={iconSize * 0.15} fill={iconColor} />
+                                <Rect x={0} y={-iconSize * 0.15} width={iconSize * 0.45} height={iconSize * 0.15} fill={iconColor} />
+                            </Group>
+                        )}
+
+                        {/* ================= LIFT ================= */}
+                        {node.type === 'lift' && (
+                            <Group>
+                                <Rect
+                                    x={-iconSize * 0.35}
+                                    y={-iconSize * 0.5}
+                                    width={iconSize * 0.7}
+                                    height={iconSize * 0.95}
+                                    cornerRadius={iconSize * 0.1}
+                                    fill={iconColor}
+                                />
+                                {/* door split */}
+                                <Line points={[0, -iconSize * 0.4, 0, iconSize * 0.4]} stroke={fill} strokeWidth={2} />
+                                {/* arrows */}
+                                <Line points={[-iconSize * 0.12, -iconSize * 0.35, 0, -iconSize * 0.55, iconSize * 0.12, -iconSize * 0.35]} stroke={fill} strokeWidth={2} />
+                                <Line points={[-iconSize * 0.12, iconSize * 0.35, 0, iconSize * 0.55, iconSize * 0.12, iconSize * 0.35]} stroke={fill} strokeWidth={2} />
+                            </Group>
+                        )}
+
+                        {/* ================= ENTRANCE / GATE ================= */}
+                        {(node.type === 'entrance' || node.type === 'gate') && (
+                            <Group>
+                                <Rect
+                                    x={-iconSize * 0.3}
+                                    y={-iconSize * 0.5}
+                                    width={iconSize * 0.6}
+                                    height={iconSize * 0.95}
+                                    cornerRadius={iconSize * 0.06}
+                                    fill={iconColor}
+                                />
+                                <Circle x={iconSize * 0.15} y={0} radius={iconSize * 0.06} fill={fill} />
+                            </Group>
+                        )}
+
+                        {/* ================= WATER COOLER ================= */}
+                        {node.type === 'water_cooler' && (
+                            <Group>
+                                <Rect
+                                    x={-iconSize * 0.14}
+                                    y={-iconSize * 0.5}
+                                    width={iconSize * 0.28}
+                                    height={iconSize * 0.65}
+                                    cornerRadius={iconSize * 0.14}
+                                    fill={iconColor}
+                                />
+                                <Circle y={iconSize * 0.35} radius={iconSize * 0.14} fill={iconColor} />
+                            </Group>
+                        )}
+
+                        {/* ================= CAFETERIA ================= */}
+                        {node.type === 'cafeteria' && (
+                            <Group>
+                                <Rect
+                                    x={-iconSize * 0.32}
+                                    y={-iconSize * 0.22}
+                                    width={iconSize * 0.64}
+                                    height={iconSize * 0.44}
+                                    cornerRadius={iconSize * 0.14}
+                                    fill={iconColor}
+                                />
+                                <Line
+                                    points={[
+                                        iconSize * 0.32, -iconSize * 0.12,
+                                        iconSize * 0.46, -iconSize * 0.12,
+                                        iconSize * 0.46, iconSize * 0.12,
+                                    ]}
+                                    stroke={iconColor}
+                                    strokeWidth={2}
+                                />
+                            </Group>
+                        )}
+
+                        {/* ================= SEATING ================= */}
+                        {node.type === 'seating' && (
+                            <Group>
+                                <Rect x={-iconSize * 0.32} y={-iconSize * 0.1} width={iconSize * 0.64} height={iconSize * 0.18} fill={iconColor} />
+                                <Rect x={-iconSize * 0.32} y={iconSize * 0.12} width={iconSize * 0.12} height={iconSize * 0.32} fill={iconColor} />
+                                <Rect x={iconSize * 0.2} y={iconSize * 0.12} width={iconSize * 0.12} height={iconSize * 0.32} fill={iconColor} />
+                            </Group>
+                        )}
+
+                        {/* ================= DEFAULT ================= */}
+                        {![
+                            'washroom_gents',
+                            'washroom_ladies',
+                            'stairs',
+                            'lift',
+                            'entrance',
+                            'gate',
+                            'water_cooler',
+                            'cafeteria',
+                            'seating',
+                        ].includes(node.type) && (
+                                <Circle radius={iconSize * 0.28} fill={iconColor} />
+                            )}
+                    </Group>
+                );
+
+            })()}
 
             {/* Label Rendering */}
             {(!isCorridorNode || editorMode) && (
