@@ -1,898 +1,1135 @@
 // Building data for Campus 25 floor plan
 // Updated using Map Editor with precise coordinates and paths
 
+
+
+
 export const nodes = {
-    "entrance_main": {
-        "x": 562,
-        "y": 913,
-        "label": "Campus 25 Main Gate (KP 25 Boys Side)",
-        "type": "entrance"
-    },
-    "entrance_qc19": {
-        "x": 954,
-        "y": 102,
-        "label": "Campus 25 Second Entrance (QC 19/25 Side)",
-        "type": "entrance"
-    },
-    "A001": {
-        "x": 515,
-        "y": 793,
-        "label": "A001",
+    "node_1000": {
+        "x": 1040,
+        "y": 1041,
+        "label": "A-001",
         "type": "classroom"
     },
-    "A002": {
-        "x": 478,
-        "y": 800,
-        "label": "A002",
+    "node_1001": {
+        "x": 1039,
+        "y": 880,
+        "label": "A-002",
         "type": "lab"
     },
-    "A003": {
-        "x": 442,
-        "y": 739,
-        "label": "A003",
-        "type": "classroom"
-    },
-    "A004": {
-        "x": 401,
-        "y": 799,
-        "label": "A004 IOT Lab",
+    "node_1002": {
+        "x": 1210,
+        "y": 802,
+        "label": "A-003",
         "type": "lab"
     },
-    "A005": {
-        "x": 307,
-        "y": 796,
-        "label": "A005",
+    "node_1003": {
+        "x": 1040,
+        "y": 738,
+        "label": "A-004",
+        "type": "lab"
+    },
+    "node_1004": {
+        "x": 1039,
+        "y": 570,
+        "label": "A-005",
+        "type": "office"
+    },
+    "node_1005": {
+        "x": 841,
+        "y": 1169,
+        "label": "A-BLOCK ENTRANCE",
+        "type": "entrance"
+    },
+    "node_1006": {
+        "x": 1227,
+        "y": 425,
+        "label": "A-006",
         "type": "classroom"
     },
-    "A006": {
-        "x": 113,
-        "y": 725,
-        "label": "A006",
+    "node_1007": {
+        "x": 1373,
+        "y": 427,
+        "label": "A-007",
         "type": "classroom"
     },
-    "A007": {
-        "x": 114,
-        "y": 645,
-        "label": "A007",
+    "node_1008": {
+        "x": 1372,
+        "y": 564,
+        "label": "A-008",
         "type": "classroom"
     },
-    "A008": {
-        "x": 193,
-        "y": 645,
-        "label": "A008",
+    "node_1009": {
+        "x": 1516,
+        "y": 427,
+        "label": "A-009",
         "type": "classroom"
     },
-    "A009": {
-        "x": 113,
-        "y": 590,
-        "label": "A009",
+    "node_1010": {
+        "x": 1515,
+        "y": 563,
+        "label": "A-010",
         "type": "classroom"
     },
-    "A010": {
-        "x": 194,
-        "y": 594,
-        "label": "A010",
+    "node_1011": {
+        "x": 1670,
+        "y": 689,
+        "label": "A-011",
         "type": "classroom"
     },
-    "A011": {
-        "x": 173,
-        "y": 518,
-        "label": "A011",
+    "node_1014": {
+        "x": 1674,
+        "y": 1196,
+        "label": "A-014",
         "type": "classroom"
     },
-    "A012": {
-        "x": 223,
-        "y": 573,
-        "label": "A012",
+    "node_1015": {
+        "x": 1673,
+        "y": 1291,
+        "label": "A-015",
         "type": "classroom"
     },
-    "A013": {
-        "x": 204,
-        "y": 515,
-        "label": "A013",
+    "node_1016": {
+        "x": 1442,
+        "y": 1187,
+        "label": "A-016",
         "type": "classroom"
     },
-    "A014": {
-        "x": 457,
-        "y": 521,
-        "label": "A014",
+    "node_1017": {
+        "x": 1366,
+        "y": 1054,
+        "label": "A-017",
+        "type": "office"
+    },
+    "node_1018": {
+        "x": 1349,
+        "y": 1185,
+        "label": "A-018",
         "type": "classroom"
     },
-    "A015": {
-        "x": 502,
-        "y": 520,
-        "label": "A015",
+    "node_1019": {
+        "x": 2802,
+        "y": 1661,
+        "label": "B-001",
         "type": "classroom"
     },
-    "A016": {
-        "x": 597,
-        "y": 627,
-        "label": "A016",
+    "node_1020": {
+        "x": 2808,
+        "y": 1508,
+        "label": "B-002",
+        "type": "lab"
+    },
+    "node_1021": {
+        "x": 2622,
+        "y": 1433,
+        "label": "B-003",
+        "type": "lab"
+    },
+    "node_1022": {
+        "x": 2811,
+        "y": 1362,
+        "label": "B-004",
+        "type": "lab"
+    },
+    "node_1023": {
+        "x": 2803,
+        "y": 1192,
+        "label": "B-005",
+        "type": "office"
+    },
+    "node_1024": {
+        "x": 2612,
+        "y": 1050,
+        "label": "B-006",
         "type": "classroom"
     },
-    "A017": {
-        "x": 526,
-        "y": 658,
-        "label": "A017",
+    "node_1025": {
+        "x": 2469,
+        "y": 1054,
+        "label": "B-007",
         "type": "classroom"
     },
-    "A018": {
-        "x": 600,
-        "y": 661,
-        "label": "A018",
+    "node_1026": {
+        "x": 2466,
+        "y": 1184,
+        "label": "B-008",
         "type": "classroom"
     },
-    "B001": {
-        "x": 710,
-        "y": 82,
-        "label": "B001",
+    "node_1027": {
+        "x": 2328,
+        "y": 1187,
+        "label": "B-010",
         "type": "classroom"
     },
-    "B002": {
-        "x": 636,
-        "y": 94,
-        "label": "B002",
+    "node_1028": {
+        "x": 2330,
+        "y": 1053,
+        "label": "B-009",
         "type": "classroom"
     },
-    "B003": {
-        "x": 623,
-        "y": 146,
-        "label": "B003",
+    "node_1029": {
+        "x": 2159,
+        "y": 839,
+        "label": "B-011",
+        "type": "office"
+    },
+    "node_1030": {
+        "x": 1992,
+        "y": 837,
+        "label": "B-012",
+        "type": "lab"
+    },
+    "node_1031": {
+        "x": 1967,
+        "y": 999,
+        "label": "B-013",
         "type": "classroom"
     },
-    "B004": {
-        "x": 602,
-        "y": 97,
-        "label": "B004",
+    "node_1032": {
+        "x": 1848,
+        "y": 840,
+        "label": "B-014",
+        "type": "lab"
+    },
+    "node_1033": {
+        "x": 1875,
+        "y": 998,
+        "label": "B-015",
         "type": "classroom"
     },
-    "B005": {
-        "x": 557,
-        "y": 97,
-        "label": "B005",
+    "node_1034": {
+        "x": 2159,
+        "y": 1198,
+        "label": "B-016",
         "type": "classroom"
     },
-    "B006": {
-        "x": 385,
-        "y": 162,
-        "label": "B006",
+    "node_1035": {
+        "x": 2163,
+        "y": 1295,
+        "label": "B-017",
         "type": "classroom"
     },
-    "B007": {
-        "x": 390,
-        "y": 212,
-        "label": "B007",
+    "node_1036": {
+        "x": 2300,
+        "y": 1459,
+        "label": "B-018",
+        "type": "lab"
+    },
+    "node_1037": {
+        "x": 2321,
+        "y": 1675,
+        "label": "B-019",
         "type": "classroom"
     },
-    "B008": {
-        "x": 471,
-        "y": 210,
-        "label": "B008",
+    "node_1038": {
+        "x": 2396,
+        "y": 1806,
+        "label": "B-020",
         "type": "classroom"
     },
-    "B009": {
-        "x": 390,
-        "y": 259,
-        "label": "B009",
+    "node_1039": {
+        "x": 2489,
+        "y": 1676,
+        "label": "B-021",
+        "type": "office"
+    },
+    "node_1040": {
+        "x": 2488,
+        "y": 1806,
+        "label": "B-022",
         "type": "classroom"
     },
-    "B010": {
-        "x": 466,
-        "y": 259,
-        "label": "B010",
-        "type": "classroom"
+    "node_1041": {
+        "x": 2572,
+        "y": 1702,
+        "label": "LIFT-7",
+        "type": "lift"
     },
-    "B011": {
-        "x": 212,
-        "y": 355,
-        "label": "B011",
-        "type": "classroom"
+    "node_1042": {
+        "x": 1269,
+        "y": 1078,
+        "label": "LIFT-1",
+        "type": "lift"
     },
-    "B012": {
-        "x": 215,
-        "y": 388,
-        "label": "B012",
-        "type": "classroom"
+    "node_1043": {
+        "x": 1178,
+        "y": 979,
+        "label": "LIFT-2",
+        "type": "lift"
     },
-    "B013": {
-        "x": 294,
-        "y": 411,
-        "label": "B013",
-        "type": "classroom"
+    "node_1044": {
+        "x": 1180,
+        "y": 632,
+        "label": "LIFT-3",
+        "type": "lift"
     },
-    "B014": {
-        "x": 216,
-        "y": 437,
-        "label": "B014",
-        "type": "classroom"
+    "node_1045": {
+        "x": 1270,
+        "y": 535,
+        "label": "LIFT-4",
+        "type": "lift"
     },
-    "B015": {
-        "x": 293,
-        "y": 461,
-        "label": "B015",
-        "type": "classroom"
+    "node_1046": {
+        "x": 1746,
+        "y": 976,
+        "label": "LIFT-5",
+        "type": "lift"
     },
-    "B016": {
-        "x": 466,
-        "y": 350,
-        "label": "B016",
-        "type": "classroom"
+    "node_1047": {
+        "x": 1656,
+        "y": 1064,
+        "label": "LIFT-6",
+        "type": "lift"
     },
-    "B017": {
-        "x": 514,
-        "y": 350,
-        "label": "B017",
-        "type": "classroom"
+    "node_1048": {
+        "x": 2665,
+        "y": 1604,
+        "label": "LIFT-8",
+        "type": "lift"
     },
-    "B018": {
-        "x": 676,
-        "y": 290,
-        "label": "B018",
-        "type": "classroom"
+    "node_1049": {
+        "x": 2667,
+        "y": 1254,
+        "label": "LIFT-9",
+        "type": "lift"
     },
-    "B019": {
-        "x": 705,
-        "y": 279,
-        "label": "B019",
-        "type": "classroom"
+    "node_1050": {
+        "x": 2573,
+        "y": 1165,
+        "label": "LIFT-10",
+        "type": "lift"
     },
-    "B020": {
-        "x": 785,
-        "y": 264,
-        "label": "B020",
-        "type": "classroom"
+    "node_1051": {
+        "x": 2184,
+        "y": 1067,
+        "label": "LIFT-11",
+        "type": "lift"
     },
-    "B021": {
-        "x": 705,
-        "y": 210,
-        "label": "B021",
-        "type": "classroom"
+    "node_1053": {
+        "x": 2101,
+        "y": 2104,
+        "label": "LIFT-13",
+        "type": "lift"
     },
-    "B022": {
-        "x": 780,
-        "y": 229,
-        "label": "B022",
-        "type": "classroom"
+    "node_1054": {
+        "x": 2075,
+        "y": 2113,
+        "label": "LIFT-14",
+        "type": "lift"
     },
-    "C001": {
-        "x": 600,
-        "y": 396,
-        "label": "C001",
-        "type": "classroom"
+    "node_1055": {
+        "x": 2102,
+        "y": 1810,
+        "label": "LIFT-15",
+        "type": "lift"
     },
-    "C012": {
-        "x": 862,
-        "y": 743,
-        "label": "C012",
-        "type": "classroom"
+    "node_1056": {
+        "x": 2073,
+        "y": 1823,
+        "label": "LIFT-16",
+        "type": "lift"
     },
-    "C013": {
-        "x": 755,
-        "y": 736,
-        "label": "C013",
-        "type": "classroom"
+    "node_1057": {
+        "x": 1698,
+        "y": 1749,
+        "label": "LIFT-17",
+        "type": "lift"
     },
-    "open_seating": {
-        "x": 886,
-        "y": 384,
-        "label": "Open Seating Area",
-        "type": "seating"
+    "node_1058": {
+        "x": 1606,
+        "y": 1656,
+        "label": "LIFT-18",
+        "type": "lift"
     },
-    "faculty_seating": {
-        "x": 868,
-        "y": 566,
-        "label": "Faculty Seating Area",
-        "type": "seating"
+    "node_1059": {
+        "x": 1498,
+        "y": 1658,
+        "label": "LIFT-19",
+        "type": "lift"
     },
-    "students_seating": {
-        "x": 950,
-        "y": 594,
-        "label": "Students Seating Area",
-        "type": "seating"
+    "node_1060": {
+        "x": 1408,
+        "y": 1754,
+        "label": "LIFT-20",
+        "type": "lift"
     },
-    "seminar_hall": {
-        "x": 815,
-        "y": 778,
-        "label": "Seminar Halls",
-        "type": "academic"
+    "node_1061": {
+        "x": 1213,
+        "y": 1037,
+        "label": "STAIRS-1",
+        "type": "stairs"
     },
-    "cafeteria": {
-        "x": 1022,
-        "y": 550,
-        "label": "Cafeteria",
+    "node_1062": {
+        "x": 1211,
+        "y": 575,
+        "label": "STAIRS-2",
+        "type": "stairs"
+    },
+    "node_1063": {
+        "x": 1693,
+        "y": 1013,
+        "label": "STAIRS-3",
+        "type": "stairs"
+    },
+    "node_1064": {
+        "x": 2624,
+        "y": 1658,
+        "label": "STAIRS-4",
+        "type": "stairs"
+    },
+    "node_1065": {
+        "x": 2627,
+        "y": 1201,
+        "label": "STAIRS-5",
+        "type": "stairs"
+    },
+    "node_1066": {
+        "x": 2145,
+        "y": 1011,
+        "label": "STAIRS-6",
+        "type": "stairs"
+    },
+    "node_1067": {
+        "x": 2145,
+        "y": 2074,
+        "label": "STAIRS-7",
+        "type": "stairs"
+    },
+    "node_1068": {
+        "x": 2151,
+        "y": 1781,
+        "label": "STAIRS-8",
+        "type": "stairs"
+    },
+    "node_1069": {
+        "x": 1642,
+        "y": 1709,
+        "label": "STAIRS-9",
+        "type": "stairs"
+    },
+    "node_1070": {
+        "x": 1465,
+        "y": 1709,
+        "label": "STAIRS-10",
+        "type": "stairs"
+    },
+    "node_1071": {
+        "x": 1916,
+        "y": 1417,
+        "label": "STAIRS-11",
+        "type": "stairs"
+    },
+    "node_1072": {
+        "x": 1668,
+        "y": 1889,
+        "label": "STAIRS-12",
+        "type": "stairs"
+    },
+    "node_1073": {
+        "x": 1551,
+        "y": 2094,
+        "label": "KIIT CAFE",
         "type": "cafeteria"
     },
-    "washroom_gents_b": {
-        "x": 392,
-        "y": 86,
-        "label": "Gents Washroom (Near B006)",
+    "node_1074": {
+        "x": 1552,
+        "y": 1886,
+        "label": "FACULTY LOUNGE",
+        "type": "seating"
+    },
+    "node_1075": {
+        "x": 1878,
+        "y": 1952,
+        "label": "C-BLOCK LOBBY",
+        "type": "seating"
+    },
+    "node_1076": {
+        "x": 2095,
+        "y": 1951,
+        "label": "C-BLOCK ENTRANCE",
+        "type": "entrance"
+    },
+    "node_1077": {
+        "x": 2710,
+        "y": 1977,
+        "label": "B-BLOCK ENTRANCE",
+        "type": "entrance"
+    },
+    "node_1078": {
+        "x": 1215,
+        "y": 1278,
+        "label": "GENTS WASHROOM",
         "type": "washroom_gents"
     },
-    "washroom_ladies_ab": {
-        "x": 183,
-        "y": 316,
-        "label": "Ladies Washroom (Near A011/B011)",
+    "node_1079": {
+        "x": 1667,
+        "y": 342,
+        "label": "GENTS WASHROOM",
+        "type": "washroom_gents"
+    },
+    "node_1080": {
+        "x": 2765,
+        "y": 968,
+        "label": "GENTS WASHROOM",
+        "type": "washroom_gents"
+    },
+    "node_1081": {
+        "x": 1005,
+        "y": 1586,
+        "label": "GENTS WASHROOM",
+        "type": "washroom_gents"
+    },
+    "node_1082": {
+        "x": 1571,
+        "y": 1081,
+        "label": "GENTS WASHROOM",
+        "type": "washroom_gents"
+    },
+    "node_1083": {
+        "x": 1075,
+        "y": 338,
+        "label": "LADIES WASHROOM",
         "type": "washroom_ladies"
     },
-    "staff_toilet": {
-        "x": 544,
-        "y": 599,
-        "label": "Staff Toilet",
-        "type": "washroom_gents"
+    "node_1084": {
+        "x": 1452,
+        "y": 1083,
+        "label": "LADIES WASHROOM",
+        "type": "washroom_ladies"
     },
-    "stairs_a1": {
-        "x": 261,
-        "y": 736,
-        "label": "Stairs (Near Lift 12)",
-        "type": "stairs"
-    },
-    "stairs_b1": {
-        "x": 453,
-        "y": 145,
-        "label": "Stairs (Near Lift 10)",
-        "type": "stairs"
-    },
-    "stairs_c1": {
-        "x": 780,
-        "y": 592,
-        "label": "Stairs (Near Lift 19)",
-        "type": "stairs"
-    },
-    "lift_1": {
-        "x": 540,
+    "node_1085": {
+        "x": 2288,
         "y": 728,
-        "label": "Lift 1",
+        "label": "LADIES WASHROOM",
+        "type": "washroom_ladies"
+    },
+    "node_1086": {
+        "x": 2957,
+        "y": 1659,
+        "label": "LADIES WASHROOM",
+        "type": "washroom_ladies"
+    },
+    "node_1087": {
+        "x": 1003,
+        "y": 2009,
+        "label": "LADIES WASHROOM",
+        "type": "washroom_ladies"
+    },
+    "node_1088": {
+        "x": 1225,
+        "y": 1957,
+        "label": "C-011",
+        "type": "classroom"
+    },
+    "node_1089": {
+        "x": 965,
+        "y": 1798,
+        "label": "C-012",
+        "type": "classroom"
+    },
+    "node_1090": {
+        "x": 1210,
+        "y": 1653,
+        "label": "C-013",
+        "type": "classroom"
+    },
+    "node_1091": {
+        "x": 2102,
+        "y": 1745,
+        "label": "C-001",
+        "type": "office"
+    },
+    "node_1092": {
+        "x": 2129,
+        "y": 1530,
+        "label": "C-008",
+        "type": "office"
+    },
+    "node_1093": {
+        "x": 1128,
+        "y": 1163,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1094": {
+        "x": 1269,
+        "y": 1163,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1095": {
+        "x": 1268,
+        "y": 1117,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1096": {
+        "x": 1269,
+        "y": 1222,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1097": {
+        "x": 1130,
+        "y": 1038,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1098": {
+        "x": 1131,
+        "y": 982,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1099": {
+        "x": 1042,
+        "y": 982,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1100": {
+        "x": 1132,
+        "y": 880,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1101": {
+        "x": 1132,
+        "y": 803,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1102": {
+        "x": 1132,
+        "y": 738,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1103": {
+        "x": 1132,
+        "y": 633,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1104": {
+        "x": 1038,
+        "y": 633,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1105": {
+        "x": 1213,
+        "y": 498,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1106": {
+        "x": 1133,
+        "y": 499,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1107": {
+        "x": 1133,
+        "y": 406,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1108": {
+        "x": 1228,
+        "y": 498,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1109": {
+        "x": 1269,
+        "y": 498,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1110": {
+        "x": 1372,
+        "y": 497,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1111": {
+        "x": 1515,
+        "y": 499,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1112": {
+        "x": 1608,
+        "y": 499,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1113": {
+        "x": 1609,
+        "y": 404,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1114": {
+        "x": 1609,
+        "y": 688,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1117": {
+        "x": 1746,
+        "y": 933,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1118": {
+        "x": 1609,
+        "y": 933,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1119": {
+        "x": 1692,
+        "y": 933,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1120": {
+        "x": 1609,
+        "y": 1065,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1121": {
+        "x": 1610,
+        "y": 1115,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1122": {
+        "x": 1491,
+        "y": 1084,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1123": {
+        "x": 1491,
+        "y": 1114,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1124": {
+        "x": 1443,
+        "y": 1114,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1125": {
+        "x": 1365,
+        "y": 1116,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1126": {
+        "x": 1349,
+        "y": 1116,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1127": {
+        "x": 1611,
+        "y": 1197,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1128": {
+        "x": 1611,
+        "y": 1291,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1129": {
+        "x": 1610,
+        "y": 1462,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1130": {
+        "x": 1552,
+        "y": 1461,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1131": {
+        "x": 1916,
+        "y": 1464,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1132": {
+        "x": 2227,
+        "y": 1462,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1134": {
+        "x": 2228,
+        "y": 1294,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1135": {
+        "x": 2228,
+        "y": 1201,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1136": {
+        "x": 2228,
+        "y": 1120,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1137": {
+        "x": 2227,
+        "y": 1065,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1138": {
+        "x": 2228,
+        "y": 1010,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1139": {
+        "x": 2228,
+        "y": 932,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1140": {
+        "x": 2089,
+        "y": 932,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1141": {
+        "x": 2228,
+        "y": 839,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1143": {
+        "x": 2228,
+        "y": 791,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1144": {
+        "x": 1992,
+        "y": 931,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1145": {
+        "x": 1968,
+        "y": 931,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1146": {
+        "x": 1875,
+        "y": 932,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1147": {
+        "x": 1848,
+        "y": 932,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1148": {
+        "x": 2231,
+        "y": 1748,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1149": {
+        "x": 2320,
+        "y": 1750,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1150": {
+        "x": 2488,
+        "y": 1749,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1151": {
+        "x": 2396,
+        "y": 1748,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1153": {
+        "x": 2573,
+        "y": 1748,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1154": {
+        "x": 2623,
+        "y": 1748,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1155": {
+        "x": 2709,
+        "y": 1748,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1156": {
+        "x": 2711,
+        "y": 1605,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1157": {
+        "x": 2801,
+        "y": 1604,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1158": {
+        "x": 2896,
+        "y": 1603,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1159": {
+        "x": 2710,
+        "y": 1510,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1160": {
+        "x": 2710,
+        "y": 1434,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1161": {
+        "x": 2709,
+        "y": 1363,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1162": {
+        "x": 2709,
+        "y": 1256,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1164": {
+        "x": 2709,
+        "y": 1201,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1165": {
+        "x": 2708,
+        "y": 1121,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1166": {
+        "x": 2572,
+        "y": 1122,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1167": {
+        "x": 2613,
+        "y": 1121,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1168": {
+        "x": 2708,
+        "y": 1025,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1169": {
+        "x": 2469,
+        "y": 1119,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1170": {
+        "x": 2329,
+        "y": 1118,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1171": {
+        "x": 2128,
+        "y": 1463,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1172": {
+        "x": 2102,
+        "y": 1782,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1175": {
+        "x": 1700,
+        "y": 1803,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1176": {
+        "x": 1776,
+        "y": 1803,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1177": {
+        "x": 2101,
+        "y": 2075,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1178": {
+        "x": 2074,
+        "y": 2075,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1179": {
+        "x": 2035,
+        "y": 2074,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1180": {
+        "x": 2036,
+        "y": 1951,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1181": {
+        "x": 1553,
+        "y": 1987,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1182": {
+        "x": 1670,
+        "y": 1987,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1183": {
+        "x": 1775,
+        "y": 1950,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1184": {
+        "x": 1775,
+        "y": 1987,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1185": {
+        "x": 1408,
+        "y": 1802,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1186": {
+        "x": 1552,
+        "y": 1803,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1187": {
+        "x": 1551,
+        "y": 1657,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1188": {
+        "x": 1553,
+        "y": 1712,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1189": {
+        "x": 1130,
+        "y": 1800,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1193": {
+        "x": 1608,
+        "y": 809,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1194": {
+        "x": 1609,
+        "y": 832,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1195": {
+        "x": 1526,
+        "y": 809,
+        "label": "A-012",
+        "type": "lab"
+    },
+    "node_1196": {
+        "x": 1670,
+        "y": 832,
+        "label": "A-013",
+        "type": "classroom"
+    },
+    "node_1199": {
+        "x": 2088,
+        "y": 975,
+        "label": "LIFT-12",
         "type": "lift"
     },
-    "lift_2": {
-        "x": 516,
-        "y": 742,
-        "label": "Lift 2",
-        "type": "lift"
-    },
-    "lift_3": {
-        "x": 353,
-        "y": 740,
-        "label": "Lift 3",
-        "type": "lift"
-    },
-    "lift_4": {
-        "x": 191,
-        "y": 692,
-        "label": "Lift 4",
-        "type": "lift"
-    },
-    "lift_7": {
-        "x": 709,
-        "y": 181,
-        "label": "Lift 7",
-        "type": "lift"
-    },
-    "lift_8": {
-        "x": 666,
-        "y": 148,
-        "label": "Lift 8",
-        "type": "lift"
-    },
-    "lift_9": {
-        "x": 560,
-        "y": 147,
-        "label": "Lift 9",
-        "type": "lift"
-    },
-    "lift_10": {
-        "x": 472,
-        "y": 177,
-        "label": "Lift 10",
-        "type": "lift"
-    },
-    "lift_11": {
-        "x": 388,
-        "y": 350,
-        "label": "Lift 11",
-        "type": "lift"
-    },
-    "lift_12": {
-        "x": 294,
-        "y": 370,
-        "label": "Lift 12",
-        "type": "lift"
-    },
-    "lift_15": {
-        "x": 290,
-        "y": 505,
-        "label": "Lift 15",
-        "type": "lift"
-    },
-    "lift_16": {
-        "x": 864,
-        "y": 326,
-        "label": "Lift 16",
-        "type": "lift"
-    },
-    "lift_18": {
-        "x": 735,
-        "y": 528,
-        "label": "Lift 18",
-        "type": "lift"
-    },
-    "lift_19": {
-        "x": 735,
-        "y": 607,
-        "label": "Lift 19",
-        "type": "lift"
-    },
-    "water_b": {
-        "x": 506,
-        "y": 147,
-        "label": "Water Cooler",
-        "type": "water_cooler"
-    },
-    "water_c": {
-        "x": 792,
-        "y": 531,
-        "label": "Water Cooler",
-        "type": "water_cooler"
-    },
-    "gate_ab": {
-        "x": 534,
-        "y": 568,
-        "label": "Internal Gate A–B",
-        "type": "gate"
-    },
-    "gate_bc": {
-        "x": 564,
-        "y": 339,
-        "label": "Internal Gate B–C",
-        "type": "gate"
-    },
-    "c_54": {
-        "x": 564,
-        "y": 768,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_55": {
-        "x": 515,
-        "y": 765,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_56": {
-        "x": 564,
-        "y": 730,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_57": {
-        "x": 479,
-        "y": 766,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_58": {
-        "x": 443,
-        "y": 767,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_59": {
-        "x": 400,
-        "y": 765,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_60": {
-        "x": 352,
-        "y": 767,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_61": {
-        "x": 305,
-        "y": 764,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_62": {
-        "x": 257,
-        "y": 766,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_63": {
-        "x": 153,
-        "y": 764,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_64": {
-        "x": 155,
-        "y": 728,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_65": {
-        "x": 156,
-        "y": 691,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_66": {
-        "x": 154,
-        "y": 646,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_67": {
-        "x": 154,
-        "y": 600,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_68": {
-        "x": 153,
-        "y": 547,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_69": {
-        "x": 179,
-        "y": 548,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_70": {
-        "x": 204,
-        "y": 547,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_71": {
-        "x": 224,
-        "y": 546,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_72": {
-        "x": 255,
-        "y": 546,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_73": {
-        "x": 254,
-        "y": 503,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_74": {
-        "x": 255,
-        "y": 467,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_75": {
-        "x": 254,
-        "y": 437,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_76": {
-        "x": 254,
-        "y": 412,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_77": {
-        "x": 255,
-        "y": 389,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_79": {
-        "x": 251,
-        "y": 319,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_80": {
-        "x": 212,
-        "y": 315,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_81": {
-        "x": 322,
-        "y": 317,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_82": {
-        "x": 386,
-        "y": 318,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_83": {
-        "x": 425,
-        "y": 318,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_84": {
-        "x": 469,
-        "y": 317,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_85": {
-        "x": 425,
-        "y": 259,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_86": {
-        "x": 426,
-        "y": 210,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_87": {
-        "x": 425,
-        "y": 180,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_88": {
-        "x": 425,
-        "y": 160,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_89": {
-        "x": 426,
-        "y": 120,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_90": {
-        "x": 504,
-        "y": 118,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_91": {
-        "x": 558,
-        "y": 121,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_92": {
-        "x": 600,
-        "y": 121,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_93": {
-        "x": 625,
-        "y": 120,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_94": {
-        "x": 647,
-        "y": 121,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_95": {
-        "x": 671,
-        "y": 121,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_96": {
-        "x": 672,
-        "y": 81,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_97": {
-        "x": 740,
-        "y": 127,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_98": {
-        "x": 742,
-        "y": 182,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_99": {
-        "x": 742,
-        "y": 211,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_100": {
-        "x": 741,
-        "y": 282,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_102": {
-        "x": 743,
-        "y": 256,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_103": {
-        "x": 739,
-        "y": 319,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_105": {
-        "x": 560,
-        "y": 313,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_106": {
-        "x": 561,
-        "y": 395,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_107": {
-        "x": 562,
-        "y": 443,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_108": {
-        "x": 407,
-        "y": 546,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_109": {
-        "x": 456,
-        "y": 547,
-        "label": "",
+    "node_1200": {
+        "x": 2803,
+        "y": 1255,
+        "label": "New Node",
         "type": "corridor"
     },
-    "c_110": {
-        "x": 500,
-        "y": 547,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_111": {
-        "x": 533,
-        "y": 540,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_112": {
-        "x": 568,
-        "y": 550,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_113": {
-        "x": 564,
-        "y": 599,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_114": {
-        "x": 565,
-        "y": 629,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_115": {
-        "x": 565,
-        "y": 663,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_116": {
-        "x": 737,
-        "y": 558,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_117": {
-        "x": 775,
-        "y": 558,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_118": {
-        "x": 817,
-        "y": 536,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_119": {
-        "x": 816,
-        "y": 565,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_120": {
-        "x": 815,
-        "y": 468,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_121": {
-        "x": 953,
-        "y": 471,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_122": {
-        "x": 811,
-        "y": 741,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_123": {
-        "x": 954,
-        "y": 554,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_124": {
-        "x": 253,
-        "y": 366,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_125": {
-        "x": 741,
-        "y": 233,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_126": {
-        "x": 673,
-        "y": 321,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_127": {
-        "x": 512,
-        "y": 318,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_128": {
-        "x": 954,
-        "y": 364,
-        "label": "",
-        "type": "corridor"
-    },
-    "c_129": {
-        "x": 812,
-        "y": 397,
-        "label": "",
+    "node_1201": {
+        "x": 2013,
+        "y": 1802,
+        "label": "New Node",
         "type": "corridor"
     },
-    "c_130": {
-        "x": 813,
-        "y": 322,
+    "node_1202": {
+        "x": 2034,
+        "y": 1801,
         "label": "",
         "type": "corridor"
     },
-    "c_131": {
-        "x": 812,
-        "y": 293,
+    "node_1203": {
+        "x": 2034,
+        "y": 1783,
         "label": "",
         "type": "corridor"
     }
@@ -900,744 +1137,949 @@ export const nodes = {
 
 export const edges = [
     [
-        "c_54",
-        "c_55",
-        47
+        "node_1005",
+        "node_1093",
+        287
     ],
     [
-        "A001",
-        "c_55",
-        25
+        "node_1093",
+        "node_1094",
+        139
     ],
     [
-        "lift_2",
-        "c_55",
-        23
+        "node_1094",
+        "node_1096",
+        63
     ],
     [
-        "c_57",
-        "c_55",
-        37
+        "node_1096",
+        "node_1078",
+        73
     ],
     [
-        "A002",
-        "c_57",
-        27
-    ],
-    [
-        "c_58",
-        "A003",
-        28
-    ],
-    [
-        "c_59",
-        "c_58",
-        43
-    ],
-    [
-        "A004",
-        "c_59",
-        31
-    ],
-    [
-        "c_60",
-        "c_59",
-        49
-    ],
-    [
-        "c_60",
-        "lift_3",
-        25
-    ],
-    [
-        "c_61",
-        "c_62",
-        46
-    ],
-    [
-        "c_62",
-        "stairs_a1",
-        33
-    ],
-    [
-        "A005",
-        "c_61",
-        26
-    ],
-    [
-        "c_62",
-        "c_63",
-        106
-    ],
-    [
-        "c_64",
-        "c_63",
-        36
-    ],
-    [
-        "c_65",
-        "c_64",
-        34
-    ],
-    [
-        "A006",
-        "c_64",
-        41
-    ],
-    [
-        "lift_4",
-        "c_65",
-        37
-    ],
-    [
-        "c_66",
-        "c_65",
-        48
-    ],
-    [
-        "c_66",
-        "A007",
-        39
-    ],
-    [
-        "A008",
-        "c_66",
-        33
-    ],
-    [
-        "c_67",
-        "A010",
-        41
-    ],
-    [
-        "A009",
-        "c_67",
-        40
-    ],
-    [
-        "c_66",
-        "c_67",
-        50
-    ],
-    [
-        "c_67",
-        "c_68",
-        51
-    ],
-    [
-        "c_68",
-        "c_69",
-        21
-    ],
-    [
-        "c_69",
-        "c_70",
-        29
-    ],
-    [
-        "c_70",
-        "c_71",
-        20
-    ],
-    [
-        "c_69",
-        "A011",
-        24
-    ],
-    [
-        "c_70",
-        "A013",
-        22
-    ],
-    [
-        "A012",
-        "c_71",
-        28
-    ],
-    [
-        "c_71",
-        "c_72",
-        33
-    ],
-    [
-        "c_108",
-        "c_72",
-        152
-    ],
-    [
-        "c_73",
-        "c_72",
-        40
-    ],
-    [
-        "lift_15",
-        "c_73",
-        38
-    ],
-    [
-        "c_74",
-        "c_73",
+        "node_1094",
+        "node_1095",
         44
     ],
     [
-        "B015",
-        "c_74",
-        41
-    ],
-    [
-        "c_75",
-        "c_74",
-        25
-    ],
-    [
-        "c_76",
-        "c_75",
-        25
-    ],
-    [
-        "c_76",
-        "c_77",
-        22
-    ],
-    [
-        "B014",
-        "c_75",
-        54
-    ],
-    [
-        "B012",
-        "c_77",
+        "node_1095",
+        "node_1042",
         40
     ],
     [
-        "lift_12",
-        "c_124",
-        37
+        "node_1093",
+        "node_1097",
+        115
     ],
     [
-        "c_124",
-        "c_79",
+        "node_1097",
+        "node_1061",
+        81
+    ],
+    [
+        "node_1097",
+        "node_1098",
+        67
+    ],
+    [
+        "node_1098",
+        "node_1043",
         47
     ],
     [
-        "c_80",
-        "c_79",
-        39
+        "node_1098",
+        "node_1099",
+        90
     ],
     [
-        "c_81",
-        "c_79",
-        71
-    ],
-    [
-        "c_80",
-        "washroom_ladies_ab",
-        29
-    ],
-    [
-        "c_82",
-        "c_81",
-        64
-    ],
-    [
-        "lift_11",
-        "c_82",
-        35
-    ],
-    [
-        "c_83",
-        "c_82",
-        38
-    ],
-    [
-        "c_83",
-        "c_84",
-        45
-    ],
-    [
-        "c_84",
-        "B016",
-        33
-    ],
-    [
-        "c_83",
-        "c_85",
-        55
-    ],
-    [
-        "c_85",
-        "B010",
-        39
-    ],
-    [
-        "c_85",
-        "B009",
-        35
-    ],
-    [
-        "c_86",
-        "c_85",
-        49
-    ],
-    [
-        "B008",
-        "c_86",
-        48
-    ],
-    [
-        "B007",
-        "c_86",
-        40
-    ],
-    [
-        "c_87",
-        "c_86",
-        35
-    ],
-    [
-        "c_87",
-        "lift_10",
-        43
-    ],
-    [
-        "c_88",
-        "c_87",
-        17
-    ],
-    [
-        "B006",
-        "c_88",
-        39
-    ],
-    [
-        "c_88",
-        "c_89",
-        38
-    ],
-    [
-        "c_89",
-        "stairs_b1",
-        37
-    ],
-    [
-        "c_90",
-        "c_89",
-        79
-    ],
-    [
-        "water_b",
-        "c_90",
-        23
-    ],
-    [
-        "c_91",
-        "c_90",
-        55
-    ],
-    [
-        "lift_9",
-        "c_91",
-        24
-    ],
-    [
-        "c_89",
-        "washroom_gents_b",
-        48
-    ],
-    [
-        "B005",
-        "c_91",
-        28
-    ],
-    [
-        "c_92",
-        "c_91",
-        40
-    ],
-    [
-        "c_92",
-        "B004",
-        25
-    ],
-    [
-        "c_93",
-        "c_92",
-        25
-    ],
-    [
-        "c_94",
-        "c_93",
-        22
-    ],
-    [
-        "B003",
-        "c_93",
-        25
-    ],
-    [
-        "B002",
-        "c_94",
-        29
-    ],
-    [
-        "c_95",
-        "c_94",
-        24
-    ],
-    [
-        "c_97",
-        "c_95",
-        68
-    ],
-    [
-        "lift_8",
-        "c_95",
-        31
-    ],
-    [
-        "c_96",
-        "c_95",
-        40
-    ],
-    [
-        "B001",
-        "c_96",
-        38
-    ],
-    [
-        "c_97",
-        "c_98",
+        "node_1099",
+        "node_1000",
         59
     ],
     [
-        "lift_7",
-        "c_98",
-        33
+        "node_1098",
+        "node_1100",
+        102
     ],
     [
-        "c_99",
-        "c_98",
-        29
+        "node_1100",
+        "node_1001",
+        88
     ],
     [
-        "B021",
-        "c_99",
-        36
+        "node_1100",
+        "node_1101",
+        82
     ],
     [
-        "c_125",
-        "c_99",
-        22
+        "node_1101",
+        "node_1002",
+        76
     ],
     [
-        "c_102",
-        "c_125",
-        23
-    ],
-    [
-        "B022",
-        "c_125",
-        39
-    ],
-    [
-        "B020",
-        "c_102",
-        43
-    ],
-    [
-        "c_100",
-        "c_102",
-        26
-    ],
-    [
-        "B019",
-        "c_100",
-        36
-    ],
-    [
-        "c_103",
-        "c_100",
-        37
-    ],
-    [
-        "B018",
-        "c_126",
-        20
-    ],
-    [
-        "c_103",
-        "c_126",
-        66
-    ],
-    [
-        "c_126",
-        "c_105",
-        113
-    ],
-    [
-        "gate_bc",
-        "c_105",
-        20
-    ],
-    [
-        "c_84",
-        "c_127",
-        43
-    ],
-    [
-        "B017",
-        "c_127",
-        32
-    ],
-    [
-        "c_105",
-        "c_127",
-        48
-    ],
-    [
-        "c_106",
-        "gate_bc",
+        "node_1101",
+        "node_1102",
         62
     ],
     [
-        "C001",
-        "c_106",
-        39
+        "node_1102",
+        "node_1003",
+        90
     ],
     [
-        "c_107",
-        "c_106",
-        48
+        "node_1102",
+        "node_1103",
+        100
     ],
     [
-        "c_108",
-        "c_109",
-        49
+        "node_1103",
+        "node_1044",
+        50
     ],
     [
-        "c_110",
-        "c_109",
-        44
+        "node_1103",
+        "node_1104",
+        92
     ],
     [
-        "c_111",
-        "c_110",
-        34
+        "node_1104",
+        "node_1004",
+        63
     ],
     [
-        "c_112",
-        "c_111",
-        36
+        "node_1103",
+        "node_1106",
+        136
     ],
     [
-        "gate_ab",
-        "c_111",
+        "node_1106",
+        "node_1107",
+        93
+    ],
+    [
+        "node_1107",
+        "node_1083",
+        87
+    ],
+    [
+        "node_1106",
+        "node_1105",
+        67
+    ],
+    [
+        "node_1105",
+        "node_1062",
+        78
+    ],
+    [
+        "node_1105",
+        "node_1108",
         28
     ],
     [
-        "A015",
-        "c_110",
-        27
+        "node_1108",
+        "node_1006",
+        72
     ],
     [
-        "A014",
-        "c_109",
-        26
-    ],
-    [
-        "c_54",
-        "c_56",
-        35
-    ],
-    [
-        "c_56",
-        "lift_1",
-        26
-    ],
-    [
-        "c_115",
-        "c_56",
-        69
-    ],
-    [
-        "c_115",
-        "A018",
-        35
-    ],
-    [
-        "c_115",
-        "A017",
-        39
-    ],
-    [
-        "c_114",
-        "c_115",
-        34
-    ],
-    [
-        "c_114",
-        "A016",
-        32
-    ],
-    [
-        "c_113",
-        "c_114",
-        30
-    ],
-    [
-        "c_112",
-        "c_113",
-        49
-    ],
-    [
-        "c_113",
-        "staff_toilet",
-        20
-    ],
-    [
-        "c_112",
-        "c_116",
-        169
-    ],
-    [
-        "lift_19",
-        "c_116",
-        49
-    ],
-    [
-        "lift_18",
-        "c_116",
-        30
-    ],
-    [
-        "c_117",
-        "c_116",
+        "node_1108",
+        "node_1109",
         40
     ],
     [
-        "stairs_c1",
-        "c_117",
-        33
-    ],
-    [
-        "c_119",
-        "c_117",
+        "node_1109",
+        "node_1045",
         39
     ],
     [
-        "c_118",
-        "c_119",
-        29
+        "node_1109",
+        "node_1110",
+        104
     ],
     [
-        "water_c",
-        "c_118",
-        25
-    ],
-    [
-        "c_119",
-        "c_122",
-        176
-    ],
-    [
-        "C013",
-        "c_122",
-        56
-    ],
-    [
-        "C012",
-        "c_122",
-        51
-    ],
-    [
-        "seminar_hall",
-        "c_122",
-        37
-    ],
-    [
-        "c_120",
-        "c_118",
-        68
-    ],
-    [
-        "c_121",
-        "c_120",
-        138
-    ],
-    [
-        "c_123",
-        "c_121",
-        83
-    ],
-    [
-        "cafeteria",
-        "c_123",
-        68
-    ],
-    [
-        "students_seating",
-        "c_123",
-        40
-    ],
-    [
-        "c_119",
-        "faculty_seating",
-        52
-    ],
-    [
-        "c_129",
-        "c_120",
+        "node_1110",
+        "node_1007",
         71
     ],
     [
-        "c_128",
-        "c_121",
-        107
+        "node_1110",
+        "node_1008",
+        67
     ],
     [
-        "c_129",
-        "c_130",
-        75
+        "node_1111",
+        "node_1110",
+        143
     ],
     [
-        "c_131",
-        "c_130",
-        29
+        "node_1111",
+        "node_1010",
+        64
     ],
     [
-        "c_130",
-        "lift_16",
-        51
+        "node_1111",
+        "node_1009",
+        72
     ],
     [
-        "c_54",
-        "entrance_main",
-        146
+        "node_1111",
+        "node_1112",
+        93
     ],
     [
-        "c_58",
-        "c_57",
-        38
+        "node_1112",
+        "node_1113",
+        98
     ],
     [
-        "c_60",
-        "c_61",
-        46
+        "node_1113",
+        "node_1079",
+        85
     ],
     [
-        "c_124",
-        "c_77",
-        23
+        "node_1112",
+        "node_1114",
+        186
     ],
     [
-        "B013",
-        "c_76",
+        "node_1114",
+        "node_1011",
+        60
+    ],
+    [
+        "node_1114",
+        "node_1193",
+        106
+    ],
+    [
+        "node_1194",
+        "node_1193",
         40
     ],
     [
-        "entrance_qc19",
-        "c_128",
-        262
+        "node_1195",
+        "node_1193",
+        84
+    ],
+    [
+        "node_1194",
+        "node_1196",
+        59
+    ],
+    [
+        "node_1194",
+        "node_1118",
+        99
+    ],
+    [
+        "node_1118",
+        "node_1119",
+        71
+    ],
+    [
+        "node_1119",
+        "node_1117",
+        64
+    ],
+    [
+        "node_1117",
+        "node_1046",
+        40
+    ],
+    [
+        "node_1095",
+        "node_1126",
+        81
+    ],
+    [
+        "node_1126",
+        "node_1018",
+        67
+    ],
+    [
+        "node_1126",
+        "node_1125",
+        22
+    ],
+    [
+        "node_1125",
+        "node_1017",
+        65
+    ],
+    [
+        "node_1125",
+        "node_1124",
+        75
+    ],
+    [
+        "node_1124",
+        "node_1016",
+        71
+    ],
+    [
+        "node_1124",
+        "node_1123",
+        46
+    ],
+    [
+        "node_1123",
+        "node_1122",
+        28
+    ],
+    [
+        "node_1122",
+        "node_1084",
+        38
+    ],
+    [
+        "node_1122",
+        "node_1082",
+        81
+    ],
+    [
+        "node_1123",
+        "node_1121",
+        114
+    ],
+    [
+        "node_1121",
+        "node_1120",
+        53
+    ],
+    [
+        "node_1120",
+        "node_1047",
+        48
+    ],
+    [
+        "node_1120",
+        "node_1118",
+        128
+    ],
+    [
+        "node_1119",
+        "node_1063",
+        80
+    ],
+    [
+        "node_1121",
+        "node_1127",
+        84
+    ],
+    [
+        "node_1127",
+        "node_1014",
+        63
+    ],
+    [
+        "node_1127",
+        "node_1128",
+        88
+    ],
+    [
+        "node_1128",
+        "node_1015",
+        59
+    ],
+    [
+        "node_1128",
+        "node_1129",
+        171
+    ],
+    [
+        "node_1129",
+        "node_1130",
+        57
+    ],
+    [
+        "node_1117",
+        "node_1147",
+        101
+    ],
+    [
+        "node_1147",
+        "node_1032",
+        92
+    ],
+    [
+        "node_1147",
+        "node_1146",
+        29
+    ],
+    [
+        "node_1146",
+        "node_1033",
+        65
+    ],
+    [
+        "node_1146",
+        "node_1145",
+        91
+    ],
+    [
+        "node_1145",
+        "node_1031",
+        68
+    ],
+    [
+        "node_1145",
+        "node_1144",
+        23
+    ],
+    [
+        "node_1144",
+        "node_1030",
+        91
+    ],
+    [
+        "node_1144",
+        "node_1140",
+        100
+    ],
+    [
+        "node_1140",
+        "node_1199",
+        50
+    ],
+    [
+        "node_1140",
+        "node_1139",
+        138
+    ],
+    [
+        "node_1139",
+        "node_1141",
+        94
+    ],
+    [
+        "node_1141",
+        "node_1029",
+        68
+    ],
+    [
+        "node_1141",
+        "node_1143",
+        50
+    ],
+    [
+        "node_1143",
+        "node_1085",
+        87
+    ],
+    [
+        "node_1139",
+        "node_1138",
+        75
+    ],
+    [
+        "node_1138",
+        "node_1066",
+        83
+    ],
+    [
+        "node_1138",
+        "node_1137",
+        59
+    ],
+    [
+        "node_1137",
+        "node_1051",
+        45
+    ],
+    [
+        "node_1137",
+        "node_1136",
+        53
+    ],
+    [
+        "node_1136",
+        "node_1170",
+        101
+    ],
+    [
+        "node_1170",
+        "node_1028",
+        65
+    ],
+    [
+        "node_1170",
+        "node_1027",
+        69
+    ],
+    [
+        "node_1136",
+        "node_1135",
+        77
+    ],
+    [
+        "node_1135",
+        "node_1034",
+        71
+    ],
+    [
+        "node_1135",
+        "node_1134",
+        95
+    ],
+    [
+        "node_1035",
+        "node_1134",
+        65
+    ],
+    [
+        "node_1132",
+        "node_1171",
+        98
+    ],
+    [
+        "node_1171",
+        "node_1131",
+        212
+    ],
+    [
+        "node_1131",
+        "node_1071",
+        42
+    ],
+    [
+        "node_1134",
+        "node_1132",
+        166
+    ],
+    [
+        "node_1132",
+        "node_1036",
+        74
+    ],
+    [
+        "node_1132",
+        "node_1148",
+        282
+    ],
+    [
+        "node_1148",
+        "node_1149",
+        91
+    ],
+    [
+        "node_1149",
+        "node_1037",
+        69
+    ],
+    [
+        "node_1149",
+        "node_1151",
+        73
+    ],
+    [
+        "node_1151",
+        "node_1038",
+        58
+    ],
+    [
+        "node_1151",
+        "node_1150",
+        78
+    ],
+    [
+        "node_1150",
+        "node_1039",
+        74
+    ],
+    [
+        "node_1150",
+        "node_1040",
+        58
+    ],
+    [
+        "node_1150",
+        "node_1153",
+        99
+    ],
+    [
+        "node_1041",
+        "node_1153",
+        46
+    ],
+    [
+        "node_1153",
+        "node_1154",
+        58
+    ],
+    [
+        "node_1154",
+        "node_1155",
+        69
+    ],
+    [
+        "node_1155",
+        "node_1156",
+        144
+    ],
+    [
+        "node_1156",
+        "node_1048",
+        42
+    ],
+    [
+        "node_1154",
+        "node_1064",
+        90
+    ],
+    [
+        "node_1155",
+        "node_1077",
+        228
+    ],
+    [
+        "node_1156",
+        "node_1157",
+        94
+    ],
+    [
+        "node_1157",
+        "node_1019",
+        57
+    ],
+    [
+        "node_1157",
+        "node_1158",
+        95
+    ],
+    [
+        "node_1158",
+        "node_1086",
+        83
+    ],
+    [
+        "node_1159",
+        "node_1156",
+        96
+    ],
+    [
+        "node_1159",
+        "node_1020",
+        96
+    ],
+    [
+        "node_1160",
+        "node_1159",
+        76
+    ],
+    [
+        "node_1160",
+        "node_1021",
+        89
+    ],
+    [
+        "node_1160",
+        "node_1161",
+        67
+    ],
+    [
+        "node_1161",
+        "node_1022",
+        98
+    ],
+    [
+        "node_1161",
+        "node_1162",
+        110
+    ],
+    [
+        "node_1162",
+        "node_1049",
+        43
+    ],
+    [
+        "node_1170",
+        "node_1169",
+        140
+    ],
+    [
+        "node_1169",
+        "node_1025",
+        65
+    ],
+    [
+        "node_1169",
+        "node_1026",
+        65
+    ],
+    [
+        "node_1169",
+        "node_1166",
+        101
+    ],
+    [
+        "node_1166",
+        "node_1050",
+        43
+    ],
+    [
+        "node_1166",
+        "node_1167",
+        49
+    ],
+    [
+        "node_1167",
+        "node_1024",
+        63
+    ],
+    [
+        "node_1167",
+        "node_1165",
+        88
+    ],
+    [
+        "node_1165",
+        "node_1164",
+        68
+    ],
+    [
+        "node_1164",
+        "node_1162",
+        67
+    ],
+    [
+        "node_1164",
+        "node_1065",
+        82
+    ],
+    [
+        "node_1165",
+        "node_1168",
+        98
+    ],
+    [
+        "node_1168",
+        "node_1080",
+        76
+    ],
+    [
+        "node_1129",
+        "node_1131",
+        306
+    ],
+    [
+        "node_1130",
+        "node_1187",
+        198
+    ],
+    [
+        "node_1187",
+        "node_1058",
+        54
+    ],
+    [
+        "node_1187",
+        "node_1059",
+        51
+    ],
+    [
+        "node_1187",
+        "node_1188",
+        62
+    ],
+    [
+        "node_1188",
+        "node_1069",
+        91
+    ],
+    [
+        "node_1188",
+        "node_1070",
+        88
+    ],
+    [
+        "node_1188",
+        "node_1186",
+        77
+    ],
+    [
+        "node_1186",
+        "node_1175",
+        141
+    ],
+    [
+        "node_1175",
+        "node_1057",
+        47
+    ],
+    [
+        "node_1186",
+        "node_1185",
+        142
+    ],
+    [
+        "node_1185",
+        "node_1060",
+        43
+    ],
+    [
+        "node_1175",
+        "node_1176",
+        77
+    ],
+    [
+        "node_1172",
+        "node_1068",
+        51
+    ],
+    [
+        "node_1172",
+        "node_1055",
+        21
+    ],
+    [
+        "node_1172",
+        "node_1091",
+        81
+    ],
+    [
+        "node_1076",
+        "node_1180",
+        58
+    ],
+    [
+        "node_1180",
+        "node_1075",
+        158
+    ],
+    [
+        "node_1075",
+        "node_1183",
+        102
+    ],
+    [
+        "node_1183",
+        "node_1184",
+        37
+    ],
+    [
+        "node_1183",
+        "node_1176",
+        139
+    ],
+    [
+        "node_1184",
+        "node_1182",
+        105
+    ],
+    [
+        "node_1182",
+        "node_1072",
+        103
+    ],
+    [
+        "node_1186",
+        "node_1074",
+        89
+    ],
+    [
+        "node_1182",
+        "node_1181",
+        122
+    ],
+    [
+        "node_1181",
+        "node_1073",
+        99
+    ],
+    [
+        "node_1180",
+        "node_1179",
+        126
+    ],
+    [
+        "node_1179",
+        "node_1178",
+        32
+    ],
+    [
+        "node_1178",
+        "node_1177",
+        27
+    ],
+    [
+        "node_1177",
+        "node_1067",
+        44
+    ],
+    [
+        "node_1177",
+        "node_1053",
+        25
+    ],
+    [
+        "node_1178",
+        "node_1054",
+        34
+    ],
+    [
+        "node_1185",
+        "node_1189",
+        282
+    ],
+    [
+        "node_1189",
+        "node_1090",
+        164
+    ],
+    [
+        "node_1189",
+        "node_1088",
+        187
+    ],
+    [
+        "node_1189",
+        "node_1087",
+        248
+    ],
+    [
+        "node_1081",
+        "node_1189",
+        244
+    ],
+    [
+        "node_1189",
+        "node_1089",
+        165
+    ],
+    [
+        "node_1171",
+        "node_1092",
+        65
+    ],
+    [
+        "node_1162",
+        "node_1200",
+        89
+    ],
+    [
+        "node_1200",
+        "node_1023",
+        63
+    ],
+    [
+        "node_1203",
+        "node_1172",
+        68
+    ],
+    [
+        "node_1203",
+        "node_1202",
+        18
+    ],
+    [
+        "node_1202",
+        "node_1201",
+        21
+    ],
+    [
+        "node_1176",
+        "node_1201",
+        237
     ]
 ];
 

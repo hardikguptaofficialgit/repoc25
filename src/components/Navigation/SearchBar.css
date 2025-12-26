@@ -163,6 +163,23 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.match-badge {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(211, 74, 9, 0.15);
+    color: #D34509;
+    border-radius: 4px;
+    letter-spacing: 0.03em;
+    flex-shrink: 0;
 }
 
 .suggestion-type {
