@@ -49,6 +49,14 @@ export function getNodesByFloor(floor) {
             }
         }
 
+        // Ground Floor: Change node_1075 to LOBBY
+        if (floor === 0) {
+            if (id === 'node_1075') {
+                newNode.label = 'LOBBY';
+                newNode.type = 'seating';
+            }
+        }
+
         // Floor-specific node filtering
         if (floor > 0) {
             if (newNode.type === 'entrance') return;
@@ -58,13 +66,14 @@ export function getNodesByFloor(floor) {
                 if (newNode.type === 'cafeteria' || newNode.label.includes('LOBBY')) return;
                 if (id === 'node_1053' || id === 'node_1054' || id === 'node_1067') return;
                 if (id === 'node_1074') return;
+                if (id === 'node_1075') return;
                 if (id === 'node_1177' || id === 'node_1178' || id === 'node_1179' || id === 'node_1180' ||
                     id === 'node_1181' || id === 'node_1182' || id === 'node_1183' || id === 'node_1184') return;
             }
 
             // 2nd Floor
             if (floor === 2) {
-                if (newNode.label.includes('LOBBY')) {
+                if (id === 'node_1075') {
                     newNode.label = 'LIBRARY';
                     newNode.type = 'library';
                 }
