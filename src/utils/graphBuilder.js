@@ -32,43 +32,145 @@ export function buildGraph() {
 }
 
 /**
- * Search for locations by query string
+ * Get nodes filtered/modified by floor
+ * @param {number} floor - Floor number
+ * @returns {Object} - Filtered nodes
+ */
+export function getNodesByFloor(floor) {
+    const filtered = {};
+    Object.entries(nodes).forEach(([id, node]) => {
+        let newNode = { ...node };
+
+        // Floor Logic
+        if (floor > 0) {
+            // 1. Remove entrances for all floors above ground
+            if (newNode.type === 'entrance') return;
+
+            // 2. 1st Floor: Remove cafe and lobby
+            if (floor === 1) {
+                if (newNode.type === 'cafeteria' || newNode.label.includes('LOBBY')) return;
+            }
+
+            // 3. 2nd Floor: Convert lobby to library
+            if (floor === 2) {
+                if (newNode.label.includes('LOBBY')) {
+                    newNode.label = 'LIBRARY';
+                    newNode.type = 'library';
+                }
+            }
+
+            // 4. 3rd Floor: Entrances already removed, cafe/lobby might be there or not 
+            // Depending on user's original request: "Remove entrances for floors above ground. Remove cafe/lobby from 1st floor, convert lobby on 2nd to library."
+            // This implies 3rd floor follows general "above ground" rules but keeps cafe if present (if requested).
+        }
+
+        filtered[id] = newNode;
+    });
+    return filtered;
+}
+
+/**
+ * Calculate fuzzy match score between query and text
  * @param {string} query - Search query
+ * @param {string} text - Text to match against
+ * @returns {number} - Match score (higher is better)
+ */
+function fuzzyMatchScore(query, text) {
+    const queryLower = query.toLowerCase();
+    const textLower = text.toLowerCase();
+
+    // Exact match - highest score
+    if (textLower === queryLower) return 1000;
+
+    // Starts with query - very high score
+    if (textLower.startsWith(queryLower)) return 900;
+
+    // Contains exact query - high score
+    if (textLower.includes(queryLower)) return 800;
+
+    // Word boundary match (e.g., "A-101" matches "a 101")
+    const words = textLower.split(/[\s\-_]/);
+    if (words.some(word => word.startsWith(queryLower))) return 750;
+
+    // Acronym match (e.g., "wg" matches "Washroom Gents")
+    const acronym = words.map(w => w[0]).join('');
+    if (acronym.includes(queryLower)) return 700;
+
+    // Fuzzy character-by-character matching
+    let score = 0;
+    let queryIndex = 0;
+    let consecutiveMatches = 0;
+
+    for (let i = 0; i < textLower.length && queryIndex < queryLower.length; i++) {
+        if (textLower[i] === queryLower[queryIndex]) {
+            score += 10 + consecutiveMatches * 5; // Bonus for consecutive matches
+            consecutiveMatches++;
+            queryIndex++;
+        } else {
+            consecutiveMatches = 0;
+        }
+    }
+
+    // All characters matched in order
+    if (queryIndex === queryLower.length) {
+        return score + 100;
+    }
+
+    return 0;
+}
+
+/**
+ * Search for locations by query string with fuzzy matching
+ * @param {string} query - Search query
+ * @param {number} floor - Current floor
  * @returns {Array} - Array of matching locations
  */
-export function searchLocations(query) {
+export function searchLocations(query, floor = 0) {
     if (!query || query.length === 0) return [];
 
     const searchTerm = query.toLowerCase().trim();
     const results = [];
+    const floorNodes = getNodesByFloor(floor);
 
-    for (let [nodeId, node] of Object.entries(nodes)) {
+    for (let [nodeId, node] of Object.entries(floorNodes)) {
         // Skip corridor nodes from search results
         if (node.type === 'corridor') continue;
 
-        const labelMatch = node.label.toLowerCase().includes(searchTerm);
-        const typeMatch = node.type.replace(/_/g, ' ').toLowerCase().includes(searchTerm);
-        const idMatch = nodeId.toLowerCase().includes(searchTerm);
+        // Calculate match scores for different fields
+        const labelScore = fuzzyMatchScore(searchTerm, node.label);
+        const typeScore = fuzzyMatchScore(searchTerm, node.type.replace(/_/g, ' '));
+        const idScore = fuzzyMatchScore(searchTerm, nodeId);
 
-        if (labelMatch || typeMatch || idMatch) {
+        // Take the best score
+        const bestScore = Math.max(labelScore, typeScore * 0.8, idScore * 0.6);
+
+        // Only include if there's a meaningful match
+        if (bestScore > 0) {
+            // Priority boost for certain types
+            let typePriority = 1;
+            if (node.type === 'classroom') typePriority = 1.2;
+            if (node.type === 'washroom_gents' || node.type === 'washroom_ladies') typePriority = 1.3;
+            if (node.type === 'stairs' || node.type === 'lift') typePriority = 1.4;
+            if (node.type === 'entrance') typePriority = 1.5;
+
             results.push({
                 id: nodeId,
                 label: node.label,
                 type: node.type,
-                // Score for sorting (exact match gets higher score)
-                score: labelMatch ? (node.label.toLowerCase().startsWith(searchTerm) ? 3 : 2) : 1
+                score: bestScore * typePriority,
+                matchType: labelScore > typeScore ? 'label' : 'type'
             });
         }
     }
 
     // Sort by score (higher first) and then alphabetically
     results.sort((a, b) => {
-        if (b.score !== a.score) return b.score - a.score;
+        if (Math.abs(b.score - a.score) > 10) return b.score - a.score;
         return a.label.localeCompare(b.label);
     });
 
-    // Limit results
-    return results.slice(0, 15);
+    // Limit results to top 20
+    return results.slice(0, 20);
 }
 
 /**

@@ -36,14 +36,14 @@ const RouteInfo = ({ path, distance, startLabel, endLabel }) => {
             if (i === 0) {
                 directions.push({
                     step: 1,
-                    instruction: `Start at ${startLabel || node.label}`,
+                    instruction: startLabel || node.label,
                     icon: MapPin,
                     type: 'start',
                 });
             } else if (i === path.length - 1) {
                 directions.push({
                     step: directions.length + 1,
-                    instruction: `Arrive at ${endLabel || node.label}`,
+                    instruction: endLabel || node.label,
                     icon: Navigation,
                     type: 'end',
                 });
@@ -51,7 +51,7 @@ const RouteInfo = ({ path, distance, startLabel, endLabel }) => {
                 // Only show non-corridor waypoints
                 directions.push({
                     step: directions.length + 1,
-                    instruction: `Pass through ${node.label}`,
+                    instruction: node.label,
                     icon: getNodeIcon(node.type),
                     type: 'waypoint',
                 });
@@ -85,12 +85,12 @@ const RouteInfo = ({ path, distance, startLabel, endLabel }) => {
                 <div className="route-header">
                     <h3 className="route-title">Route Found</h3>
                     <div className="route-badges">
-                        <span className="route-badge distance-badge">
-                            <Route size={16} />
+                        <span className="route-badge">
+                            <Route size={14} />
                             {Math.round(distance * 0.2)} steps
                         </span>
-                        <span className="route-badge time-badge">
-                            <Clock size={16} />
+                        <span className="route-badge">
+                            <Clock size={14} />
                             {minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`}
                         </span>
                     </div>
@@ -98,23 +98,16 @@ const RouteInfo = ({ path, distance, startLabel, endLabel }) => {
 
                 <div className="route-endpoints">
                     <div className="endpoint start-point">
-                        <span className="endpoint-icon start-icon">
-                            <MapPin size={20} />
-                        </span>
-                        <div className="endpoint-info">
-                            <span className="endpoint-label">From</span>
+                        <MapPin size={16} className="endpoint-icon" />
+                        <div className="endpoint-text">
+                            <span className="endpoint-label">FROM</span>
                             <span className="endpoint-name">{startLabel}</span>
                         </div>
                     </div>
-                    <div className="route-arrow">
-                        <ArrowRight size={20} />
-                    </div>
+                    <ArrowRight size={16} className="route-arrow" />
                     <div className="endpoint end-point">
-                        <span className="endpoint-icon end-icon">
-                            <Navigation size={20} />
-                        </span>
-                        <div className="endpoint-info">
-                            <span className="endpoint-label">To</span>
+                        <Navigation size={16} className="endpoint-icon" />
+                        <div className="endpoint-text">
                             <span className="endpoint-name">{endLabel}</span>
                         </div>
                     </div>
@@ -122,7 +115,7 @@ const RouteInfo = ({ path, distance, startLabel, endLabel }) => {
             </div>
 
             <div className="directions-list">
-                <h4 className="directions-title">Turn-by-Turn Directions</h4>
+                <h4 className="directions-title">TURN-BY-TURN DIRECTIONS</h4>
                 {directions.map((direction, index) => {
                     const IconComponent = direction.icon;
                     return (
@@ -130,15 +123,13 @@ const RouteInfo = ({ path, distance, startLabel, endLabel }) => {
                             key={index}
                             className={`direction-item ${direction.type}`}
                         >
-                            <div className="direction-step">
-                                <span className="step-number">{direction.step}</span>
-                            </div>
-                            <div className="direction-content">
-                                <span className="direction-icon">
-                                    <IconComponent size={20} />
-                                </span>
-                                <span className="direction-text">{direction.instruction}</span>
-                            </div>
+                            <span className="step-number">{direction.step}</span>
+                            <IconComponent size={18} className="direction-icon" />
+                            <span className="direction-text">
+                                {direction.type === 'start' && 'Start at '}
+                                {direction.type === 'end' && 'Arrive at '}
+                                {direction.instruction}
+                            </span>
                         </div>
                     );
                 })}

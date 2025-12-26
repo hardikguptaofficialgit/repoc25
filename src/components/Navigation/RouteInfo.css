@@ -1,32 +1,34 @@
 .route-info-container {
     background: #121212;
     border: 1px solid #2A2A2A;
-    border-radius: 16px;
-    padding: 16px;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
 }
 
 /* ===============================
    SUMMARY
    =============================== */
 .route-summary {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .route-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
+    gap: 8px;
+    margin-bottom: 10px;
 }
 
 .route-title {
-    font-size: 15px;
-    font-weight: 700;
+    font-size: 14px;
+    font-weight: 800;
     background: linear-gradient(135deg, #D34B09 0%, #D7860C 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    letter-spacing: 0.02em;
 }
 
 /* ===============================
@@ -34,34 +36,24 @@
    =============================== */
 .route-badges {
     display: flex;
-    gap: 8px;
+    gap: 6px;
+    flex-shrink: 0;
 }
 
 .route-badge {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
 
-    padding: 5px 10px;
-    border-radius: 14px;
+    padding: 4px 8px;
+    border-radius: 10px;
 
-    font-size: 12px;
-    font-weight: 600;
-}
+    font-size: 11px;
+    font-weight: 700;
 
-/* distance */
-.distance-badge {
     background: linear-gradient(135deg,
-            rgba(211, 75, 9, 0.22),
-            rgba(215, 134, 12, 0.22));
-    color: #FFD6A0;
-}
-
-/* time */
-.time-badge {
-    background: linear-gradient(135deg,
-            rgba(211, 75, 9, 0.22),
-            rgba(215, 134, 12, 0.22));
+            rgba(211, 75, 9, 0.2),
+            rgba(215, 134, 12, 0.2));
     color: #FFD6A0;
 }
 
@@ -71,60 +63,46 @@
 .route-endpoints {
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 10px;
 
-    padding: 14px;
+    padding: 10px;
     background: #0F0F0F;
-    border-radius: 12px;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
 .endpoint {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 6px;
     flex: 1;
-}
-
-.endpoint-icon {
-    width: 36px;
-    height: 36px;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    border-radius: 50%;
-    flex-shrink: 0;
-
-    background: linear-gradient(135deg, #D34B09, #D7860C);
-    color: #FFFFFF;
-}
-
-/* start / end share gradient, difference is label */
-.start-icon,
-.end-icon {
-    background: linear-gradient(135deg, #D34B09, #D7860C);
-    color: #FFFFFF;
-}
-
-.endpoint-info {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
     min-width: 0;
 }
 
+.endpoint-icon {
+    flex-shrink: 0;
+    color: #D34B09;
+}
+
+.endpoint-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    overflow: hidden;
+}
+
 .endpoint-label {
-    font-size: 10px;
-    font-weight: 600;
-    color: #8A8A8A;
+    font-size: 8px;
+    font-weight: 700;
+    color: #6A6A6A;
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.5px;
 }
 
 .endpoint-name {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: 12px;
+    font-weight: 700;
     color: #FFFFFF;
 
     white-space: nowrap;
@@ -133,7 +111,7 @@
 }
 
 .route-arrow {
-    color: #5A5A5A;
+    color: #4A4A4A;
     flex-shrink: 0;
 }
 
@@ -142,36 +120,37 @@
    =============================== */
 .directions-list {
     border-top: 1px solid #2A2A2A;
-    padding-top: 14px;
+    padding-top: 10px;
 }
 
 .directions-title {
-    font-size: 12px;
-    font-weight: 700;
-    color: #FFFFFF;
-    margin-bottom: 10px;
+    font-size: 10px;
+    font-weight: 800;
+    color: #8A8A8A;
+    margin-bottom: 8px;
 
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
 }
 
 .direction-item {
     display: flex;
-    align-items: flex-start;
-    gap: 12px;
+    align-items: center;
+    gap: 8px;
 
-    padding: 10px 0;
-    border-bottom: 1px solid #242424;
+    padding: 8px 0;
+    border-bottom: 1px solid #1F1F1F;
 }
 
 .direction-item:last-child {
     border-bottom: none;
+    padding-bottom: 0;
 }
 
 /* step */
 .step-number {
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
 
     display: flex;
     align-items: center;
@@ -181,43 +160,75 @@
     color: #FFFFFF;
     border-radius: 50%;
 
-    font-size: 11px;
-    font-weight: 700;
-}
-
-.direction-content {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
+    font-size: 10px;
+    font-weight: 800;
+    flex-shrink: 0;
 }
 
 .direction-icon {
-    color: #B0B0B0;
+    color: #9A9A9A;
     flex-shrink: 0;
 }
 
 .direction-text {
-    font-size: 13px;
-    font-weight: 500;
+    font-size: 12px;
+    font-weight: 600;
     color: #E5E5E5;
+    line-height: 1.4;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Type-specific styling */
+.direction-item.start .step-number {
+    background: #22C55E;
+}
+
+.direction-item.end .step-number {
+    background: #EF4444;
 }
 
 /* ===============================
    MOBILE
    =============================== */
 @media (max-width: 768px) {
+    .route-info-container {
+        padding: 10px;
+    }
+
     .route-endpoints {
         flex-direction: column;
-        gap: 10px;
+        gap: 8px;
+        align-items: stretch;
+    }
+
+    .endpoint {
+        justify-content: flex-start;
     }
 
     .route-arrow {
         transform: rotate(90deg);
+        align-self: center;
     }
 
     .route-header {
         flex-direction: column;
         align-items: flex-start;
+        gap: 6px;
+    }
+
+    .route-badges {
+        width: 100%;
+    }
+
+    .route-badge {
+        flex: 1;
+        justify-content: center;
+    }
+
+    .direction-text {
+        font-size: 11px;
     }
 }

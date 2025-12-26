@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
-import { Stage, Layer, Rect, Circle, Line, Text, Group, Image } from 'react-konva';
+import { Stage, Layer, Rect, Circle, Line, Text, Group, Image, RegularPolygon } from 'react-konva';
 import { nodes as initialNodes, edges as initialEdges } from '../../data/buildingData';
-import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, Maximize, Minimize, X, Plus, Trash2, Link, MousePointer, Upload, Trash } from 'lucide-react';
+import { getNodesByFloor } from '../../utils/graphBuilder';
+import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, Maximize, Minimize, X, Plus, Trash2, Link, MousePointer, Upload, Trash, Layers, RefreshCw } from 'lucide-react';
 import './FloorMap.css';
 
 // -----------------------------------------------------------------------------
@@ -17,9 +18,10 @@ const PALETTE = {
     entrance: '#EAB308',     // Yellow
     office: '#F43F5E',       // Rose
     lab: '#14B8A6',          // Teal
+    library: '#8B5CF6',      // Violet for Library
     corridor: '#404040',     // Dark Grey
     default: '#64748B',      // Slate
-    highlight: '#FFFFFF'     // White for selection/path
+    highlight: '#0EA5E9'     // Sky Blue for path highlight
 };
 
 // -----------------------------------------------------------------------------
@@ -42,11 +44,22 @@ const MapNode = memo(({
 }) => {
     const isCorridorNode = node.type === 'corridor';
 
+    // SIZE & SHAPE LOGIC
+    const getNodeDimensions = (type) => {
+        // Returns { width, height, cornerRadius }
+        if (type === 'corridor') return { width: 12, height: 12, cornerRadius: 2 };
+        if (type === 'washroom_gents' || type === 'washroom_ladies') return { width: 40, height: 30, cornerRadius: 4 };
+        if (type === 'stairs' || type === 'lift') return { width: 35, height: 35, cornerRadius: 4 };
+        if (type === 'entrance' || type === 'gate') return { width: 45, height: 25, cornerRadius: 6 };
+        if (type === 'office' || type === 'lab' || type === 'library') return { width: 50, height: 35, cornerRadius: 4 };
+        // Default for classrooms
+        return { width: 45, height: 30, cornerRadius: 4 };
+    };
+
     // COLOR LOGIC
     const getNodeStyle = (type, label) => {
         let fill = PALETTE.default;
-        let stroke = 'rgba(255,255,255,0.2)';
-        let radius = isCorridorNode ? 5 : 10;
+        let stroke = 'rgba(255, 255, 255, 0.3)';
 
         // 1. Specific Functional Types take priority
         if (type === 'washroom_gents') fill = PALETTE.washroomG;
@@ -56,6 +69,7 @@ const MapNode = memo(({
         else if (type === 'entrance' || type === 'gate') fill = PALETTE.entrance;
         else if (type === 'office') fill = PALETTE.office;
         else if (type === 'lab') fill = PALETTE.lab;
+        else if (type === 'library') fill = PALETTE.library;
         else if (type === 'corridor') fill = PALETTE.corridor;
 
         // 2. Block Logic (if not a special type, check Label for A/B)
@@ -65,19 +79,21 @@ const MapNode = memo(({
             else if (firstChar === 'B') fill = PALETTE.blockB;
         }
 
-        return { fill, stroke, radius };
+        return { fill, stroke };
     };
 
-    let { fill, stroke, radius } = getNodeStyle(node.type, node.label);
-    let strokeWidth = 1;
+    let { fill, stroke } = getNodeStyle(node.type, node.label);
+    let { width, height, cornerRadius } = getNodeDimensions(node.type);
+    let strokeWidth = 2;
 
     // State Overrides
     if (isInPath) {
         stroke = PALETTE.highlight;
         strokeWidth = 3;
         if (!isStart && !isEnd) {
-            fill = PALETTE.highlight; // Path nodes turn white
-            radius = 6;
+            fill = PALETTE.highlight;
+            width = Math.max(width * 0.7, 10);
+            height = Math.max(height * 0.7, 10);
         }
     }
 
@@ -85,20 +101,25 @@ const MapNode = memo(({
         fill = '#22C55E'; // Green start
         stroke = '#fff';
         strokeWidth = 3;
-        radius = 12;
+        width = 50;
+        height = 50;
+        cornerRadius = 8;
     }
 
     if (isEnd) {
         fill = '#EF4444'; // Red end
         stroke = '#fff';
         strokeWidth = 3;
-        radius = 12;
+        width = 50;
+        height = 50;
+        cornerRadius = 8;
     }
 
     if (isSelected) {
         stroke = '#fff';
         strokeWidth = 3;
-        radius = radius * 1.2;
+        width = width * 1.15;
+        height = height * 1.15;
     }
 
     if (isConnecting) {
@@ -123,34 +144,48 @@ const MapNode = memo(({
         >
             {/* Selection Glow */}
             {(isSelected || isHovered) && (
-                <Circle radius={radius + 4} fill={fill} opacity={0.3} listening={false} />
+                <Rect
+                    x={-width / 2 - 4}
+                    y={-height / 2 - 4}
+                    width={width + 8}
+                    height={height + 8}
+                    cornerRadius={cornerRadius + 2}
+                    fill={fill}
+                    opacity={0.3}
+                    listening={false}
+                />
             )}
 
-            <Circle
-                radius={radius}
+            <Rect
+                x={-width / 2}
+                y={-height / 2}
+                width={width}
+                height={height}
+                cornerRadius={cornerRadius}
                 fill={fill}
                 stroke={stroke}
                 strokeWidth={strokeWidth}
                 hitStrokeWidth={10}
                 shadowColor="black"
-                shadowBlur={5}
-                shadowOpacity={0.3}
-                shadowEnabled={isSelected || isHovered} // Optimization: Only shadow when active
+                shadowBlur={6}
+                shadowOpacity={0.4}
+                shadowOffsetY={2}
+                shadowEnabled={isSelected || isHovered}
             />
 
-            {/* Label Rendering (No shadow for perf) */}
+            {/* Label Rendering */}
             {(!isCorridorNode || editorMode) && (
                 <Text
                     text={node.label || nodeId}
                     x={-60}
-                    y={-radius - 18}
+                    y={height / 2 + 6}
                     width={120}
                     align="center"
-                    fontSize={11}
+                    fontSize={10}
                     fontStyle="bold"
                     fontFamily="Inter, sans-serif"
                     fill="#FFFFFF"
-                    opacity={1}
+                    opacity={0.95}
                     listening={false}
                 />
             )}
@@ -166,7 +201,8 @@ const FloorMap = ({
     onNodeClick = null,
     selectedStart = null,
     selectedEnd = null,
-    editorMode = false
+    editorMode = false,
+    currentFloor = 0
 }) => {
     // Data State
     const [nodes, setNodes] = useState(initialNodes);
@@ -185,6 +221,15 @@ const FloorMap = ({
     const [bgImageOpacity, setBgImageOpacity] = useState(0.5);
     const [showGrid, setShowGrid] = useState(editorMode);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [is3D, setIs3D] = useState(false);
+    const [pathOffset, setPathOffset] = useState(0);
+    const [rotation, setRotation] = useState(0);
+
+    const recenterMap = useCallback(() => {
+        setScale(0.85);
+        setPosition({ x: 0, y: 0 });
+        setRotation(0);
+    }, []);
 
     // Editor Tools State
     const [editorTool, setEditorTool] = useState('select');
@@ -247,6 +292,19 @@ const FloorMap = ({
         window.addEventListener('keydown', handleEsc);
         return () => window.removeEventListener('keydown', handleEsc);
     }, [isFullscreen, connectingFrom, selectedNode]);
+
+    // Path animation effect
+    useEffect(() => {
+        let animId;
+        const animate = () => {
+            setPathOffset(prev => (prev + 1) % 40);
+            animId = requestAnimationFrame(animate);
+        };
+        if (path.length > 0) {
+            animId = requestAnimationFrame(animate);
+        }
+        return () => cancelAnimationFrame(animId);
+    }, [path]);
 
     // Handlers
     const handleNodeDrag = useCallback((nodeId, x, y) => {
@@ -321,6 +379,42 @@ const FloorMap = ({
         setPosition({ x: pointer.x - mousePointTo.x * newScale, y: pointer.y - mousePointTo.y * newScale });
     }, []);
 
+    // Multi-touch Gesture Handling (Pinch & Rotate)
+    const lastDist = useRef(0);
+    const lastRotation = useRef(0);
+
+    const handleTouch = (e) => {
+        if (e.evt.touches.length !== 2) return;
+
+        e.evt.preventDefault();
+        const touch1 = e.evt.touches[0];
+        const touch2 = e.evt.touches[1];
+
+        const dist = Math.sqrt(Math.pow(touch2.clientX - touch1.clientX, 2) + Math.pow(touch2.clientY - touch1.clientY, 2));
+        const angle = Math.atan2(touch2.clientY - touch1.clientY, touch2.clientX - touch1.clientX) * 180 / Math.PI;
+
+        if (!lastDist.current) {
+            lastDist.current = dist;
+            lastRotation.current = angle;
+            return;
+        }
+
+        // Scaling
+        const scaleFactor = dist / lastDist.current;
+        setScale(prev => Math.min(Math.max(prev * scaleFactor, 0.1), 5));
+        lastDist.current = dist;
+
+        // Rotation
+        const rotationDiff = angle - lastRotation.current;
+        setRotation(prev => prev + rotationDiff);
+        lastRotation.current = angle;
+    };
+
+    const handleTouchEnd = () => {
+        lastDist.current = 0;
+        lastRotation.current = 0;
+    };
+
     const exportData = () => {
         const data = `export const nodes = ${JSON.stringify(nodes, null, 2)};\n\nexport const edges = ${JSON.stringify(edges, null, 2)};`;
         navigator.clipboard.writeText(data).then(() => alert("Data copied to clipboard"));
@@ -355,36 +449,78 @@ const FloorMap = ({
         }
     };
 
-    // Define PALETTE here, as it's used in MapNode and FloorMap
-    const PALETTE = {
-        blockA: '#60A5FA',       // Blue
-        blockB: '#F87171',       // Red
-        stairs: '#34D399',       // Green
-        lift: '#A78BFA',         // Purple
-        washroomG: '#22D3EE',    // Cyan
-        washroomL: '#F472B6',    // Pink
-        entrance: '#FACC15',     // Yellow
-        office: '#F43F5E',       // Rose
-        lab: '#14B8A6',          // Teal
-        corridor: '#FFFFFF',     // White for Corridors (Black Background)
-        default: '#94A3B8',      // Slate
-        highlight: '#FFFFFF'     // White for selection/path
+    // Filter and Modify Nodes based on current floor
+    const visibleNodes = React.useMemo(() => getNodesByFloor(currentFloor), [currentFloor]);
+
+    // Internal Palette
+    const INTERNAL_PALETTE = {
+        blockA: '#6366F1',
+        blockB: '#F97316',
+        stairs: '#22C55E',
+        lift: '#A855F7',
+        washroomG: '#0EA5E9',
+        washroomL: '#EC4899',
+        entrance: '#EAB308',
+        office: '#F43F5E',
+        lab: '#14B8A6',
+        library: '#8B5CF6',
+        corridor: '#525252',     // Lighter Gray for corridors
+        default: '#94A3B8',
+        highlight: '#38BDF8'
     };
 
     // Render Helpers
     const renderedEdges = edges.map((edge, i) => {
         const [n1, n2] = edge;
-        if (!nodes[n1] || !nodes[n2]) return null;
+        if (!visibleNodes[n1] || !visibleNodes[n2]) return null;
         const isPathEdge = path.some((id, idx) => idx < path.length - 1 && ((id === n1 && path[idx + 1] === n2) || (id === n2 && path[idx + 1] === n1)));
 
-        let strokeColor = '#525252'; // Visible Grey on Black
-        let strokeWidth = 2;
-        let opacity = 0.6;
+        let strokeColor = 'rgba(255, 255, 255, 0.3)'; // Increased from 0.15
+        let strokeWidth = 6;                          // Increased from 5
+        let opacity = 0.5;                             // Increased from 0.3
 
         if (editorMode) { strokeColor = '#737373'; opacity = 0.8; }
-        if (isPathEdge) { strokeColor = PALETTE.highlight; strokeWidth = 4; opacity = 1; }
 
-        return <Line key={i} points={[nodes[n1].x, nodes[n1].y, nodes[n2].x, nodes[n2].y]} stroke={strokeColor} strokeWidth={strokeWidth} opacity={opacity} lineCap="round" onClick={() => editorMode && editorTool === 'delete' && setEdges(prev => prev.filter((_, idx) => idx !== i))} />;
+        if (isPathEdge) {
+            const edgeIndex = path.findIndex((id, idx) => idx < path.length - 1 && ((id === n1 && path[idx + 1] === n2) || (id === n2 && path[idx + 1] === n1)));
+            const isForward = path[edgeIndex] === n1;
+            const fromNode = isForward ? visibleNodes[n1] : visibleNodes[n2];
+            const toNode = isForward ? visibleNodes[n2] : visibleNodes[n1];
+            const angle = Math.atan2(toNode.y - fromNode.y, toNode.x - fromNode.x) * 180 / Math.PI;
+
+            return (
+                <Group key={`path-${i}`}>
+                    {/* Path glow */}
+                    <Line
+                        points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
+                        stroke={INTERNAL_PALETTE.highlight}
+                        strokeWidth={12}
+                        opacity={0.2}
+                        lineCap="round"
+                    />
+                    {/* Animated flow line */}
+                    <Line
+                        points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
+                        stroke={INTERNAL_PALETTE.highlight}
+                        strokeWidth={5}
+                        dash={[20, 20]}
+                        dashOffset={-pathOffset}
+                        lineCap="round"
+                    />
+                    {/* Direction Arrow */}
+                    <RegularPolygon
+                        x={(fromNode.x + toNode.x) / 2}
+                        y={(fromNode.y + toNode.y) / 2}
+                        sides={3}
+                        radius={6}
+                        fill={INTERNAL_PALETTE.highlight}
+                        rotation={angle + 90}
+                    />
+                </Group>
+            );
+        }
+
+        return <Line key={i} points={[visibleNodes[n1].x, visibleNodes[n1].y, visibleNodes[n2].x, visibleNodes[n2].y]} stroke={strokeColor} strokeWidth={strokeWidth} opacity={opacity} lineCap="round" onClick={() => editorMode && editorTool === 'delete' && setEdges(prev => prev.filter((_, idx) => idx !== i))} />;
     });
 
     const renderedGrid = showGrid ? <Group>{Array.from({ length: 40 }).map((_, i) => <Line key={`v${i}`} points={[i * 50, -1000, i * 50, 2000]} stroke="#1e293b" strokeWidth={1} />)}{Array.from({ length: 40 }).map((_, i) => <Line key={`h${i}`} points={[-1000, i * 50, 2000, i * 50]} stroke="#1e293b" strokeWidth={1} />)}</Group> : null;
@@ -394,16 +530,24 @@ const FloorMap = ({
     }, []);
 
     return (
-        <div className={`floor-map-container ${isFullscreen ? 'fullscreen' : ''}`} ref={containerRef}>
+        <div className={`floor-map-container ${isFullscreen ? 'fullscreen' : ''} ${is3D ? 'view-3d' : ''}`} ref={containerRef}>
 
             {/* Controls Header */}
             <div className="map-ui-header">
                 <div className="ui-group">
+                    <button
+                        onClick={() => setIs3D(!is3D)}
+                        className={is3D ? 'active' : ''}
+                        title="Toggle 3D View"
+                    >
+                        <Layers size={18} />
+                    </button>
                     <button onClick={() => setIsFullscreen(!isFullscreen)} title="Fullscreen">{isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}</button>
-                    <button onClick={() => setScale(s => Math.min(s * 1.2, 5))}><ZoomIn size={18} /></button>
-                    <button onClick={() => setScale(s => Math.max(s / 1.2, 0.1))}><ZoomOut size={18} /></button>
-                    <button onClick={() => { setScale(0.85); setPosition({ x: 0, y: 0 }); }}><RotateCcw size={18} /></button>
+                    <button onClick={() => setScale(s => Math.min(s * 1.2, 5))} title="Zoom In"><ZoomIn size={18} /></button>
+                    <button onClick={() => setScale(s => Math.max(s / 1.2, 0.1))} title="Zoom Out"><ZoomOut size={18} /></button>
+                    <button onClick={recenterMap} title="Recenter & Reset View"><RefreshCw size={18} /></button>
                 </div>
+
                 {editorMode && (
                     <div className="ui-group">
                         <button onClick={() => setShowGrid(!showGrid)} className={showGrid ? 'active' : ''}><Grid3X3 size={18} /></button>
@@ -563,39 +707,45 @@ const FloorMap = ({
             )}
 
             {/* Canvas */}
-            <Stage
-                ref={stageRef} width={stageSize.width} height={stageSize.height}
-                scaleX={scale} scaleY={scale} x={position.x} y={position.y}
-                draggable={!editorMode || editorTool === 'select'}
-                onWheel={handleWheel} onClick={handleStageClick}
-                onMouseMove={(e) => { if (connectingFrom) { const pt = stageRef.current.getPointerPosition(); setTempLineEnd({ x: (pt.x - position.x) / scale, y: (pt.y - position.y) / scale }); } }}
-                onDragEnd={(e) => { if (e.target === stageRef.current) setPosition({ x: e.target.x(), y: e.target.y() }); }}
-            >
-                <Layer listening={false}>
-                    <Rect width={2000} height={2000} fill="#000000" x={-500} y={-500} />
-                    {bgImageObj && (
-                        <Image
-                            image={bgImageObj}
-                            x={0}
-                            y={0}
-                            opacity={bgImageOpacity}
-                        />
-                    )}
-                    {renderedGrid}
-                </Layer>
-                <Layer>
-                    {renderedEdges}
-                    {connectingFrom && tempLineEnd && <Line points={[nodes[connectingFrom].x, nodes[connectingFrom].y, tempLineEnd.x, tempLineEnd.y]} stroke="#fbbf24" strokeWidth={2} dash={[5, 5]} />}
-                    {Object.entries(nodes).map(([id, node]) => (
-                        <MapNode key={id} nodeId={id} node={node}
-                            isSelected={selectedNode === id} isHovered={hoveredNode === id}
-                            isInPath={path.includes(id)} isStart={selectedStart?.id === id} isEnd={selectedEnd?.id === id}
-                            editorMode={editorMode} isConnecting={connectingFrom === id}
-                            onDrag={handleNodeDrag} onClick={handleNodeClick} onHover={setHoveredNode} onLeave={handleNodeLeave}
-                        />
-                    ))}
-                </Layer>
-            </Stage>
+            {/* Canvas Container for 3D Transform */}
+            <div className="canvas-wrapper">
+                <Stage
+                    ref={stageRef} width={stageSize.width} height={stageSize.height}
+                    scaleX={scale} scaleY={scale} x={position.x} y={position.y}
+                    rotation={rotation}
+                    draggable={!editorMode || editorTool === 'select'}
+                    onWheel={handleWheel} onClick={handleStageClick}
+                    onTouchMove={handleTouch}
+                    onTouchEnd={handleTouchEnd}
+                    onMouseMove={(e) => { if (connectingFrom) { const pt = stageRef.current.getPointerPosition(); setTempLineEnd({ x: (pt.x - position.x) / scale, y: (pt.y - position.y) / scale }); } }}
+                    onDragEnd={(e) => { if (e.target === stageRef.current) setPosition({ x: e.target.x(), y: e.target.y() }); }}
+                >
+                    <Layer listening={false}>
+                        <Rect width={4000} height={4000} x={-1000} y={-1000} />
+                        {bgImageObj && (
+                            <Image
+                                image={bgImageObj}
+                                x={0}
+                                y={0}
+                                opacity={bgImageOpacity}
+                            />
+                        )}
+                        {renderedGrid}
+                    </Layer>
+                    <Layer>
+                        {renderedEdges}
+                        {connectingFrom && tempLineEnd && <Line points={[visibleNodes[connectingFrom].x, visibleNodes[connectingFrom].y, tempLineEnd.x, tempLineEnd.y]} stroke="#fbbf24" strokeWidth={2} dash={[5, 5]} />}
+                        {Object.entries(visibleNodes).map(([id, node]) => (
+                            <MapNode key={`${currentFloor}-${id}`} nodeId={id} node={node}
+                                isSelected={selectedNode === id} isHovered={hoveredNode === id}
+                                isInPath={path.includes(id)} isStart={selectedStart?.id === id} isEnd={selectedEnd?.id === id}
+                                editorMode={editorMode} isConnecting={connectingFrom === id}
+                                onDrag={handleNodeDrag} onClick={handleNodeClick} onHover={setHoveredNode} onLeave={handleNodeLeave}
+                            />
+                        ))}
+                    </Layer>
+                </Stage>
+            </div>
 
             {/* Colored Legend */}
             {!editorMode && (
