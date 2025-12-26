@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import './SearchBar.css';
 
-const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location..." }) => {
+const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location...", variant = "default" }) => {
     const [query, setQuery] = useState(value || '');
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -121,7 +121,7 @@ const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location..
     };
 
     return (
-        <div className="search-bar-container">
+        <div className={`search-bar-container ${variant}`}>
             <div className="search-input-wrapper">
                 <Search size={18} className="search-icon" />
                 <input

@@ -41,17 +41,7 @@ const RouteInfo = ({ path, instructions, distance, startLabel, endLabel, isNavig
             <div className="route-summary">
                 <div className="route-header" onClick={() => setExpanded(!expanded)}>
                     <div className="header-left">
-                        <h3 className="route-title">Route Details</h3>
-                        <div className="route-badges">
-                            <span className="route-badge distance-badge">
-                                <Route size={14} />
-                                {Math.round(distance)}m
-                            </span>
-                            <span className="route-badge time-badge">
-                                <Clock size={14} />
-                                {minutes}m {seconds}s
-                            </span>
-                        </div>
+                        {/* Content removed as per user request */}
                     </div>
                     <button className="expand-btn">
                         {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}

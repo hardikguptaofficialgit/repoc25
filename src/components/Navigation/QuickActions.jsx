@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, ArrowUpCircle, MoveVertical, User, Users, LogOut, Droplets } from 'lucide-react';
 import './QuickActions.css';
 
-const QuickActions = ({ onQuickAction, currentLocation, minimized = false }) => {
+const QuickActions = ({ onQuickAction, currentLocation, availableActions = [], minimized = false }) => {
     const [isExpanded, setIsExpanded] = useState(!minimized);
 
     useEffect(() => {
@@ -56,31 +56,17 @@ const QuickActions = ({ onQuickAction, currentLocation, minimized = false }) => 
 
     const handleClick = (action) => {
         if (!currentLocation) {
-            // Ideally use a toast, but this works for now
             return;
         }
         onQuickAction(action);
     };
 
+    // Hide completely if minimized (route active)
+    if (minimized) return null;
+
     return (
         <div className={`quick-actions-container ${!isExpanded ? 'collapsed' : ''}`}>
-            <div className="campus-overview-section">
-                <h3 className="section-title">Campus Overview</h3>
-                <div className="overview-stats">
-                    <div className="overview-stat">
-                        <span className="stat-value">5</span>
-                        <span className="stat-label">Floors</span>
-                    </div>
-                    <div className="overview-stat">
-                        <span className="stat-value">42</span>
-                        <span className="stat-label">Rooms</span>
-                    </div>
-                    <div className="overview-stat">
-                        <span className="stat-value">12</span>
-                        <span className="stat-label">POIs</span>
-                    </div>
-                </div>
-            </div>
+
 
             <div
                 className="quick-actions-header"
@@ -94,19 +80,30 @@ const QuickActions = ({ onQuickAction, currentLocation, minimized = false }) => 
 
             {isExpanded && (
                 <div className="quick-actions-grid animate-in">
-                    {quickActions.map((action) => (
-                        <button
-                            key={action.id}
-                            className="quick-action-button"
-                            onClick={() => handleClick(action.action)}
-                            style={{ '--action-color': action.color }}
-                            disabled={!currentLocation}
-                            title={!currentLocation ? "Select a start location first" : action.label}
-                        >
-                            <span className="action-icon">{action.icon}</span>
-                            <span className="action-label">{action.label}</span>
-                        </button>
-                    ))}
+                    {quickActions.map((action) => {
+                        const isAvailable = availableActions.includes(action.action);
+                        return (
+                            <button
+                                key={action.id}
+                                className="quick-action-button"
+                                onClick={() => handleClick(action.action)}
+                                style={{ '--action-color': action.color }}
+                                disabled={!currentLocation || !isAvailable}
+                                title={
+                                    !currentLocation
+                                        ? "Select a start location first"
+                                        : !isAvailable
+                                            ? "Not available on this floor"
+                                            : action.label
+                                }
+                            >
+                                <span className={`action-icon ${!isAvailable ? 'grayscale' : ''}`}>
+                                    {action.icon}
+                                </span>
+                                <span className="action-label">{action.label}</span>
+                            </button>
+                        );
+                    })}
                 </div>
             )}
         </div>

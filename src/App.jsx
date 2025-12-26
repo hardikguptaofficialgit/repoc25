@@ -4,14 +4,15 @@ import SearchBar from './components/Navigation/SearchBar';
 import RouteInfo from './components/Navigation/RouteInfo';
 import QuickActions from './components/Navigation/QuickActions';
 import NavigationOverlay from './components/Navigation/NavigationOverlay';
-import { buildGraph } from './utils/graphBuilder';
+import { buildGraph, getNodesByFloor } from './utils/graphBuilder';
 import { findShortestPath, findNearestPOI } from './utils/pathfinding';
-import { generateRouteInstructions } from './utils/navigation';
 import { nodes, poiCategories } from './data/buildingData';
-import { ArrowUpDown, Edit3, Eye, Menu, ChevronLeft, MapPin } from 'lucide-react';
+import { ArrowUpDown, Trash2, Edit3, Eye, Menu, ChevronLeft, Building, ChevronDown, LogOut, Key } from 'lucide-react';
+import Toast from './components/UI/Toast';
 import './App.css';
 
 function App() {
+  const [isAdmin, setIsAdmin] = useState(false);
   const [graph, setGraph] = useState(null);
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');
@@ -19,30 +20,32 @@ function App() {
   const [selectedEnd, setSelectedEnd] = useState(null);
   const [path, setPath] = useState([]);
   const [distance, setDistance] = useState(0);
-  const [instructions, setInstructions] = useState([]);
   const [error, setError] = useState('');
-  const [isNavigating, setIsNavigating] = useState(false);
 
   const [editorMode, setEditorMode] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [highContrast, setHighContrast] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
+  const [currentFloor, setCurrentFloor] = useState(0);
+  const [showFloorDropdown, setShowFloorDropdown] = useState(false);
+  const [toast, setToast] = useState(null);
 
-  // Initial Graph Build
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+  };
+
+  // Check for existing admin session on mount
+  useEffect(() => {
+    const adminSession = localStorage.getItem('adminSession');
+    if (adminSession === 'true') {
+      setIsAdmin(true);
+    }
+  }, []);
+
   useEffect(() => {
     const builtGraph = buildGraph();
     setGraph(builtGraph);
   }, []);
 
-  // Update body class for high contrast
-  useEffect(() => {
-    if (highContrast) {
-      document.body.classList.add('high-contrast');
-    } else {
-      document.body.classList.remove('high-contrast');
-    }
-  }, [highContrast]);
-
-  // Recalculate route when start/end changes
   useEffect(() => {
     if (selectedStart && selectedEnd && graph) {
       calculateRoute(selectedStart.id, selectedEnd.id);
@@ -52,9 +55,34 @@ function App() {
   const toggleEditorMode = () => {
     const newEditorState = !editorMode;
     setEditorMode(newEditorState);
-    if (newEditorState) {
-      setSidebarOpen(false);
+    setSidebarOpen(!newEditorState);
+  };
+
+  const handleLogin = () => {
+    const password = window.prompt("Enter Admin Password:");
+    if (password === "admin123") {
+      setIsAdmin(true);
+      localStorage.setItem('adminSession', 'true');
+      alert("Admin Access Granted!");
+    } else if (password !== null) {
+      alert("Incorrect Password!");
     }
+  };
+
+  const handleLogout = () => {
+    setIsAdmin(false);
+    setEditorMode(false);
+    localStorage.removeItem('adminSession');
+  };
+
+  const handleStartNavigation = () => {
+    setIsNavigating(true);
+    setSidebarOpen(false); // Close sidebar for full map view
+  };
+
+  const handleExitNavigation = () => {
+    setIsNavigating(false);
+    setSidebarOpen(true); // Re-open sidebar
   };
 
   const calculateRoute = (startId, endId) => {
@@ -64,18 +92,12 @@ function App() {
       setError(result.error);
       setPath([]);
       setDistance(0);
-      setInstructions([]);
+      showToast(result.error, 'error');
     } else {
       setPath(result.path);
       setDistance(result.distance);
       setError('');
-
-      const newInstructions = generateRouteInstructions(result.path, nodes);
-      setInstructions(newInstructions);
-
-      // Show preview first, don't auto-collapse sidebar yet
-      setIsNavigating(false);
-      setSidebarOpen(true);
+      showToast('Route calculated successfully', 'success');
     }
   };
 
@@ -98,6 +120,7 @@ function App() {
       return;
     }
 
+    const floorNodes = getNodesByFloor(currentFloor);
     let targetNodes = [];
     switch (poiType) {
       case 'stairs': targetNodes = poiCategories.stairs; break;
@@ -109,9 +132,12 @@ function App() {
       default: return;
     }
 
-    const result = findNearestPOI(graph, selectedStart.id, targetNodes);
+    // Filter targetNodes based on whether they exist on the current floor
+    const availableTargets = (targetNodes || []).filter(id => floorNodes[id]);
+
+    const result = findNearestPOI(graph, selectedStart.id, availableTargets);
     if (result.error || !result.target) {
-      setError(result.error || 'No nearby location found');
+      setError(result.error || `No ${poiType.replace(/_/g, ' ')} found on ${currentFloor === 0 ? 'Ground' : currentFloor + 'F'}`);
       setTimeout(() => setError(''), 3000);
       setPath([]);
       setDistance(0);
@@ -129,13 +155,6 @@ function App() {
       setPath(result.path);
       setDistance(result.distance);
       setError('');
-
-      const newInstructions = generateRouteInstructions(result.path, nodes);
-      setInstructions(newInstructions);
-
-      if (window.innerWidth <= 1024) {
-        setSidebarOpen(false); // Peek mode
-      }
     }
   };
 
@@ -155,7 +174,6 @@ function App() {
     setSelectedEnd(null);
     setPath([]);
     setDistance(0);
-    setInstructions([]);
     setError('');
   };
 
@@ -163,7 +181,6 @@ function App() {
     if (editorMode) return;
     if (node.type === 'corridor') return;
 
-    // Open sidebar to show details/context (Desktop only mostly, or expand on mobile)
     setSidebarOpen(true);
 
     const location = { id: nodeId, label: node.label, type: node.type };
@@ -173,7 +190,7 @@ function App() {
       return;
     }
     if (selectedStart.id === nodeId) {
-      setError('Start and destination cannot be the same');
+      setError('Start and destination cannot be the same location');
       setTimeout(() => setError(''), 3000);
       return;
     }
@@ -181,7 +198,6 @@ function App() {
       handleEndSelect(location);
       return;
     }
-    // Deselect if clicking same end node
     if (selectedEnd.id === nodeId) {
       setSelectedEnd(null);
       setEndLocation('');
@@ -191,179 +207,220 @@ function App() {
     }
   };
 
-  // Determine current page state - simplified to 2 pages
-  // Page 1: Campus Overview & Quick Navigate
-  // Page 2: Route Steps & Navigation (combined)
-  const currentPage = !selectedEnd ? 1 : 2;
+  // Calculate available amenities on current floor
+  const getAvailableActions = () => {
+    if (!graph) return [];
+    const floorNodes = getNodesByFloor(currentFloor);
+    const actions = ['stairs', 'lift', 'washroom_gents', 'washroom_ladies', 'entrance', 'water_cooler'];
 
-  const handleStartNavigation = () => {
-    setIsNavigating(true);
-    if (window.innerWidth <= 1024) {
-      setSidebarOpen(false); // Close sidebar to focus on map/overlay
-    }
+    return actions.filter(action => {
+      let targetNodes = [];
+      switch (action) {
+        case 'stairs': targetNodes = poiCategories.stairs; break;
+        case 'lift': targetNodes = poiCategories.lifts; break;
+        case 'washroom_gents': targetNodes = poiCategories.washrooms_gents; break;
+        case 'washroom_ladies': targetNodes = poiCategories.washrooms_ladies; break;
+        case 'entrance': targetNodes = poiCategories.entrances; break;
+        case 'water_cooler': targetNodes = poiCategories.water_coolers; break;
+        default: return false;
+      }
+      return (targetNodes || []).some(id => floorNodes[id]);
+    });
   };
 
-  const handleBackToPage1 = () => {
-    handleClearRoute();
-    setSidebarOpen(true);
-  };
+  const availableActions = getAvailableActions();
 
   return (
-    <div className={`app page-${currentPage}`}>
+    <div className="app">
 
-      {/* --- 1. Independent Floating Toggle Button (Desktop/Mobile) --- */}
+      {/* --- 1. Independent Floating Toggle Button --- */}
+      {/* detached from the sidebar structure */}
       <div className={`floating-menu-trigger ${!sidebarOpen && !editorMode ? 'visible' : ''}`}>
         <button
           className="glass-btn"
           onClick={() => setSidebarOpen(true)}
           title="Open Navigation"
         >
-          <Menu size={20} />
+          <Menu size={24} />
         </button>
       </div>
 
-      {/* --- 2. Sidebar / Bottom Sheet Wrapper --- */}
-      <div className={`sidebar-wrapper ${sidebarOpen ? 'expanded' : 'closed'} ui-page-${currentPage}`}>
+      {/* --- 2. Detached Sidebar Wrapper --- */}
+      <div className={`sidebar-wrapper ${sidebarOpen ? 'open' : 'closed'}`}>
 
         {/* Container 1: Header & Search (Top Island) */}
         <div className="panel-card header-island">
+
           <div className="sidebar-header">
             <div className="brand">
-              <div className="brand-icon">
-                <MapPin size={18} />
-              </div>
-              <div className="brand-text">
-                <h1>Campus 25</h1>
-              </div>
+              <h1>KIIT Campus 25</h1>
             </div>
-            {currentPage === 1 ? (
-              <button className="close-sidebar-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+            <div className="header-actions">
+              {!isAdmin && (
+                <button
+                  className="icon-btn-mini login-trigger"
+                  onClick={handleLogin}
+                  title="Admin Login"
+                >
+                  <Key size={16} />
+                </button>
+              )}
+              <button className="close-btn-mini" onClick={() => setSidebarOpen(false)}>
                 <ChevronLeft size={20} />
               </button>
-            ) : (
-              <button className="clear-text-btn" onClick={handleBackToPage1}>
-                <ChevronLeft size={16} /> Back
+            </div>
+          </div>
+
+          <div className="search-section">
+            <div className="search-group">
+              <label className="search-label">
+                <div className="dot start-dot"></div> Start
+              </label>
+              <SearchBar
+                value={startLocation}
+                onChange={setStartLocation}
+                onSelect={handleStartSelect}
+                placeholder="Starting point..."
+                floor={currentFloor}
+                variant="start"
+              />
+            </div>
+
+            {/* Sidebar Floor Toggle Intermediary */}
+            <div className="floor-toggle-bar">
+              <span className="floor-toggle-label">Floor</span>
+              <div className="floor-pills">
+                {[0, 1, 2, 3].map(f => (
+                  <button
+                    key={f}
+                    className={`floor-pill ${currentFloor === f ? 'active' : ''}`}
+                    onClick={() => setCurrentFloor(f)}
+                  >
+                    {f === 0 ? 'G' : f}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="connector-gap">
+              <button
+                className="swap-button-floating"
+                onClick={handleSwapLocations}
+                disabled={!selectedStart || !selectedEnd}
+              >
+                <ArrowUpDown size={14} />
+              </button>
+            </div>
+
+            <div className="search-group">
+              <label className="search-label">
+                <div className="dot end-dot"></div> End
+              </label>
+              <SearchBar
+                value={endLocation}
+                onChange={setEndLocation}
+                onSelect={handleEndSelect}
+                placeholder="Destination..."
+                floor={currentFloor}
+                variant="end"
+              />
+            </div>
+
+            {error && (
+              <div className="error-message">
+                <span className="error-icon">⚠</span> {error}
+              </div>
+            )}
+
+            {(selectedStart || selectedEnd) && (
+              <button className="clear-route-link" onClick={handleClearRoute}>
+                Clear Route
               </button>
             )}
           </div>
-
-          {currentPage === 1 ? (
-            <div className="search-section">
-              <div className="search-group">
-                <div className="search-label-row">
-                  <div className="dot-indicator dot-start"></div>
-                  <span>Start Location</span>
-                </div>
-                <SearchBar
-                  value={startLocation}
-                  onChange={(val) => {
-                    setStartLocation(val);
-                    if (path.length > 0) setPath([]);
-                  }}
-                  onSelect={handleStartSelect}
-                  placeholder="Search start point..."
-                />
-              </div>
-
-              <div className="swap-container">
-                <button
-                  className="swap-btn"
-                  onClick={handleSwapLocations}
-                  disabled={!selectedStart || !selectedEnd}
-                  title="Swap locations"
-                >
-                  <ArrowUpDown size={14} />
-                </button>
-              </div>
-
-              <div className="search-group">
-                <div className="search-label-row">
-                  <div className="dot-indicator dot-end"></div>
-                  <span>Destination</span>
-                </div>
-                <SearchBar
-                  value={endLocation}
-                  onChange={(val) => {
-                    setEndLocation(val);
-                    if (path.length > 0) setPath([]);
-                  }}
-                  onSelect={handleEndSelect}
-                  placeholder="Search destination..."
-                />
-              </div>
-
-              {error && (
-                <div className="error-banner">
-                  <span className="error-icon">⚠</span> {error}
-                </div>
-              )}
-            </div>
-          ) : (
-            /* PAGE 2 & 3 HEADER */
-            <div className="search-section animate-in">
-              <div className="route-header-compact">
-                <div className="route-points">
-                  <div className="point-row">
-                    <div className="dot-indicator dot-start"></div>
-                    <span className="point-label">{startLocation}</span>
-                  </div>
-                  <div className="connector-line"></div>
-                  <div className="point-row">
-                    <div className="dot-indicator dot-end"></div>
-                    <span className="point-label">{endLocation}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Container 2: Actions & Results (Scrollable Island) */}
+        {/* Only show this container if there's content to show, or always show QuickActions */}
         <div className="panel-card action-island">
-          <div className="scroll-container">
-            {currentPage === 1 ? (
-              <QuickActions
-                key="actions"
-                onQuickAction={handleQuickAction}
-                currentLocation={selectedStart}
-              />
-            ) : (
+          <QuickActions
+            onQuickAction={handleQuickAction}
+            currentLocation={selectedStart}
+            availableActions={availableActions}
+            minimized={path.length > 0}
+          />
+
+          {path.length > 0 && (
+            <>
+              <div className="divider"></div>
               <RouteInfo
-                key="route-info"
                 path={path}
-                instructions={instructions}
                 distance={distance}
                 startLabel={startLocation}
                 endLabel={endLocation}
                 isNavigating={isNavigating}
                 onStartNavigation={handleStartNavigation}
               />
-            )}
-          </div>
+            </>
+          )}
         </div>
 
       </div>
 
-      {/* Map Controls (Top Right) hidden as per user request */}
-      {/* <div className="map-controls-group">
-        <button
-          className={`glass-btn ${highContrast ? 'active' : ''}`}
-          onClick={() => setHighContrast(!highContrast)}
-          title={highContrast ? 'Disable High Contrast' : 'Enable High Contrast'}
-        >
-          <Eye size={20} />
-        </button>
-        <button
-          className={`glass-btn ${editorMode ? 'active' : ''}`}
-          onClick={toggleEditorMode}
-          title={editorMode ? 'Exit Editor Mode' : 'Enter Editor Mode'}
-        >
-          <Edit3 size={20} />
-        </button>
-      </div> */}
+      {/* --- Map Tool Layer (Top Right) --- */}
+      <div className="map-tool-layer">
+        {isAdmin && (
+          <>
+            <button
+              className={`glass-btn editor-toggle ${editorMode ? 'active' : ''}`}
+              onClick={toggleEditorMode}
+              title={editorMode ? 'Exit Editor Mode' : 'Enter Editor Mode'}
+            >
+              {editorMode ? <Eye size={20} /> : <Edit3 size={20} />}
+            </button>
+            <button
+              className="glass-btn logout-btn"
+              onClick={handleLogout}
+              title="Logout Admin"
+            >
+              <LogOut size={18} />
+            </button>
+          </>
+        )}
 
-      {/* --- Fullscreen Map --- */}
-      <div className="map-fullscreen">
+        {/* Floor Dropdown */}
+        <div className="floor-dropdown-container">
+          <button
+            className="floor-dropdown-trigger glass-btn"
+            onClick={() => setShowFloorDropdown(!showFloorDropdown)}
+          >
+            <Building size={18} />
+            <span className="floor-label">{currentFloor === 0 ? 'GF' : `${currentFloor}F`}</span>
+            <ChevronDown size={14} className={showFloorDropdown ? 'rotate-180' : ''} />
+          </button>
+
+          {showFloorDropdown && (
+            <div className="floor-options-panel glass-panel">
+              {[3, 2, 1, 0].map((floor) => (
+                <button
+                  key={floor}
+                  className={`floor-option ${currentFloor === floor ? 'selected' : ''}`}
+                  onClick={() => {
+                    setCurrentFloor(floor);
+                    setShowFloorDropdown(false);
+                  }}
+                >
+                  <span className="floor-num">{floor === 0 ? 'G' : `${floor}F`}</span>
+                  <span className="floor-name">
+                    {floor === 0 ? 'Ground Floor' : `${floor}${floor === 1 ? 'st' : floor === 2 ? 'nd' : 'rd'} Floor`}
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className={`map-fullscreen ${isNavigating ? 'nav-mode' : ''}`}>
         <FloorMap
           path={path}
           highlightedNodes={[selectedStart?.id, selectedEnd?.id].filter(Boolean)}
@@ -371,11 +428,28 @@ function App() {
           selectedStart={selectedStart}
           selectedEnd={selectedEnd}
           editorMode={editorMode}
+          currentFloor={currentFloor}
           isNavigating={isNavigating}
         />
       </div>
 
-      <NavigationOverlay path={isNavigating ? path : null} onBack={null} />
+      {isNavigating && (
+        <button
+          className="glass-btn floating-exit-nav"
+          onClick={handleExitNavigation}
+          title="Exit Navigation"
+        >
+          <ChevronLeft size={24} />
+        </button>
+      )}
+      {/* {isNavigating && <NavigationOverlay path={path} onBack={handleExitNavigation} />} */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }

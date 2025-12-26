@@ -1,52 +1,14 @@
 .route-info-container {
-    background: rgba(20, 20, 20, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 16px;
-    padding: 16px;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    min-height: 100%;
-    /* Fill the scroll container */
-    animation: slideUpFade 0.4s ease-out forwards;
+    gap: 16px;
+    animation: fadeIn 0.4s var(--ease-out-expo);
 }
 
-/* Mobile: Remove card styling to fill width */
-@media (max-width: 1024px) {
-    .route-info-container {
-        background: transparent;
-        border: none;
-        border-radius: 0;
-        padding: 0;
-        box-shadow: none;
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-        width: 100%;
-        max-width: 100%;
-    }
-
-    .navigation-actions {
-        padding: 0 0 16px 0;
-        /* Remove horizontal padding */
-        margin-top: 16px;
-        width: 100%;
-        box-sizing: border-box;
-    }
-
-    .start-nav-btn {
-        width: 100%;
-        max-width: 100%;
-        box-sizing: border-box;
-    }
-}
-
-@keyframes slideUpFade {
+@keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(10px);
+        transform: translateY(4px);
     }
 
     to {
@@ -56,43 +18,36 @@
 }
 
 /* ===============================
-   HEADER & SUMMARY
+   ROUTE SUMMARY CARD
    =============================== */
 .route-summary {
-    margin-bottom: 1px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 16px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
 }
 
 .route-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    cursor: pointer;
-    user-select: none;
-}
-
-.header-left {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    align-items: center;
 }
 
 .route-title {
-    font-size: 14px;
+    font-size: 11px;
     font-weight: 700;
-    background: var(--accent-gradient);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
 }
 
-/* ===============================
-   BADGES
-   =============================== */
 .route-badges {
     display: flex;
     gap: 8px;
-    margin-top: 2px;
 }
 
 .route-badge {
@@ -138,68 +93,105 @@
     color: var(--text-primary);
 }
 
+
 /* ===============================
    DIRECTIONS LIST
    =============================== */
 .directions-list {
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    padding-top: 14px;
-    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .directions-title {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    color: var(--text-muted);
-    margin-bottom: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.5px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+    padding-left: 4px;
 }
 
 .direction-item {
     display: flex;
+    align-items: center;
     gap: 12px;
-    position: relative;
-    padding-bottom: 0;
-    margin-bottom: 0;
+    padding: 12px;
+
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid transparent;
+    /* Prepare for hover border */
+    border-radius: var(--radius-md);
+
+    transition: all 0.2s ease;
+
+    /* Staggered Animation setup */
+    opacity: 0;
+    animation: slideInRight 0.4s var(--ease-out-expo) forwards;
 }
 
-/* Step Indicator (Number + Line) */
-.step-indicator {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 24px;
-    flex-shrink: 0;
+.direction-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.05);
+    transform: translateX(4px);
+}
+
+/* Stagger delays */
+.direction-item:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.direction-item:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.direction-item:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.direction-item:nth-child(4) {
+    animation-delay: 0.25s;
+}
+
+.direction-item:nth-child(5) {
+    animation-delay: 0.3s;
+}
+
+.direction-item:nth-child(n+6) {
+    animation-delay: 0.35s;
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .step-number {
-    width: 24px;
-    height: 24px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    color: var(--text-secondary);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    width: 20px;
+    height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2;
-    position: relative;
+    border-radius: 50%;
+    flex-shrink: 0;
 }
 
-.step-line {
-    width: 1px;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.05));
-    flex: 1;
-    margin-top: -1px;
-    /* Connect smoothly */
-    margin-bottom: -1px;
-    min-height: 24px;
+.direction-icon {
+    color: var(--accent-secondary);
+    flex-shrink: 0;
 }
-
-/* Hide line for last item handled by JS usually, but here flex takes care */
 
 /* Content */
 .direction-content {
@@ -208,7 +200,8 @@
     /* Align icon top with text */
     gap: 12px;
     flex: 1;
-    padding-bottom: 16px;
+    padding-bottom: 0;
+    /* Adjusted from 16 to 0 for item */
 }
 
 .direction-icon-wrapper {
@@ -241,117 +234,63 @@
 
 .direction-text {
     font-size: 13px;
-    color: var(--text-primary);
     font-weight: 500;
-    line-height: 1.4;
+    color: var(--text-primary);
 }
 
-/* Navigation Actions */
+.direction-item.start .direction-icon,
+.direction-item.end .direction-icon {
+    color: var(--accent-primary);
+}
+
+.direction-item.start,
+.direction-item.end {
+    background: rgba(211, 74, 9, 0.05);
+    border: 1px solid rgba(211, 74, 9, 0.1);
+}
+
+/* ===============================
+   NAVIGATION ACTIONS
+   =============================== */
 .navigation-actions {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 16px;
     display: flex;
-    justify-content: flex-start;
-    /* Left alignment */
+    justify-content: center;
+    width: 100%;
 }
 
-/* Start Navigation Button */
 .start-nav-btn {
-    width: 100%;
-    max-width: 320px;
-    background: var(--accent-gradient);
-    color: white;
-    border: none;
-    padding: 10px 16px;
-    border-radius: var(--radius-md);
-    font-weight: 600;
-    font-size: 15px;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
+
+    width: 80%;
+    /* Prominent width but not full */
+    padding: 12px 24px;
+
+    background: var(--accent-gradient);
+    border: none;
+    border-radius: var(--radius-pill);
+
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.25);
-    transition: all 0.2s;
-    box-sizing: border-box;
-    margin-left: 40px;
-    /* Shifted more to the right */
-}
+    box-shadow: 0 4px 20px rgba(255, 87, 34, 0.4);
 
-/* Hover & Active States */
-.start-nav-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-}
-
-.start-nav-btn:active {
+    transition: all 0.3s var(--ease-out-expo);
     transform: translateY(0);
 }
 
-/* Mobile Responsiveness */
-@media (max-width: 480px) {
-    .start-nav-btn {
-        max-width: 260px;
-        font-size: 14px;
-        padding: 8px 14px;
-        margin-left: 24px;
-        /* Slightly smaller shift on mobile */
-    }
+.start-nav-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(255, 87, 34, 0.6);
 }
 
-/* Animation - Page Slide Effect */
-.animate-slide-down {
-    animation: slideInRight 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
-}
-
-@keyframes slideInRight {
-    from {
-        opacity: 0;
-        transform: translateX(20px);
-    }
-
-    to {
-        opacity: 1;
-        transform: translateX(0);
-    }
-}
-
-/* High Contrast Override */
-.high-contrast .route-info-container {
-    background: #000000;
-    border: 2px solid #FFFFFF;
-}
-
-.high-contrast .route-title {
-    -webkit-text-fill-color: #FFFF00;
-    background: none;
-    color: #FFFF00;
-}
-
-.high-contrast .distance-badge,
-.high-contrast .time-badge {
-    background: #000;
-    border: 1px solid #FFF;
-    color: #FFF;
-}
-
-.high-contrast .step-number {
-    background: #000;
-    border: 2px solid #FFF;
-    color: #FFF;
-    font-weight: bold;
-}
-
-.high-contrast .step-line {
-    background: #FFF;
-    width: 2px;
-}
-
-.high-contrast .direction-icon-wrapper {
-    color: #FFFF00 !important;
-}
-
-.high-contrast .direction-text {
-    color: #FFF;
+.start-nav-btn:active {
+    transform: scale(0.97);
 }
