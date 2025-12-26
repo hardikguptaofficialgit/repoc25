@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import './SearchBar.css';
 
-const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location...", variant = "default" }) => {
+const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location...", floor = 0 }) => {
     const [query, setQuery] = useState(value || '');
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -21,14 +21,14 @@ const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location..
 
     useEffect(() => {
         if (query.length > 0) {
-            const results = searchLocations(query);
+            const results = searchLocations(query, floor);
             setSuggestions(results);
-            setShowSuggestions(true);
+            // Don't automatically show suggestions if they were explicitly hidden
         } else {
             setSuggestions([]);
             setShowSuggestions(false);
         }
-    }, [query]);
+    }, [query, floor]);
 
     useEffect(() => {
         setQuery(value || '');
@@ -56,12 +56,21 @@ const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location..
         setQuery(newValue);
         onChange(newValue);
         setSelectedIndex(-1);
+        // Only show suggestions if user is actively typing
+        if (newValue.length > 0) {
+            setShowSuggestions(true);
+        }
     };
 
     const handleSelectSuggestion = (location) => {
         setQuery(location.label);
         setShowSuggestions(false);
+        setSelectedIndex(-1);
         onSelect(location);
+        // Blur the input to prevent dropdown from reopening
+        if (inputRef.current) {
+            inputRef.current.blur();
+        }
     };
 
     const handleKeyDown = (e) => {
@@ -121,7 +130,7 @@ const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location..
     };
 
     return (
-        <div className={`search-bar-container ${variant}`}>
+        <div className="search-bar-container">
             <div className="search-input-wrapper">
                 <Search size={18} className="search-icon" />
                 <input
@@ -166,7 +175,12 @@ const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location..
                             >
                                 <span className="suggestion-icon">{getTypeIcon(location.type)}</span>
                                 <div className="suggestion-content">
-                                    <div className="suggestion-label">{location.label}</div>
+                                    <div className="suggestion-label">
+                                        {location.label}
+                                        {location.matchType && location.score > 700 && (
+                                            <span className="match-badge">{location.matchType === 'label' ? 'exact' : 'type'}</span>
+                                        )}
+                                    </div>
                                     <div className="suggestion-type">{getTypeLabel(location.type)}</div>
                                 </div>
                             </div>

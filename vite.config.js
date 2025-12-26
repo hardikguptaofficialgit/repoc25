@@ -5,7 +5,6 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [react()],
   server: {
-    host: true, // Exposes the server to the network
     hmr: {
       overlay: false, // Disabled to prevent iframe-related errors with React Konva
     }

@@ -1,29 +1,27 @@
 import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
-import { Stage, Layer, Rect, Circle, Line, Text, Group, Image } from 'react-konva';
+import { Stage, Layer, Rect, Circle, Line, Text, Group, Image, RegularPolygon } from 'react-konva';
 import { nodes as initialNodes, edges as initialEdges } from '../../data/buildingData';
-import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, Maximize, Minimize, X, Plus, Trash2, Link, MousePointer, Upload, Trash } from 'lucide-react';
+import { getNodesByFloor } from '../../utils/graphBuilder';
+import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, Maximize, Minimize, X, Plus, Trash2, Link, MousePointer, Upload, Trash, Layers, RefreshCw } from 'lucide-react';
 import './FloorMap.css';
 
 // -----------------------------------------------------------------------------
-// Integrated Color Palette (Premium)
+// Color Palette System
 // -----------------------------------------------------------------------------
 const PALETTE = {
-    blockA: '#6366F1',       // Indigo
-    blockB: '#F97316',       // Orange
-    washroomG: '#0EA5E9',    // Sky Blue
-    washroomL: '#EC4899',    // Pink
-    stairs: '#10B981',       // Emerald
-    lift: '#8B5CF6',         // Violet
-    entrance: '#F59E0B',     // Amber
+    blockA: '#6366F1',       // Indigo for Block A
+    blockB: '#F97316',       // Orange for Block B
+    washroomG: '#0EA5E9',    // Sky Blue for Gents
+    washroomL: '#EC4899',    // Pink for Ladies
+    stairs: '#22C55E',       // Green
+    lift: '#A855F7',         // Purple
+    entrance: '#EAB308',     // Yellow
     office: '#F43F5E',       // Rose
-    lab: '#06B6D4',          // Cyan
-    corridor: '#404040',     // Neutral Gray
+    lab: '#14B8A6',          // Teal
+    library: '#8B5CF6',      // Violet for Library
+    corridor: '#404040',     // Dark Grey
     default: '#64748B',      // Slate
-    highlight: '#FFFFFF',    // White
-
-    // Node Strokes
-    strokeDefault: 'rgba(255,255,255,0.3)',
-    strokeSelected: '#FFFFFF'
+    highlight: '#0EA5E9'     // Sky Blue for path highlight
 };
 
 // -----------------------------------------------------------------------------
@@ -37,7 +35,6 @@ const MapNode = memo(({
     isInPath,
     isStart,
     isEnd,
-    isDimmed,
     editorMode,
     isConnecting,
     onDrag,
@@ -46,43 +43,93 @@ const MapNode = memo(({
     onLeave
 }) => {
     const isCorridorNode = node.type === 'corridor';
+    const isFacilityNode = ['washroom_gents', 'washroom_ladies', 'stairs', 'lift', 'entrance', 'water_cooler', 'cafeteria', 'seating', 'gate'].includes(node.type);
+
+    // SIZE & SHAPE LOGIC
+    const getNodeDimensions = (type) => {
+        // Returns { width, height, cornerRadius }
+        if (type === 'corridor') return { width: 12, height: 12, cornerRadius: 2 };
+        if (isFacilityNode) return { width: 36, height: 36, cornerRadius: 18 }; // Circular container for facilities
+        if (type === 'washroom_gents' || type === 'washroom_ladies') return { width: 40, height: 30, cornerRadius: 4 };
+        if (type === 'stairs' || type === 'lift') return { width: 35, height: 35, cornerRadius: 4 };
+        if (type === 'entrance' || type === 'gate') return { width: 45, height: 25, cornerRadius: 6 };
+        if (type === 'office' || type === 'lab' || type === 'library') return { width: 50, height: 35, cornerRadius: 4 };
+        // Default for classrooms
+        return { width: 45, height: 30, cornerRadius: 4 };
+    };
 
     // COLOR LOGIC
     const getNodeStyle = (type, label) => {
         let fill = PALETTE.default;
-        let radius = isCorridorNode ? 5 : 10;
+        let stroke = 'rgba(255, 255, 255, 0.3)';
 
-        // 1. Specific Functional Types take priority
-        if (type === 'washroom_gents') fill = PALETTE.washroomG;
+        // 1. Facility nodes get black containers by default
+        if (isFacilityNode) {
+            fill = '#000000'; // Black container for facilities
+            stroke = '#FFFFFF'; // White border for facilities
+        }
+        // 2. Specific Functional Types take priority (for non-facility nodes)
+        else if (type === 'washroom_gents') fill = PALETTE.washroomG;
         else if (type === 'washroom_ladies') fill = PALETTE.washroomL;
         else if (type === 'stairs') fill = PALETTE.stairs;
         else if (type === 'lift') fill = PALETTE.lift;
         else if (type === 'entrance' || type === 'gate') fill = PALETTE.entrance;
         else if (type === 'office') fill = PALETTE.office;
         else if (type === 'lab') fill = PALETTE.lab;
+        else if (type === 'library') fill = PALETTE.library;
         else if (type === 'corridor') fill = PALETTE.corridor;
 
-        // 2. Block Logic (if not a special type, check Label for A/B)
+        // 3. Block Logic (if not a special type, check Label for A/B)
         else if (label) {
             const firstChar = label.trim().charAt(0).toUpperCase();
             if (firstChar === 'A') fill = PALETTE.blockA;
             else if (firstChar === 'B') fill = PALETTE.blockB;
         }
 
-        return { fill, radius };
+        return { fill, stroke };
     };
 
-    let { fill, radius } = getNodeStyle(node.type, node.label);
-    let stroke = PALETTE.strokeDefault;
-    let strokeWidth = 1.5;
+    let { fill, stroke } = getNodeStyle(node.type, node.label);
+    let { width, height, cornerRadius } = getNodeDimensions(node.type);
+    let strokeWidth = 2;
+
+    // Store original facility color for selection state
+    const getFacilityCategoryColor = (type) => {
+        if (type === 'washroom_gents') return PALETTE.washroomG;
+        if (type === 'washroom_ladies') return PALETTE.washroomL;
+        if (type === 'stairs') return PALETTE.stairs;
+        if (type === 'lift') return PALETTE.lift;
+        if (type === 'entrance' || type === 'gate') return PALETTE.entrance;
+        if (type === 'water_cooler') return PALETTE.washroomG; // Using blue for water cooler
+        if (type === 'cafeteria') return PALETTE.lab; // Using teal for cafeteria
+        if (type === 'seating') return PALETTE.lift; // Using purple for seating
+        return PALETTE.default;
+    };
+
+    let iconColor = '#FFFFFF'; // Default icon color (will be overridden for facilities)
+
+    // Set facility icon colors based on category in normal view
+    if (isFacilityNode) {
+        iconColor = getFacilityCategoryColor(node.type); // Use category color for icons
+
+        // In editing mode, ensure icons are always visible with proper contrast
+        if (editorMode) {
+            // For black containers, use the category color as is (should be visible)
+            // If container is not black (due to selection/start/end states), adjust icon color for contrast
+            if (fill !== '#000000') {
+                iconColor = '#000000'; // Black icon for colored containers
+            }
+        }
+    }
 
     // State Overrides
     if (isInPath) {
         stroke = PALETTE.highlight;
         strokeWidth = 3;
         if (!isStart && !isEnd) {
-            fill = PALETTE.highlight; // Path nodes turn white
-            radius = 6;
+            fill = PALETTE.highlight;
+            width = Math.max(width * 0.7, 10);
+            height = Math.max(height * 0.7, 10);
         }
     }
 
@@ -90,20 +137,46 @@ const MapNode = memo(({
         fill = '#22C55E'; // Green start
         stroke = '#fff';
         strokeWidth = 3;
-        radius = 12;
+        width = 50;
+        height = 50;
+        cornerRadius = 8;
+
+        // Special handling for facility nodes when selected as start
+        if (isFacilityNode) {
+            fill = getFacilityCategoryColor(node.type); // Container fills with category color
+            iconColor = editorMode ? '#000000' : '#FFFFFF'; // Icon changes based on mode for contrast
+        }
     }
 
     if (isEnd) {
         fill = '#EF4444'; // Red end
         stroke = '#fff';
         strokeWidth = 3;
-        radius = 12;
+        width = 50;
+        height = 50;
+        cornerRadius = 8;
+
+        // Special handling for facility nodes when selected as end
+        if (isFacilityNode) {
+            fill = getFacilityCategoryColor(node.type); // Container fills with category color
+            iconColor = editorMode ? '#000000' : '#FFFFFF'; // Icon changes based on mode for contrast
+        }
     }
 
     if (isSelected) {
         stroke = '#fff';
         strokeWidth = 3;
-        radius = radius * 1.25;
+        width = width * 1.15;
+        height = height * 1.15;
+
+        // Special handling for facility nodes when selected
+        if (isFacilityNode) {
+            fill = getFacilityCategoryColor(node.type); // Container fills with category color
+            iconColor = editorMode ? '#000000' : '#FFFFFF'; // Icon changes based on mode for contrast
+        } else {
+            // For regular nodes, keep the original fill color from palette
+            // Don't override with red, use the existing palette-based fill
+        }
     }
 
     if (isConnecting) {
@@ -126,41 +199,260 @@ const MapNode = memo(({
             onMouseEnter={() => onHover(nodeId)}
             onMouseLeave={onLeave}
         >
-            {/* Selection/Hover Glow */}
+            {/* Selection Glow */}
             {(isSelected || isHovered) && (
-                <Circle radius={radius + 6} fill={fill} opacity={0.25} listening={false} />
+                <Rect
+                    x={-width / 2 - 4}
+                    y={-height / 2 - 4}
+                    width={width + 8}
+                    height={height + 8}
+                    cornerRadius={cornerRadius + 2}
+                    fill={fill}
+                    opacity={0.3}
+                    listening={false}
+                />
             )}
 
-            <Circle
-                radius={radius}
-                fill={fill}
-                stroke={stroke}
-                strokeWidth={strokeWidth}
-                hitStrokeWidth={12}
-                shadowColor="black"
-                shadowBlur={8}
-                shadowOpacity={0.4}
-                shadowEnabled={true}
-                opacity={isDimmed ? 0.3 : 1}
-            />
+            {/* Main Node Shape - Conditional rendering for facilities vs regular nodes */}
+            {isFacilityNode ? (
+                // Circular container for facility nodes
+                <Circle
+                    x={0}
+                    y={0}
+                    radius={width / 2}
+                    fill={fill}
+                    stroke={stroke}
+                    strokeWidth={strokeWidth}
+                    hitStrokeWidth={10}
+                    shadowColor="black"
+                    shadowBlur={6}
+                    shadowOpacity={0.4}
+                    shadowOffsetY={2}
+                    shadowEnabled={isSelected || isHovered}
+                />
+            ) : (
+                // Regular rectangular nodes
+                <Rect
+                    x={-width / 2}
+                    y={-height / 2}
+                    width={width}
+                    height={height}
+                    cornerRadius={cornerRadius}
+                    fill={fill}
+                    stroke={stroke}
+                    strokeWidth={strokeWidth}
+                    hitStrokeWidth={10}
+                    shadowColor="black"
+                    shadowBlur={6}
+                    shadowOpacity={0.4}
+                    shadowOffsetY={2}
+                    shadowEnabled={isSelected || isHovered}
+                />
+            )}
+
+            {/* Icon Rendering for Facility Nodes */}
+            {isFacilityNode && (() => {
+                const iconSize = Math.min(width, height) * 0.5;
+                return (
+                    <Group>
+                        {/* ================= WASHROOM – GENTS ================= */}
+                        {node.type === 'washroom_gents' && (
+                            <Group>
+                                {/* head */}
+                                <Circle x={0} y={-iconSize * 0.45} radius={iconSize * 0.22} fill={iconColor} />
+                                {/* shoulders */}
+                                <Rect
+                                    x={-iconSize * 0.35}
+                                    y={-iconSize * 0.2}
+                                    width={iconSize * 0.7}
+                                    height={iconSize * 0.25}
+                                    cornerRadius={iconSize * 0.1}
+                                    fill={iconColor}
+                                />
+                                {/* body */}
+                                <Rect
+                                    x={-iconSize * 0.2}
+                                    y={iconSize * 0.05}
+                                    width={iconSize * 0.4}
+                                    height={iconSize * 0.45}
+                                    cornerRadius={iconSize * 0.08}
+                                    fill={iconColor}
+                                />
+                                {/* legs */}
+                                <Rect x={-iconSize * 0.18} y={iconSize * 0.5} width={iconSize * 0.14} height={iconSize * 0.28} fill={iconColor} />
+                                <Rect x={iconSize * 0.04} y={iconSize * 0.5} width={iconSize * 0.14} height={iconSize * 0.28} fill={iconColor} />
+                            </Group>
+                        )}
+
+                        {/* ================= WASHROOM – LADIES ================= */}
+                        {/* ================= WASHROOM – LADIES (SIMPLIFIED, ADJUSTED) ================= */}
+                        {node.type === 'washroom_ladies' && (
+                            <Group>
+                                {/* head */}
+                                <Circle
+                                    x={0}
+                                    y={-iconSize * 0.55}
+                                    radius={iconSize * 0.17}
+                                    fill={iconColor}
+                                />
+
+                                {/* body + skirt (shorter triangle, shifted up) */}
+                                <Line
+                                    points={[
+                                        0, -iconSize * 0.32,               // neck (up)
+                                        iconSize * 0.38, iconSize * 0.45,  // right bottom (shorter)
+                                        -iconSize * 0.38, iconSize * 0.45, // left bottom (shorter)
+                                    ]}
+                                    closed
+                                    fill={iconColor}
+                                />
+
+                                {/* left leg */}
+                                <Rect
+                                    x={-iconSize * 0.14}
+                                    y={iconSize * 0.45}
+                                    width={iconSize * 0.11}
+                                    height={iconSize * 0.32}
+                                    cornerRadius={iconSize * 0.05}
+                                    fill={iconColor}
+                                />
+
+                                {/* right leg */}
+                                <Rect
+                                    x={iconSize * 0.03}
+                                    y={iconSize * 0.45}
+                                    width={iconSize * 0.11}
+                                    height={iconSize * 0.32}
+                                    cornerRadius={iconSize * 0.05}
+                                    fill={iconColor}
+                                />
+                            </Group>
+                        )}
+
+
+                        {/* ================= STAIRS ================= */}
+                        {node.type === 'stairs' && (
+                            <Group>
+                                <Rect x={-iconSize * 0.45} y={iconSize * 0.35} width={iconSize * 0.9} height={iconSize * 0.15} fill={iconColor} />
+                                <Rect x={-iconSize * 0.15} y={iconSize * 0.1} width={iconSize * 0.6} height={iconSize * 0.15} fill={iconColor} />
+                                <Rect x={0} y={-iconSize * 0.15} width={iconSize * 0.45} height={iconSize * 0.15} fill={iconColor} />
+                            </Group>
+                        )}
+
+                        {/* ================= LIFT ================= */}
+                        {node.type === 'lift' && (
+                            <Group>
+                                <Rect
+                                    x={-iconSize * 0.35}
+                                    y={-iconSize * 0.5}
+                                    width={iconSize * 0.7}
+                                    height={iconSize * 0.95}
+                                    cornerRadius={iconSize * 0.1}
+                                    fill={iconColor}
+                                />
+                                {/* door split */}
+                                <Line points={[0, -iconSize * 0.4, 0, iconSize * 0.4]} stroke={fill} strokeWidth={2} />
+                                {/* arrows */}
+                                <Line points={[-iconSize * 0.12, -iconSize * 0.35, 0, -iconSize * 0.55, iconSize * 0.12, -iconSize * 0.35]} stroke={fill} strokeWidth={2} />
+                                <Line points={[-iconSize * 0.12, iconSize * 0.35, 0, iconSize * 0.55, iconSize * 0.12, iconSize * 0.35]} stroke={fill} strokeWidth={2} />
+                            </Group>
+                        )}
+
+                        {/* ================= ENTRANCE / GATE ================= */}
+                        {(node.type === 'entrance' || node.type === 'gate') && (
+                            <Group>
+                                <Rect
+                                    x={-iconSize * 0.3}
+                                    y={-iconSize * 0.5}
+                                    width={iconSize * 0.6}
+                                    height={iconSize * 0.95}
+                                    cornerRadius={iconSize * 0.06}
+                                    fill={iconColor}
+                                />
+                                <Circle x={iconSize * 0.15} y={0} radius={iconSize * 0.06} fill={fill} />
+                            </Group>
+                        )}
+
+                        {/* ================= WATER COOLER ================= */}
+                        {node.type === 'water_cooler' && (
+                            <Group>
+                                <Rect
+                                    x={-iconSize * 0.14}
+                                    y={-iconSize * 0.5}
+                                    width={iconSize * 0.28}
+                                    height={iconSize * 0.65}
+                                    cornerRadius={iconSize * 0.14}
+                                    fill={iconColor}
+                                />
+                                <Circle y={iconSize * 0.35} radius={iconSize * 0.14} fill={iconColor} />
+                            </Group>
+                        )}
+
+                        {/* ================= CAFETERIA ================= */}
+                        {node.type === 'cafeteria' && (
+                            <Group>
+                                <Rect
+                                    x={-iconSize * 0.32}
+                                    y={-iconSize * 0.22}
+                                    width={iconSize * 0.64}
+                                    height={iconSize * 0.44}
+                                    cornerRadius={iconSize * 0.14}
+                                    fill={iconColor}
+                                />
+                                <Line
+                                    points={[
+                                        iconSize * 0.32, -iconSize * 0.12,
+                                        iconSize * 0.46, -iconSize * 0.12,
+                                        iconSize * 0.46, iconSize * 0.12,
+                                    ]}
+                                    stroke={iconColor}
+                                    strokeWidth={2}
+                                />
+                            </Group>
+                        )}
+
+                        {/* ================= SEATING ================= */}
+                        {node.type === 'seating' && (
+                            <Group>
+                                <Rect x={-iconSize * 0.32} y={-iconSize * 0.1} width={iconSize * 0.64} height={iconSize * 0.18} fill={iconColor} />
+                                <Rect x={-iconSize * 0.32} y={iconSize * 0.12} width={iconSize * 0.12} height={iconSize * 0.32} fill={iconColor} />
+                                <Rect x={iconSize * 0.2} y={iconSize * 0.12} width={iconSize * 0.12} height={iconSize * 0.32} fill={iconColor} />
+                            </Group>
+                        )}
+
+                        {/* ================= DEFAULT ================= */}
+                        {![
+                            'washroom_gents',
+                            'washroom_ladies',
+                            'stairs',
+                            'lift',
+                            'entrance',
+                            'gate',
+                            'water_cooler',
+                            'cafeteria',
+                            'seating',
+                        ].includes(node.type) && (
+                                <Circle radius={iconSize * 0.28} fill={iconColor} />
+                            )}
+                    </Group>
+                );
+
+            })()}
 
             {/* Label Rendering */}
             {(!isCorridorNode || editorMode) && (
                 <Text
                     text={node.label || nodeId}
                     x={-60}
-                    y={-radius - 20}
+                    y={height / 2 + 6}
                     width={120}
                     align="center"
-                    fontSize={11}
-                    fontStyle="600"
+                    fontSize={10}
+                    fontStyle="bold"
                     fontFamily="Inter, sans-serif"
                     fill="#FFFFFF"
-                    opacity={isDimmed ? 0.4 : 1}
+                    opacity={0.95}
                     listening={false}
-                    shadowColor="black"
-                    shadowBlur={2}
-                    shadowOpacity={0.8}
                 />
             )}
         </Group>
@@ -176,7 +468,6 @@ const FloorMap = ({
     selectedStart = null,
     selectedEnd = null,
     editorMode = false,
-    isNavigating = false,
     currentFloor = 0
 }) => {
     // Data State
@@ -196,6 +487,15 @@ const FloorMap = ({
     const [bgImageOpacity, setBgImageOpacity] = useState(0.5);
     const [showGrid, setShowGrid] = useState(editorMode);
     const [isFullscreen, setIsFullscreen] = useState(false);
+    const [is3D, setIs3D] = useState(false);
+    const [pathOffset, setPathOffset] = useState(0);
+    const [rotation, setRotation] = useState(0);
+
+    const recenterMap = useCallback(() => {
+        setScale(0.85);
+        setPosition({ x: 0, y: 0 });
+        setRotation(0);
+    }, []);
 
     // Editor Tools State
     const [editorTool, setEditorTool] = useState('select');
@@ -241,7 +541,7 @@ const FloorMap = ({
         return () => resizeObserver.disconnect();
     }, [isFullscreen]);
 
-    // Key Listeners
+    // 3. Key Listeners
     useEffect(() => {
         const handleEsc = (e) => {
             if (e.key === 'Escape') {
@@ -258,6 +558,19 @@ const FloorMap = ({
         window.addEventListener('keydown', handleEsc);
         return () => window.removeEventListener('keydown', handleEsc);
     }, [isFullscreen, connectingFrom, selectedNode]);
+
+    // Path animation effect
+    useEffect(() => {
+        let animId;
+        const animate = () => {
+            setPathOffset(prev => (prev + 1) % 40);
+            animId = requestAnimationFrame(animate);
+        };
+        if (path.length > 0) {
+            animId = requestAnimationFrame(animate);
+        }
+        return () => cancelAnimationFrame(animId);
+    }, [path]);
 
     // Handlers
     const handleNodeDrag = useCallback((nodeId, x, y) => {
@@ -332,6 +645,42 @@ const FloorMap = ({
         setPosition({ x: pointer.x - mousePointTo.x * newScale, y: pointer.y - mousePointTo.y * newScale });
     }, []);
 
+    // Multi-touch Gesture Handling (Pinch & Rotate)
+    const lastDist = useRef(0);
+    const lastRotation = useRef(0);
+
+    const handleTouch = (e) => {
+        if (e.evt.touches.length !== 2) return;
+
+        e.evt.preventDefault();
+        const touch1 = e.evt.touches[0];
+        const touch2 = e.evt.touches[1];
+
+        const dist = Math.sqrt(Math.pow(touch2.clientX - touch1.clientX, 2) + Math.pow(touch2.clientY - touch1.clientY, 2));
+        const angle = Math.atan2(touch2.clientY - touch1.clientY, touch2.clientX - touch1.clientX) * 180 / Math.PI;
+
+        if (!lastDist.current) {
+            lastDist.current = dist;
+            lastRotation.current = angle;
+            return;
+        }
+
+        // Scaling
+        const scaleFactor = dist / lastDist.current;
+        setScale(prev => Math.min(Math.max(prev * scaleFactor, 0.1), 5));
+        lastDist.current = dist;
+
+        // Rotation
+        const rotationDiff = angle - lastRotation.current;
+        setRotation(prev => prev + rotationDiff);
+        lastRotation.current = angle;
+    };
+
+    const handleTouchEnd = () => {
+        lastDist.current = 0;
+        lastRotation.current = 0;
+    };
+
     const exportData = () => {
         const data = `export const nodes = ${JSON.stringify(nodes, null, 2)};\n\nexport const edges = ${JSON.stringify(edges, null, 2)};`;
         navigator.clipboard.writeText(data).then(() => alert("Data copied to clipboard"));
@@ -366,130 +715,78 @@ const FloorMap = ({
         }
     };
 
-    // Animation State
-    const [dashOffset, setDashOffset] = useState(0);
+    // Filter and Modify Nodes based on current floor
+    const visibleNodes = React.useMemo(() => getNodesByFloor(currentFloor), [currentFloor]);
 
-    useEffect(() => {
-        let anim;
-        if (path.length > 0) {
-            const animate = () => {
-                setDashOffset(prev => prev - 1); // Move dashes
-                anim = requestAnimationFrame(animate);
-            };
-            anim = requestAnimationFrame(animate);
-
-            // Auto-Zoom to Path Logic
-            if (stageSize.width > 0 && path.length > 1) {
-                const padding = 100;
-                let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
-
-                path.forEach(nodeId => {
-                    const n = nodes[nodeId];
-                    if (n) {
-                        minX = Math.min(minX, n.x);
-                        maxX = Math.max(maxX, n.x);
-                        minY = Math.min(minY, n.y);
-                        maxY = Math.max(maxY, n.y);
-                    }
-                });
-
-                if (minX !== Infinity) {
-                    const width = maxX - minX + padding * 2;
-                    const height = maxY - minY + padding * 2;
-                    const centerX = minX + (maxX - minX) / 2;
-                    const centerY = minY + (maxY - minY) / 2;
-
-                    // Calculate fitting scale
-                    const fitScale = Math.min(
-                        stageSize.width / width,
-                        stageSize.height / height
-                    );
-
-                    // Clamp scale
-                    const finalScale = Math.min(Math.max(fitScale, 0.4), 2.5);
-
-                    // Calculate position to center
-                    const finalX = stageSize.width / 2 - centerX * finalScale;
-                    const finalY = stageSize.height / 2 - centerY * finalScale;
-
-                    // Animate (Basic lerp or direct set for now)
-                    // Using direct set for responsiveness
-                    setScale(finalScale);
-                    setPosition({ x: finalX, y: finalY });
-                }
-            }
-        } else {
-            setDashOffset(0);
-            // Optional: meaningful default view reset could go here
-        }
-        return () => cancelAnimationFrame(anim);
-    }, [path, stageSize, nodes, isNavigating]); // Include nodes to ensure coordinates are available
+    // Internal Palette
+    const INTERNAL_PALETTE = {
+        blockA: '#6366F1',
+        blockB: '#F97316',
+        stairs: '#22C55E',
+        lift: '#A855F7',
+        washroomG: '#0EA5E9',
+        washroomL: '#EC4899',
+        entrance: '#EAB308',
+        office: '#F43F5E',
+        lab: '#14B8A6',
+        library: '#8B5CF6',
+        corridor: '#525252',     // Lighter Gray for corridors
+        default: '#94A3B8',
+        highlight: '#38BDF8'
+    };
 
     // Render Helpers
-    // Filter nodes for current floor
-    // NOTE: Since distinct floor data (z-index) is not yet available for all nodes, 
-    // we currently show the map on ALL floors to ensure they are "accepted" and visible.
-    // Once data is tagged with 'z' or 'floor', we can re-enable strict filtering.
-    const visibleNodeIds = new Set(
-        Object.entries(nodes)
-            .map(([id]) => id)
-    );
-
     const renderedEdges = edges.map((edge, i) => {
-        const [n1, n2, dist] = edge;
-        // Only render edge if BOTH nodes are visible on current floor
-        // (Or change to 'some' if you want to see connections to other floors, but usually 2D map implies both)
-        if (!visibleNodeIds.has(n1) || !visibleNodeIds.has(n2)) return null;
-        if (!nodes[n1] || !nodes[n2]) return null;
-
+        const [n1, n2] = edge;
+        if (!visibleNodes[n1] || !visibleNodes[n2]) return null;
         const isPathEdge = path.some((id, idx) => idx < path.length - 1 && ((id === n1 && path[idx + 1] === n2) || (id === n2 && path[idx + 1] === n1)));
 
-        let strokeColor = '#333333';
-        let strokeWidth = 1.5;
-        let opacity = 0.5;
-        let dash = null;
+        let strokeColor = 'rgba(255, 255, 255, 0.3)'; // Increased from 0.15
+        let strokeWidth = 6;                          // Increased from 5
+        let opacity = 0.5;                             // Increased from 0.3
 
-        if (editorMode) { strokeColor = '#555555'; opacity = 0.7; }
+        if (editorMode) { strokeColor = '#737373'; opacity = 0.8; }
 
         if (isPathEdge) {
-            strokeColor = PALETTE.highlight;
-            strokeWidth = 4;
-            opacity = 1;
-            dash = [10, 10]; // Dash pattern for flow effect
+            const edgeIndex = path.findIndex((id, idx) => idx < path.length - 1 && ((id === n1 && path[idx + 1] === n2) || (id === n2 && path[idx + 1] === n1)));
+            const isForward = path[edgeIndex] === n1;
+            const fromNode = isForward ? visibleNodes[n1] : visibleNodes[n2];
+            const toNode = isForward ? visibleNodes[n2] : visibleNodes[n1];
+            const angle = Math.atan2(toNode.y - fromNode.y, toNode.x - fromNode.x) * 180 / Math.PI;
+
+            return (
+                <Group key={`path-${i}`}>
+                    {/* Path glow */}
+                    <Line
+                        points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
+                        stroke={INTERNAL_PALETTE.highlight}
+                        strokeWidth={12}
+                        opacity={0.2}
+                        lineCap="round"
+                    />
+                    {/* Animated flow line */}
+                    <Line
+                        points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
+                        stroke={INTERNAL_PALETTE.highlight}
+                        strokeWidth={5}
+                        dash={[20, 20]}
+                        dashOffset={-pathOffset}
+                        lineCap="round"
+                    />
+                    {/* Direction Arrow */}
+                    <RegularPolygon
+                        x={(fromNode.x + toNode.x) / 2}
+                        y={(fromNode.y + toNode.y) / 2}
+                        sides={3}
+                        radius={6}
+                        fill={INTERNAL_PALETTE.highlight}
+                        rotation={angle + 90}
+                    />
+                </Group>
+            );
         }
 
-        // Midpoint for Text
-        const midX = (nodes[n1].x + nodes[n2].x) / 2;
-        const midY = (nodes[n1].y + nodes[n2].y) / 2;
-
-        return (
-            <Group key={i} onClick={() => editorMode && editorTool === 'delete' && setEdges(prev => prev.filter((_, idx) => idx !== i))}>
-                <Line
-                    points={[nodes[n1].x, nodes[n1].y, nodes[n2].x, nodes[n2].y]}
-                    stroke={strokeColor}
-                    strokeWidth={strokeWidth}
-                    opacity={opacity}
-                    lineCap="round"
-                    dash={isPathEdge ? dash : undefined}
-                    dashOffset={isPathEdge ? dashOffset : 0}
-                />
-
-                {/* Distance Label */}
-                <Text
-                    x={midX}
-                    y={midY}
-                    text={`${dist || Math.round(Math.sqrt(Math.pow(nodes[n2].x - nodes[n1].x, 2) + Math.pow(nodes[n2].y - nodes[n1].y, 2)))}m`}
-                    fontSize={10}
-                    fontFamily="Inter, sans-serif"
-                    fill={isPathEdge ? "#FFFFFF" : "rgba(255,255,255,0.4)"}
-                    align="center"
-                    verticalAlign="middle"
-                    offsetX={10}
-                    offsetY={5}
-                    listening={false} /* Let clicks pass through to line/group */
-                />
-            </Group>
-        );
+        return <Line key={i} points={[visibleNodes[n1].x, visibleNodes[n1].y, visibleNodes[n2].x, visibleNodes[n2].y]} stroke={strokeColor} strokeWidth={strokeWidth} opacity={opacity} lineCap="round" onClick={() => editorMode && editorTool === 'delete' && setEdges(prev => prev.filter((_, idx) => idx !== i))} />;
     });
 
     const renderedGrid = showGrid ? <Group>{Array.from({ length: 40 }).map((_, i) => <Line key={`v${i}`} points={[i * 50, -1000, i * 50, 2000]} stroke="#1e293b" strokeWidth={1} />)}{Array.from({ length: 40 }).map((_, i) => <Line key={`h${i}`} points={[-1000, i * 50, 2000, i * 50]} stroke="#1e293b" strokeWidth={1} />)}</Group> : null;
@@ -498,24 +795,25 @@ const FloorMap = ({
         setHoveredNode(null);
     }, []);
 
-    const visibleNodes = Object.entries(nodes).filter(([_, node]) => {
-        // Show if on current floor. Assuming node.z or floor property exists, default to 0.
-        // If node.z is undefined, it's Ground Floor (0).
-        return (node.floor !== undefined ? node.floor : (node.z !== undefined ? node.z : 0)) === currentFloor;
-    });
-
     return (
-        <div className={`floor-map-container ${isFullscreen ? 'fullscreen' : ''}`} ref={containerRef}>
-
+        <div className={`floor-map-container ${isFullscreen ? 'fullscreen' : ''} ${is3D ? 'view-3d' : ''}`} ref={containerRef}>
 
             {/* Controls Header */}
             <div className="map-ui-header">
                 <div className="ui-group">
+                    <button
+                        onClick={() => setIs3D(!is3D)}
+                        className={is3D ? 'active' : ''}
+                        title="Toggle 3D View"
+                    >
+                        <Layers size={18} />
+                    </button>
                     <button onClick={() => setIsFullscreen(!isFullscreen)} title="Fullscreen">{isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}</button>
-                    <button onClick={() => setScale(s => Math.min(s * 1.2, 5))}><ZoomIn size={18} /></button>
-                    <button onClick={() => setScale(s => Math.max(s / 1.2, 0.1))}><ZoomOut size={18} /></button>
-                    <button onClick={() => { setScale(0.85); setPosition({ x: 0, y: 0 }); }}><RotateCcw size={18} /></button>
+                    <button onClick={() => setScale(s => Math.min(s * 1.2, 5))} title="Zoom In"><ZoomIn size={18} /></button>
+                    <button onClick={() => setScale(s => Math.max(s / 1.2, 0.1))} title="Zoom Out"><ZoomOut size={18} /></button>
+                    <button onClick={recenterMap} title="Recenter & Reset View"><RefreshCw size={18} /></button>
                 </div>
+
                 {editorMode && (
                     <div className="ui-group">
                         <button onClick={() => setShowGrid(!showGrid)} className={showGrid ? 'active' : ''}><Grid3X3 size={18} /></button>
@@ -564,10 +862,19 @@ const FloorMap = ({
                             </div>
                         </>
                     )}
+
+                    {editorTool === 'addNode' && (
+                        <div className="tool-options">
+                            <div className="toolbar-label">NODE TYPE</div>
+                            <select value={activeNodeType} onChange={(e) => setActiveNodeType(e.target.value)}>
+                                {['corridor', 'classroom', 'office', 'lab', 'lift', 'stairs', 'washroom_gents', 'washroom_ladies', 'entrance'].map(t => <option key={t} value={t}>{t}</option>)}
+                            </select>
+                        </div>
+                    )}
                 </div>
             )}
 
-            {/* Editor Properties Panel */}
+            {/* Editor Properties Panel (Floating) */}
             {editorMode && selectedNode && nodes[selectedNode] && (
                 <div className="editor-properties-panel">
                     <div className="panel-header">
@@ -666,54 +973,47 @@ const FloorMap = ({
             )}
 
             {/* Canvas */}
-            <Stage
-                ref={stageRef} width={stageSize.width} height={stageSize.height}
-                scaleX={scale} scaleY={scale} x={position.x} y={position.y}
-                draggable={!isNavigating && (!editorMode || editorTool === 'select')}
-                onWheel={!isNavigating ? handleWheel : undefined} onClick={handleStageClick}
-                onMouseMove={(e) => { if (connectingFrom) { const pt = stageRef.current.getPointerPosition(); setTempLineEnd({ x: (pt.x - position.x) / scale, y: (pt.y - position.y) / scale }); } }}
-                onDragEnd={(e) => { if (e.target === stageRef.current) setPosition({ x: e.target.x(), y: e.target.y() }); }}
-            >
-                <Layer listening={false}>
-                    {/* Dark Background */}
-                    <Rect width={2000} height={2000} fill="#050505" x={-500} y={-500} />
-                    {bgImageObj && (
-                        <Image
-                            image={bgImageObj}
-                            x={0}
-                            y={0}
-                            opacity={bgImageOpacity}
-                        />
-                    )}
-                    {renderedGrid}
-                </Layer>
-                <Layer>
-                    {renderedEdges}
-                    {connectingFrom && tempLineEnd && <Line points={[nodes[connectingFrom].x, nodes[connectingFrom].y, tempLineEnd.x, tempLineEnd.y]} stroke="#fbbf24" strokeWidth={2} dash={[5, 5]} />}
+            {/* Canvas Container for 3D Transform */}
+            <div className="canvas-wrapper">
+                <Stage
+                    ref={stageRef} width={stageSize.width} height={stageSize.height}
+                    scaleX={scale} scaleY={scale} x={position.x} y={position.y}
+                    rotation={rotation}
+                    draggable={!editorMode || editorTool === 'select'}
+                    onWheel={handleWheel} onClick={handleStageClick}
+                    onTouchMove={handleTouch}
+                    onTouchEnd={handleTouchEnd}
+                    onMouseMove={(e) => { if (connectingFrom) { const pt = stageRef.current.getPointerPosition(); setTempLineEnd({ x: (pt.x - position.x) / scale, y: (pt.y - position.y) / scale }); } }}
+                    onDragEnd={(e) => { if (e.target === stageRef.current) setPosition({ x: e.target.x(), y: e.target.y() }); }}
+                >
+                    <Layer listening={false}>
+                        <Rect width={4000} height={4000} x={-1000} y={-1000} />
+                        {bgImageObj && (
+                            <Image
+                                image={bgImageObj}
+                                x={0}
+                                y={0}
+                                opacity={bgImageOpacity}
+                            />
+                        )}
+                        {renderedGrid}
+                    </Layer>
+                    <Layer>
+                        {renderedEdges}
+                        {connectingFrom && tempLineEnd && <Line points={[visibleNodes[connectingFrom].x, visibleNodes[connectingFrom].y, tempLineEnd.x, tempLineEnd.y]} stroke="#fbbf24" strokeWidth={2} dash={[5, 5]} />}
+                        {Object.entries(visibleNodes).map(([id, node]) => (
+                            <MapNode key={`${currentFloor}-${id}`} nodeId={id} node={node}
+                                isSelected={selectedNode === id} isHovered={hoveredNode === id}
+                                isInPath={path.includes(id)} isStart={selectedStart?.id === id} isEnd={selectedEnd?.id === id}
+                                editorMode={editorMode} isConnecting={connectingFrom === id}
+                                onDrag={handleNodeDrag} onClick={handleNodeClick} onHover={setHoveredNode} onLeave={handleNodeLeave}
+                            />
+                        ))}
+                    </Layer>
+                </Stage>
+            </div>
 
-                    {visibleNodes.map(([id, node]) => (
-                        <MapNode
-                            key={id}
-                            nodeId={id}
-                            node={node}
-                            isSelected={selectedNode === id}
-                            isHovered={hoveredNode === id}
-                            isInPath={path.includes(id)}
-                            isStart={selectedStart?.id === id}
-                            isEnd={selectedEnd?.id === id}
-                            isDimmed={path.length > 0 && !path.includes(id) && !selectedStart && !selectedEnd}
-                            editorMode={editorMode}
-                            isConnecting={connectingFrom === id}
-                            onDrag={handleNodeDrag}
-                            onClick={handleNodeClick}
-                            onHover={() => setHoveredNode(id)}
-                            onLeave={handleNodeLeave}
-                        />
-                    ))}
-                </Layer>
-            </Stage>
-
-            {/* Colored Legend (Only outside Editor Mode) */}
+            {/* Colored Legend */}
             {!editorMode && (
                 <div className="map-legend-colored">
                     <div className="legend-row">

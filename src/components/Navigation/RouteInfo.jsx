@@ -1,21 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
+import { nodes } from '../../data/buildingData';
 import {
     MapPin,
     Navigation,
     Clock,
     Route,
-    ArrowUpCircle,
+    ArrowUpFromLine,
     MoveVertical,
-    Footprints,
-    Flag,
-    ChevronDown,
-    ChevronUp
+    Droplet,
+    DoorOpen,
+    ArrowRight
 } from 'lucide-react';
 import './RouteInfo.css';
 
-const RouteInfo = ({ path, instructions, distance, startLabel, endLabel, isNavigating, onStartNavigation }) => {
-    const [expanded, setExpanded] = useState(true);
-
+const RouteInfo = ({ path, distance, startLabel, endLabel }) => {
     if (!path || path.length === 0) {
         return null;
     }
@@ -25,61 +23,117 @@ const RouteInfo = ({ path, instructions, distance, startLabel, endLabel, isNavig
     const minutes = Math.floor(estimatedTimeSeconds / 60);
     const seconds = estimatedTimeSeconds % 60;
 
-    const getIcon = (iconName) => {
-        switch (iconName) {
-            case 'map-pin': return MapPin;
-            case 'arrow-up-circle': return ArrowUpCircle;
-            case 'move-vertical': return MoveVertical;
-            case 'footprints': return Footprints;
-            case 'flag': return Flag;
-            default: return Navigation;
+    // Get turn-by-turn directions
+    const getDirections = () => {
+        const directions = [];
+
+        for (let i = 0; i < path.length; i++) {
+            const nodeId = path[i];
+            const node = nodes[nodeId];
+
+            if (!node) continue;
+
+            if (i === 0) {
+                directions.push({
+                    step: 1,
+                    instruction: startLabel || node.label,
+                    icon: MapPin,
+                    type: 'start',
+                });
+            } else if (i === path.length - 1) {
+                directions.push({
+                    step: directions.length + 1,
+                    instruction: endLabel || node.label,
+                    icon: Navigation,
+                    type: 'end',
+                });
+            } else if (node.type !== 'corridor') {
+                // Only show non-corridor waypoints
+                directions.push({
+                    step: directions.length + 1,
+                    instruction: node.label,
+                    icon: getNodeIcon(node.type),
+                    type: 'waypoint',
+                });
+            }
+        }
+
+        return directions;
+    };
+
+    const getNodeIcon = (type) => {
+        switch (type) {
+            case 'lift':
+                return MoveVertical;
+            case 'stairs':
+                return ArrowUpFromLine;
+            case 'washroom_gents':
+            case 'washroom_ladies':
+                return Droplet;
+            case 'entrance':
+                return DoorOpen;
+            default:
+                return ArrowRight;
         }
     };
+
+    const directions = getDirections();
 
     return (
         <div className="route-info-container">
             <div className="route-summary">
-                <div className="route-header" onClick={() => setExpanded(!expanded)}>
-                    <div className="header-left">
-                        {/* Content removed as per user request */}
+                <div className="route-header">
+                    <h3 className="route-title">Route Found</h3>
+                    <div className="route-badges">
+                        <span className="route-badge">
+                            <Route size={14} />
+                            {Math.round(distance * 0.2)} steps
+                        </span>
+                        <span className="route-badge">
+                            <Clock size={14} />
+                            {minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`}
+                        </span>
                     </div>
-                    <button className="expand-btn">
-                        {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                    </button>
+                </div>
+
+                <div className="route-endpoints">
+                    <div className="endpoint start-point">
+                        <MapPin size={16} className="endpoint-icon" />
+                        <div className="endpoint-text">
+                            <span className="endpoint-label">FROM</span>
+                            <span className="endpoint-name">{startLabel}</span>
+                        </div>
+                    </div>
+                    <ArrowRight size={16} className="route-arrow" />
+                    <div className="endpoint end-point">
+                        <Navigation size={16} className="endpoint-icon" />
+                        <div className="endpoint-text">
+                            <span className="endpoint-name">{endLabel}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            {expanded && instructions && instructions.length > 0 && (
-                <div className="directions-list animate-slide-down">
-                    <h4 className="directions-title">Step-by-Step</h4>
-                    {instructions.map((step, index) => {
-                        const IconComponent = getIcon(step.icon);
-                        return (
-                            <div key={index} className="direction-item">
-                                <div className="step-indicator">
-                                    <div className="step-number">{index + 1}</div>
-                                    {index < instructions.length - 1 && <div className="step-line"></div>}
-                                </div>
-                                <div className="direction-content">
-                                    <div className={`direction-icon-wrapper type-${step.type}`}>
-                                        <IconComponent size={18} />
-                                    </div>
-                                    <span className="direction-text">{step.text}</span>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-            )}
-
-            {!isNavigating && (
-                <div className="navigation-actions">
-                    <button className="start-nav-btn" onClick={onStartNavigation}>
-                        <Navigation size={18} />
-                        Start Navigation
-                    </button>
-                </div>
-            )}
+            <div className="directions-list">
+                <h4 className="directions-title">TURN-BY-TURN DIRECTIONS</h4>
+                {directions.map((direction, index) => {
+                    const IconComponent = direction.icon;
+                    return (
+                        <div
+                            key={index}
+                            className={`direction-item ${direction.type}`}
+                        >
+                            <span className="step-number">{direction.step}</span>
+                            <IconComponent size={18} className="direction-icon" />
+                            <span className="direction-text">
+                                {direction.type === 'start' && 'Start at '}
+                                {direction.type === 'end' && 'Arrive at '}
+                                {direction.instruction}
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
         </div>
     );
 };
