@@ -7,12 +7,10 @@ import NavigationOverlay from './components/Navigation/NavigationOverlay';
 import { buildGraph, getNodesByFloor } from './utils/graphBuilder';
 import { findShortestPath, findNearestPOI } from './utils/pathfinding';
 import { nodes, poiCategories } from './data/buildingData';
-import { ArrowUpDown, Trash2, Edit3, Eye, Menu, ChevronLeft, Building, ChevronDown, LogOut, Key } from 'lucide-react';
-import Toast from './components/UI/Toast';
+import { ArrowUpDown, Trash2, Edit3, Eye, Menu, ChevronLeft, Building, ChevronDown, LogOut } from 'lucide-react';
 import './App.css';
 
-function App() {
-  const [isAdmin, setIsAdmin] = useState(false);
+function App({ isAdmin, setIsAdmin }) {
   const [graph, setGraph] = useState(null);
   const [startLocation, setStartLocation] = useState('');
   const [endLocation, setEndLocation] = useState('');
@@ -24,22 +22,16 @@ function App() {
 
   const [editorMode, setEditorMode] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isNavigating, setIsNavigating] = useState(false);
   const [currentFloor, setCurrentFloor] = useState(0);
   const [showFloorDropdown, setShowFloorDropdown] = useState(false);
-  const [toast, setToast] = useState(null);
 
-  const showToast = (message, type = 'success') => {
-    setToast({ message, type });
-  };
-
-  // Check for existing admin session on mount
+  // Check for existing admin session
   useEffect(() => {
     const adminSession = localStorage.getItem('adminSession');
-    if (adminSession === 'true') {
+    if (adminSession === 'true' && !isAdmin) {
       setIsAdmin(true);
     }
-  }, []);
+  }, [isAdmin, setIsAdmin]);
 
   useEffect(() => {
     const builtGraph = buildGraph();
@@ -58,31 +50,10 @@ function App() {
     setSidebarOpen(!newEditorState);
   };
 
-  const handleLogin = () => {
-    const password = window.prompt("Enter Admin Password:");
-    if (password === "admin123") {
-      setIsAdmin(true);
-      localStorage.setItem('adminSession', 'true');
-      alert("Admin Access Granted!");
-    } else if (password !== null) {
-      alert("Incorrect Password!");
-    }
-  };
-
   const handleLogout = () => {
     setIsAdmin(false);
     setEditorMode(false);
     localStorage.removeItem('adminSession');
-  };
-
-  const handleStartNavigation = () => {
-    setIsNavigating(true);
-    setSidebarOpen(false); // Close sidebar for full map view
-  };
-
-  const handleExitNavigation = () => {
-    setIsNavigating(false);
-    setSidebarOpen(true); // Re-open sidebar
   };
 
   const calculateRoute = (startId, endId) => {
@@ -92,12 +63,10 @@ function App() {
       setError(result.error);
       setPath([]);
       setDistance(0);
-      showToast(result.error, 'error');
     } else {
       setPath(result.path);
       setDistance(result.distance);
       setError('');
-      showToast('Route calculated successfully', 'success');
     }
   };
 
@@ -207,29 +176,6 @@ function App() {
     }
   };
 
-  // Calculate available amenities on current floor
-  const getAvailableActions = () => {
-    if (!graph) return [];
-    const floorNodes = getNodesByFloor(currentFloor);
-    const actions = ['stairs', 'lift', 'washroom_gents', 'washroom_ladies', 'entrance', 'water_cooler'];
-
-    return actions.filter(action => {
-      let targetNodes = [];
-      switch (action) {
-        case 'stairs': targetNodes = poiCategories.stairs; break;
-        case 'lift': targetNodes = poiCategories.lifts; break;
-        case 'washroom_gents': targetNodes = poiCategories.washrooms_gents; break;
-        case 'washroom_ladies': targetNodes = poiCategories.washrooms_ladies; break;
-        case 'entrance': targetNodes = poiCategories.entrances; break;
-        case 'water_cooler': targetNodes = poiCategories.water_coolers; break;
-        default: return false;
-      }
-      return (targetNodes || []).some(id => floorNodes[id]);
-    });
-  };
-
-  const availableActions = getAvailableActions();
-
   return (
     <div className="app">
 
@@ -255,20 +201,9 @@ function App() {
             <div className="brand">
               <h1>KIIT Campus 25</h1>
             </div>
-            <div className="header-actions">
-              {!isAdmin && (
-                <button
-                  className="icon-btn-mini login-trigger"
-                  onClick={handleLogin}
-                  title="Admin Login"
-                >
-                  <Key size={16} />
-                </button>
-              )}
-              <button className="close-btn-mini" onClick={() => setSidebarOpen(false)}>
-                <ChevronLeft size={20} />
-              </button>
-            </div>
+            <button className="close-btn-mini" onClick={() => setSidebarOpen(false)}>
+              <ChevronLeft size={20} />
+            </button>
           </div>
 
           <div className="search-section">
@@ -282,24 +217,7 @@ function App() {
                 onSelect={handleStartSelect}
                 placeholder="Starting point..."
                 floor={currentFloor}
-                variant="start"
               />
-            </div>
-
-            {/* Sidebar Floor Toggle Intermediary */}
-            <div className="floor-toggle-bar">
-              <span className="floor-toggle-label">Floor</span>
-              <div className="floor-pills">
-                {[0, 1, 2, 3].map(f => (
-                  <button
-                    key={f}
-                    className={`floor-pill ${currentFloor === f ? 'active' : ''}`}
-                    onClick={() => setCurrentFloor(f)}
-                  >
-                    {f === 0 ? 'G' : f}
-                  </button>
-                ))}
-              </div>
             </div>
 
             <div className="connector-gap">
@@ -322,7 +240,6 @@ function App() {
                 onSelect={handleEndSelect}
                 placeholder="Destination..."
                 floor={currentFloor}
-                variant="end"
               />
             </div>
 
@@ -340,12 +257,12 @@ function App() {
           </div>
         </div>
 
+        {/* Container 2: Actions & Results (Bottom Island) */}
         {/* Only show this container if there's content to show, or always show QuickActions */}
         <div className="panel-card action-island">
           <QuickActions
             onQuickAction={handleQuickAction}
             currentLocation={selectedStart}
-            availableActions={availableActions}
             minimized={path.length > 0}
           />
 
@@ -357,8 +274,6 @@ function App() {
                 distance={distance}
                 startLabel={startLocation}
                 endLabel={endLocation}
-                isNavigating={isNavigating}
-                onStartNavigation={handleStartNavigation}
               />
             </>
           )}
@@ -420,7 +335,7 @@ function App() {
         </div>
       </div>
 
-      <div className={`map-fullscreen ${isNavigating ? 'nav-mode' : ''}`}>
+      <div className="map-fullscreen">
         <FloorMap
           path={path}
           highlightedNodes={[selectedStart?.id, selectedEnd?.id].filter(Boolean)}
@@ -429,27 +344,10 @@ function App() {
           selectedEnd={selectedEnd}
           editorMode={editorMode}
           currentFloor={currentFloor}
-          isNavigating={isNavigating}
         />
       </div>
 
-      {isNavigating && (
-        <button
-          className="glass-btn floating-exit-nav"
-          onClick={handleExitNavigation}
-          title="Exit Navigation"
-        >
-          <ChevronLeft size={24} />
-        </button>
-      )}
-      {/* {isNavigating && <NavigationOverlay path={path} onBack={handleExitNavigation} />} */}
-      {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      <NavigationOverlay path={path} />
     </div>
   );
 }
