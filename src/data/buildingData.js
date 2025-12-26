@@ -420,7 +420,7 @@ export const nodes = {
         "type": "stairs"
     },
     "node_1072": {
-        "x": 1668,
+        "x": 1628,
         "y": 1889,
         "label": "STAIRS-12",
         "type": "stairs"
@@ -440,7 +440,7 @@ export const nodes = {
     "node_1075": {
         "x": 1878,
         "y": 1952,
-        "label": "C-BLOCK LOBBY",
+        "label": "LIBRARY",
         "type": "seating"
     },
     "node_1076": {
@@ -1130,6 +1130,18 @@ export const nodes = {
     "node_1203": {
         "x": 2034,
         "y": 1783,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1204": {
+        "x": 1626,
+        "y": 1803,
+        "label": "",
+        "type": "corridor"
+    },
+    "node_1205": {
+        "x": 1895,
+        "y": 1803,
         "label": "",
         "type": "corridor"
     }
@@ -1898,8 +1910,13 @@ export const edges = [
     ],
     [
         "node_1186",
+        "node_1204",
+        74
+    ],
+    [
+        "node_1204",
         "node_1175",
-        141
+        74
     ],
     [
         "node_1175",
@@ -1952,6 +1969,11 @@ export const edges = [
         102
     ],
     [
+        "node_1075",
+        "node_1205",
+        150
+    ],
+    [
         "node_1183",
         "node_1184",
         37
@@ -1973,8 +1995,8 @@ export const edges = [
     ],
     [
         "node_1072",
-        "node_1175",
-        92
+        "node_1204",
+        87
     ],
     [
         "node_1186",
@@ -2083,8 +2105,13 @@ export const edges = [
     ],
     [
         "node_1176",
+        "node_1205",
+        119
+    ],
+    [
+        "node_1205",
         "node_1201",
-        237
+        118
     ]
 ];
 

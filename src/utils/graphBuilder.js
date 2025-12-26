@@ -76,6 +76,10 @@ export function getNodesByFloor(floor) {
 
                 // Remove FACULTY LOUNGE (node_1074) for 1st floor only
                 if (id === 'node_1074') return;
+
+                // Remove specific corridor nodes for 1st floor only
+                if (id === 'node_1177' || id === 'node_1178' || id === 'node_1179' || id === 'node_1180' ||
+                    id === 'node_1181' || id === 'node_1182' || id === 'node_1183' || id === 'node_1184') return;
             }
 
             // 3. 2nd Floor: Convert lobby to library
@@ -84,9 +88,20 @@ export function getNodesByFloor(floor) {
                     newNode.label = 'LIBRARY';
                     newNode.type = 'library';
                 }
+
+                // Remove specific nodes for 2nd floor
+                if (id === 'node_1074' || id === 'node_1073' || id === 'node_1072' ||
+                    id === 'node_1181' || id === 'node_1182' || id === 'node_1184') return;
             }
 
-            // 4. 3rd Floor: Entrances already removed, cafe/lobby might be there or not 
+            // 4. 3rd Floor: Remove specific nodes
+            if (floor === 3) {
+                // Remove specific nodes for 3rd floor
+                if (id === 'node_1074' || id === 'node_1073' || id === 'node_1072' ||
+                    id === 'node_1181' || id === 'node_1182' || id === 'node_1184') return;
+            }
+
+            // 5. Higher floors: Entrances already removed
             // Depending on user's original request: "Remove entrances for floors above ground. Remove cafe/lobby from 1st floor, convert lobby on 2nd to library."
             // This implies 3rd floor follows general "above ground" rules but keeps cafe if present (if requested).
         }
