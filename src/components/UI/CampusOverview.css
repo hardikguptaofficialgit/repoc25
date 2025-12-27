@@ -1,0 +1,70 @@
+.campus-overview-container {
+    width: 100%;
+    margin-bottom: 12px;
+}
+
+.section-title {
+    font-size: 14px;
+    font-weight: 800;
+    color: #FFFFFF;
+    margin-bottom: 10px;
+    margin-left: 4px;
+    text-transform: capitalize;
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.overview-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.overview-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-2px);
+}
+
+.stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+@media (max-width: 480px) {
+    .overview-grid {
+        gap: 8px;
+    }
+
+    .overview-card {
+        height: 70px;
+        border-radius: 14px;
+    }
+
+    .stat-value {
+        font-size: 24px;
+    }
+
+    .stat-label {
+        font-size: 9px;
+    }
+}
