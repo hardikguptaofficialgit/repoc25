@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Stage, Layer, Rect, Circle, Line, Text, Group, Image, RegularPolygon } from 'react-konva';
 import { nodes as initialNodes, edges as initialEdges } from '../../data/buildingData';
 import { getNodesByFloor } from '../../utils/graphBuilder';
-import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, Maximize, Minimize, X, Plus, Trash2, Link, MousePointer, Upload, Trash, Layers, RefreshCw } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, Maximize, Minimize, X, Plus, Trash2, Link, MousePointer, Upload, Trash, Layers, RefreshCw, Compass, Target } from 'lucide-react';
 import './FloorMap.css';
 
 // -----------------------------------------------------------------------------
@@ -468,7 +468,8 @@ const FloorMap = ({
     selectedStart = null,
     selectedEnd = null,
     editorMode = false,
-    currentFloor = 0
+    currentFloor = 0,
+    autoFitPath = false
 }) => {
     // Data State
     const [nodes, setNodes] = useState(initialNodes);
@@ -490,12 +491,71 @@ const FloorMap = ({
     const [is3D, setIs3D] = useState(false);
     const [pathOffset, setPathOffset] = useState(0);
     const [rotation, setRotation] = useState(0);
+    const [isMapLocked, setIsMapLocked] = useState(autoFitPath);
+
+    // Sync lock with autoFitPath prop
+    useEffect(() => {
+        if (autoFitPath) setIsMapLocked(true);
+    }, [autoFitPath]);
+
+    // Auto-fit path to view
+    const fitPathToView = useCallback(() => {
+        if (!path || path.length === 0 || !stageSize.width || !stageSize.height) return;
+
+        const visibleNodes = getNodesByFloor(currentFloor);
+        const pathNodes = path.map(id => visibleNodes[id]).filter(Boolean);
+
+        if (pathNodes.length === 0) return;
+
+        // Calculate bounding box
+        let minX = Infinity, maxX = -Infinity;
+        let minY = Infinity, maxY = -Infinity;
+
+        pathNodes.forEach(node => {
+            minX = Math.min(minX, node.x);
+            maxX = Math.max(maxX, node.x);
+            minY = Math.min(minY, node.y);
+            maxY = Math.max(maxY, node.y);
+        });
+
+        // Add padding (20% of viewport)
+        const padding = Math.min(stageSize.width, stageSize.height) * 0.2;
+        const pathWidth = maxX - minX;
+        const pathHeight = maxY - minY;
+
+        // Calculate scale to fit path in viewport
+        const scaleX = (stageSize.width - padding * 2) / pathWidth;
+        const scaleY = (stageSize.height - padding * 2) / pathHeight;
+        const newScale = Math.min(scaleX, scaleY, 2); // Max scale of 2 for mobile
+
+        // Calculate center position
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+        const newX = stageSize.width / 2 - centerX * newScale;
+        const newY = stageSize.height / 2 - centerY * newScale;
+
+        setScale(newScale);
+        setPosition({ x: newX, y: newY });
+        setRotation(0);
+    }, [path, stageSize, currentFloor]);
 
     const recenterMap = useCallback(() => {
-        setScale(0.85);
-        setPosition({ x: 0, y: 0 });
-        setRotation(0);
-    }, []);
+        if (path && path.length > 0) {
+            fitPathToView();
+            setIsMapLocked(true);
+        } else {
+            setScale(0.85);
+            setPosition({ x: 0, y: 0 });
+            setRotation(0);
+        }
+    }, [path, fitPathToView]);
+
+    // Apply auto-fit when locked and path changes
+    useEffect(() => {
+        if (isMapLocked && path && path.length > 0) {
+            fitPathToView();
+        }
+    }, [isMapLocked, path, fitPathToView]);
 
     // Editor Tools State
     const [editorTool, setEditorTool] = useState('select');
@@ -572,6 +632,18 @@ const FloorMap = ({
         return () => cancelAnimationFrame(animId);
     }, [path]);
 
+    // Auto-fit path when entering navigation mode
+    useEffect(() => {
+        if (autoFitPath && path.length > 0) {
+            // Small delay to ensure stage is ready
+            const timer = setTimeout(() => {
+                fitPathToView();
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [autoFitPath, path, fitPathToView]);
+
+
     // Handlers
     const handleNodeDrag = useCallback((nodeId, x, y) => {
         if (editorTool !== 'select') return;
@@ -643,6 +715,7 @@ const FloorMap = ({
         const newScale = Math.min(Math.max(oldScale * (e.evt.deltaY > 0 ? 0.9 : 1.1), 0.1), 5);
         setScale(newScale);
         setPosition({ x: pointer.x - mousePointTo.x * newScale, y: pointer.y - mousePointTo.y * newScale });
+        setIsMapLocked(false);
     }, []);
 
     // Multi-touch Gesture Handling (Pinch & Rotate)
@@ -674,6 +747,7 @@ const FloorMap = ({
         const rotationDiff = angle - lastRotation.current;
         setRotation(prev => prev + rotationDiff);
         lastRotation.current = angle;
+        setIsMapLocked(false);
     };
 
     const handleTouchEnd = () => {
@@ -732,7 +806,7 @@ const FloorMap = ({
         library: '#8B5CF6',
         corridor: '#525252',     // Lighter Gray for corridors
         default: '#94A3B8',
-        highlight: '#38BDF8'
+        highlight: '#00E5FF' // Vibrant Cyan for live path
     };
 
     // Render Helpers
@@ -756,31 +830,36 @@ const FloorMap = ({
 
             return (
                 <Group key={`path-${i}`}>
-                    {/* Path glow */}
+                    {/* Path glow/base */}
                     <Line
                         points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
                         stroke={INTERNAL_PALETTE.highlight}
-                        strokeWidth={12}
-                        opacity={0.2}
+                        strokeWidth={8}
+                        opacity={0.15}
                         lineCap="round"
                     />
-                    {/* Animated flow line */}
+                    {/* Animated dashed flow line */}
                     <Line
                         points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
                         stroke={INTERNAL_PALETTE.highlight}
                         strokeWidth={5}
-                        dash={[20, 20]}
+                        dash={[15, 10]} // Dashed pattern
                         dashOffset={-pathOffset}
                         lineCap="round"
+                        shadowColor={INTERNAL_PALETTE.highlight}
+                        shadowBlur={10}
+                        shadowOpacity={0.6}
                     />
-                    {/* Direction Arrow */}
+                    {/* Directional Arrow */}
                     <RegularPolygon
                         x={(fromNode.x + toNode.x) / 2}
                         y={(fromNode.y + toNode.y) / 2}
                         sides={3}
                         radius={6}
-                        fill={INTERNAL_PALETTE.highlight}
+                        fill="#FFFFFF" // White arrow for contrast
                         rotation={angle + 90}
+                        shadowColor="black"
+                        shadowBlur={4}
                     />
                 </Group>
             );
@@ -798,30 +877,31 @@ const FloorMap = ({
     return (
         <div className={`floor-map-container ${isFullscreen ? 'fullscreen' : ''} ${is3D ? 'view-3d' : ''}`} ref={containerRef}>
 
-            {/* Controls Header */}
-            <div className="map-ui-header">
-                <div className="ui-group">
-                    <button
-                        onClick={() => setIs3D(!is3D)}
-                        className={is3D ? 'active' : ''}
-                        title="Toggle 3D View"
-                    >
-                        <Layers size={18} />
-                    </button>
-                    <button onClick={() => setIsFullscreen(!isFullscreen)} title="Fullscreen">{isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}</button>
-                    <button onClick={() => setScale(s => Math.min(s * 1.2, 5))} title="Zoom In"><ZoomIn size={18} /></button>
-                    <button onClick={() => setScale(s => Math.max(s / 1.2, 0.1))} title="Zoom Out"><ZoomOut size={18} /></button>
-                    <button onClick={recenterMap} title="Recenter & Reset View"><RefreshCw size={18} /></button>
-                </div>
 
-                {editorMode && (
+            {/* Controls Header - Only visible in editor mode */}
+            {editorMode && (
+                <div className="map-ui-header">
+                    <div className="ui-group">
+                        <button
+                            onClick={() => setIs3D(!is3D)}
+                            className={is3D ? 'active' : ''}
+                            title="Toggle 3D View"
+                        >
+                            <Layers size={18} />
+                        </button>
+                        <button onClick={() => setIsFullscreen(!isFullscreen)} title="Fullscreen">{isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}</button>
+                        <button onClick={() => setScale(s => Math.min(s * 1.2, 5))} title="Zoom In"><ZoomIn size={18} /></button>
+                        <button onClick={() => setScale(s => Math.max(s / 1.2, 0.1))} title="Zoom Out"><ZoomOut size={18} /></button>
+                        <button onClick={recenterMap} title="Recenter & Reset View"><RefreshCw size={18} /></button>
+                    </div>
+
                     <div className="ui-group">
                         <button onClick={() => setShowGrid(!showGrid)} className={showGrid ? 'active' : ''}><Grid3X3 size={18} /></button>
                         <button onClick={exportData} title="Copy Data"><Download size={18} /></button>
                         <button onClick={handleClearAll} title="Delete All Nodes" style={{ color: '#EF4444' }}><Trash2 size={18} /></button>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Editor Toolbar */}
             {editorMode && (
@@ -984,6 +1064,7 @@ const FloorMap = ({
                     onTouchMove={handleTouch}
                     onTouchEnd={handleTouchEnd}
                     onMouseMove={(e) => { if (connectingFrom) { const pt = stageRef.current.getPointerPosition(); setTempLineEnd({ x: (pt.x - position.x) / scale, y: (pt.y - position.y) / scale }); } }}
+                    onDragStart={() => setIsMapLocked(false)}
                     onDragEnd={(e) => { if (e.target === stageRef.current) setPosition({ x: e.target.x(), y: e.target.y() }); }}
                 >
                     <Layer listening={false}>
@@ -1013,8 +1094,34 @@ const FloorMap = ({
                 </Stage>
             </div>
 
-            {/* Colored Legend */}
+            {/* Map Orientation & Controls Overlay */}
             {!editorMode && (
+                <div className="map-view-controls">
+                    <button
+                        className={`map-control-btn recenter-btn ${isMapLocked ? 'locked' : ''}`}
+                        onClick={recenterMap}
+                        title={isMapLocked ? "Locked on Route" : "Re-center on Route"}
+                    >
+                        <Target size={20} />
+                        {isMapLocked && <div className="lock-ping" />}
+                    </button>
+                    <div
+                        className={`map-compass ${rotation === 0 ? 'hidden' : ''}`}
+                        style={{ transform: `rotate(${-rotation}deg)` }}
+                        onClick={() => {
+                            setRotation(0);
+                            if (path && path.length > 0) setIsMapLocked(true);
+                        }}
+                        title="Reset Orientation"
+                    >
+                        <Compass size={24} className="compass-icon" />
+                        <div className="compass-north">N</div>
+                    </div>
+                </div>
+            )}
+
+            {/* Colored Legend - Only visible in editor mode */}
+            {editorMode && (
                 <div className="map-legend-colored">
                     <div className="legend-row">
                         <div className="legend-item"><div className="dot" style={{ background: PALETTE.blockA }}></div> Block A</div>

@@ -1,5 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import {
+    ChevronDown,
+    ChevronUp,
+    ArrowUp,
+    MoveVertical,
+    User,
+    Users,
+    LogOut,
+    Droplet
+} from 'lucide-react';
 import './QuickActions.css';
 
 const QuickActions = ({ onQuickAction, currentLocation, minimized = false }) => {
@@ -12,39 +21,45 @@ const QuickActions = ({ onQuickAction, currentLocation, minimized = false }) => 
     const quickActions = [
         {
             id: 'nearest_stairs',
-            label: 'Nearest Stairs',
-            color: '#10B981',
+            label: 'Stairs',
+            color: 'var(--accent-green)',
             action: 'stairs',
+            icon: <ArrowUp size={28} />
         },
         {
             id: 'nearest_lift',
-            label: 'Nearest Lift',
-            color: '#3B82F6',
+            label: 'Lift',
+            color: 'var(--accent-blue)',
             action: 'lift',
+            icon: <MoveVertical size={28} />
         },
         {
             id: 'nearest_gents',
-            label: 'Gents Washroom',
-            color: '#8B5CF6',
+            label: 'Gents',
+            color: 'var(--accent-purple)',
             action: 'washroom_gents',
+            icon: <User size={28} />
         },
         {
             id: 'nearest_ladies',
-            label: 'Ladies Washroom',
-            color: '#EC4899',
+            label: 'Ladies',
+            color: 'var(--accent-pink)',
             action: 'washroom_ladies',
+            icon: <Users size={28} />
         },
         {
             id: 'nearest_entrance',
-            label: 'Nearest Exit',
-            color: '#F59E0B',
+            label: 'Exit',
+            color: 'var(--accent-yellow)',
             action: 'entrance',
+            icon: <LogOut size={28} />
         },
         {
             id: 'nearest_water',
-            label: 'Water Cooler',
-            color: '#00CED1',
+            label: 'Water',
+            color: 'var(--accent-cyan)',
             action: 'water_cooler',
+            icon: <Droplet size={28} />
         },
     ];
 
@@ -58,14 +73,8 @@ const QuickActions = ({ onQuickAction, currentLocation, minimized = false }) => 
 
     return (
         <div className={`quick-actions-container ${!isExpanded ? 'collapsed' : ''}`}>
-            <div
-                className="quick-actions-header"
-                onClick={() => setIsExpanded(!isExpanded)}
-            >
-                <h3 className="quick-actions-title">Quick Navigation</h3>
-                <div className="toggle-icon">
-                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                </div>
+            <div className="quick-actions-header">
+                <h3 className="quick-actions-title">QUICK NAVIGATION</h3>
             </div>
 
             {isExpanded && (
@@ -73,11 +82,13 @@ const QuickActions = ({ onQuickAction, currentLocation, minimized = false }) => 
                     {quickActions.map((action) => (
                         <button
                             key={action.id}
-                            className="quick-action-button"
+                            className="quick-action-square"
                             onClick={() => handleClick(action.action)}
-                            style={{ '--action-color': action.color }}
                             disabled={!currentLocation}
                         >
+                            <div className="action-icon" style={{ color: action.color }}>
+                                {action.icon}
+                            </div>
                             <span className="action-label">{action.label}</span>
                         </button>
                     ))}
@@ -88,3 +99,4 @@ const QuickActions = ({ onQuickAction, currentLocation, minimized = false }) => 
 };
 
 export default QuickActions;
+

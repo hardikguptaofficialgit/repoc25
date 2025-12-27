@@ -1,0 +1,50 @@
+.popular-spots-container {
+    padding: 8px 0;
+}
+
+.section-label {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: var(--text-muted);
+    margin-bottom: 12px;
+}
+
+.spots-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.spot-chip {
+    padding: 8px 18px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.spot-chip:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+@media (max-width: 480px) {
+    .popular-spots-container {
+        padding: 8px 0;
+    }
+
+    .section-label {
+        margin-bottom: 8px;
+    }
+
+    .spot-chip {
+        padding: 6px 14px;
+        font-size: 12px;
+    }
+}
