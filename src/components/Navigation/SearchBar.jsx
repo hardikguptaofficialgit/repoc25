@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import './SearchBar.css';
 
-const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location...", floor = 0 }) => {
+const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location...", floor = 0, children }) => {
     const [query, setQuery] = useState(value || '');
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -159,6 +159,7 @@ const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location..
                         <X size={16} />
                     </button>
                 )}
+                {children}
             </div>
 
             {showSuggestions && (

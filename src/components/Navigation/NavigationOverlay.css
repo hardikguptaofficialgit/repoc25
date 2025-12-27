@@ -13,18 +13,18 @@
 }
 
 .nav-card {
-    background: rgba(22, 22, 22, 0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 20px;
+    background: rgba(10, 10, 10, 0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
     padding: 0;
     width: 100%;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.05);
     overflow: hidden;
     pointer-events: auto;
 
-    animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     display: flex;
     flex-direction: column;
 }
@@ -49,8 +49,9 @@
 
 .nav-progress-bar {
     height: 100%;
-    background: linear-gradient(90deg, #D34A09, #D8830D);
-    transition: width 0.3s ease;
+    background: var(--accent-gradient-vibrant);
+    box-shadow: 0 0 15px var(--accent-orange-glow);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .nav-content {
@@ -60,40 +61,12 @@
     gap: 16px;
 }
 
-.nav-icon-wrapper {
-    flex-shrink: 0;
-    width: 52px;
-    height: 52px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    transition: all 0.3s ease;
-}
-
-.nav-card.turn-right .nav-icon-wrapper,
-.nav-card.turn-left .nav-icon-wrapper {
-    background: rgba(211, 74, 9, 0.15);
-    color: #D34A09;
-    border-color: rgba(211, 74, 9, 0.3);
-}
-
-.nav-card.end .nav-icon-wrapper {
-    background: rgba(16, 185, 129, 0.15);
-    color: #10B981;
-    border-color: rgba(16, 185, 129, 0.3);
-}
-
 .nav-text {
     flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: center;
     min-width: 0;
-    /* Prevent text overflow issues */
 }
 
 .step-count {
@@ -106,13 +79,38 @@
 }
 
 .instruction-text {
-    font-size: 16px;
-    font-weight: 600;
+    font-size: 18px;
+    font-weight: 700;
     color: #fff;
     margin: 0;
-    white-space: normal;
-    overflow: hidden;
-    line-height: 1.3;
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.guiding-arrow {
+    flex-shrink: 0;
+    color: var(--accent-orange);
+    filter: drop-shadow(0 0 8px var(--accent-orange-glow));
+    animation: guidanceNudge 2s infinite ease-in-out;
+}
+
+.nav-card.end .guiding-arrow {
+    color: #10B981;
+    filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.4));
+}
+
+@keyframes guidanceNudge {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    50% {
+        transform: translateX(5px);
+    }
 }
 
 .nav-controls {
@@ -137,7 +135,12 @@
 }
 
 .nav-btn:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+    transform: scale(1.05);
+}
+
+.nav-btn:active:not(:disabled) {
+    transform: scale(0.95);
 }
 
 .nav-btn:disabled {
@@ -156,31 +159,49 @@
 
 @media (max-width: 640px) {
     .nav-overlay-container {
-        bottom: 16px;
-        width: 92%;
+        bottom: 80px;
+        width: 90%;
     }
 
     .nav-content {
-        padding: 12px 14px;
-        gap: 12px;
+        padding: 10px 12px;
+        gap: 10px;
     }
 
     .nav-icon-wrapper {
-        width: 44px;
-        height: 44px;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+    }
+
+    .nav-icon-wrapper svg {
+        width: 24px;
+        height: 24px;
+    }
+
+    .step-count {
+        font-size: 9px;
     }
 
     .instruction-text {
-        font-size: 14px;
+        font-size: 15px;
+        font-weight: 700;
+        letter-spacing: -0.2px;
+        gap: 8px;
+    }
+
+    .guiding-arrow {
+        width: 20px;
+        height: 20px;
     }
 
     .nav-btn {
-        width: 36px;
-        height: 36px;
+        width: 32px;
+        height: 32px;
     }
 
     .nav-controls {
         padding-left: 6px;
-        gap: 4px;
+        gap: 2px;
     }
 }

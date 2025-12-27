@@ -68,13 +68,12 @@ const NavigationOverlay = ({ path }) => {
                 </div>
 
                 <div className="nav-content">
-                    <div className="nav-icon-wrapper">
-                        <Icon size={32} strokeWidth={2.5} />
-                    </div>
-
                     <div className="nav-text">
                         <span className="step-count">Step {currentStep + 1} of {instructions.length}</span>
-                        <h2 className="instruction-text">{step.text}</h2>
+                        <h2 className="instruction-text">
+                            <Icon size={24} className="guiding-arrow" strokeWidth={3} />
+                            {step.text}
+                        </h2>
                     </div>
 
                     <div className="nav-controls">

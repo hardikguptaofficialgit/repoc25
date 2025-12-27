@@ -3,11 +3,14 @@ import FloorMap from './components/Map/FloorMap';
 import SearchBar from './components/Navigation/SearchBar';
 import RouteInfo from './components/Navigation/RouteInfo';
 import QuickActions from './components/Navigation/QuickActions';
+import CampusOverview from './components/UI/CampusOverview';
 import NavigationOverlay from './components/Navigation/NavigationOverlay';
+import RoutePreview from './components/Navigation/RoutePreview';
+import AdminLogin from './components/Admin/AdminLogin';
 import { buildGraph, getNodesByFloor } from './utils/graphBuilder';
 import { findShortestPath, findNearestPOI } from './utils/pathfinding';
 import { nodes, poiCategories } from './data/buildingData';
-import { ArrowUpDown, Trash2, Edit3, Eye, Menu, ChevronLeft, Building, ChevronDown, LogOut } from 'lucide-react';
+import { ArrowUpDown, Menu, ChevronLeft, Building, ChevronDown, User, Bell, X, Lock, MapPin, Circle } from 'lucide-react';
 import './App.css';
 
 function App({ isAdmin, setIsAdmin }) {
@@ -24,14 +27,9 @@ function App({ isAdmin, setIsAdmin }) {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentFloor, setCurrentFloor] = useState(0);
   const [showFloorDropdown, setShowFloorDropdown] = useState(false);
-
-  // Check for existing admin session
-  useEffect(() => {
-    const adminSession = localStorage.getItem('adminSession');
-    if (adminSession === 'true' && !isAdmin) {
-      setIsAdmin(true);
-    }
-  }, [isAdmin, setIsAdmin]);
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [showAdminLogin, setShowAdminLogin] = useState(false);
+  const [currentView, setCurrentView] = useState('overview'); // 'overview', 'preview', 'navigation'
 
   useEffect(() => {
     const builtGraph = buildGraph();
@@ -41,20 +39,15 @@ function App({ isAdmin, setIsAdmin }) {
   useEffect(() => {
     if (selectedStart && selectedEnd && graph) {
       calculateRoute(selectedStart.id, selectedEnd.id);
+      if (currentView === 'overview') {
+        setCurrentView('preview');
+      }
+    } else if (!selectedStart || !selectedEnd) {
+      if (currentView === 'preview') {
+        setCurrentView('overview');
+      }
     }
   }, [selectedStart, selectedEnd, graph]);
-
-  const toggleEditorMode = () => {
-    const newEditorState = !editorMode;
-    setEditorMode(newEditorState);
-    setSidebarOpen(!newEditorState);
-  };
-
-  const handleLogout = () => {
-    setIsAdmin(false);
-    setEditorMode(false);
-    localStorage.removeItem('adminSession');
-  };
 
   const calculateRoute = (startId, endId) => {
     if (!graph) return;
@@ -101,7 +94,6 @@ function App({ isAdmin, setIsAdmin }) {
       default: return;
     }
 
-    // Filter targetNodes based on whether they exist on the current floor
     const availableTargets = (targetNodes || []).filter(id => floorNodes[id]);
 
     const result = findNearestPOI(graph, selectedStart.id, availableTargets);
@@ -144,6 +136,7 @@ function App({ isAdmin, setIsAdmin }) {
     setPath([]);
     setDistance(0);
     setError('');
+    setCurrentView('overview');
   };
 
   const handleMapNodeClick = (nodeId, node) => {
@@ -167,174 +160,200 @@ function App({ isAdmin, setIsAdmin }) {
       handleEndSelect(location);
       return;
     }
-    if (selectedEnd.id === nodeId) {
-      setSelectedEnd(null);
-      setEndLocation('');
-      setPath([]);
-      setDistance(0);
-      setError('');
+  };
+
+  const handleStartNavigation = () => {
+    setCurrentView('navigation');
+    // Keep sidebar open but content will be hidden via CSS
+  };
+
+  const handleGoBack = () => {
+    if (currentView === 'preview') {
+      setCurrentView('overview');
+      handleClearRoute();
+    } else if (currentView === 'navigation') {
+      setCurrentView('preview');
     }
   };
 
+  const handleAdminAuth = () => {
+    setIsAdmin(true);
+    setShowAdminLogin(false);
+    setShowProfileMenu(true);
+  };
+
+  const handleLogout = () => {
+    setIsAdmin(false);
+    setEditorMode(false);
+    setShowProfileMenu(false);
+    localStorage.removeItem('adminSession');
+  };
+
+
   return (
     <div className="app">
-
-      {/* --- 1. Independent Floating Toggle Button --- */}
-      {/* detached from the sidebar structure */}
-      <div className={`floating-menu-trigger ${!sidebarOpen && !editorMode ? 'visible' : ''}`}>
-        <button
-          className="glass-btn"
-          onClick={() => setSidebarOpen(true)}
-          title="Open Navigation"
-        >
-          <Menu size={24} />
-        </button>
-      </div>
-
-      {/* --- 2. Detached Sidebar Wrapper --- */}
       <div className={`sidebar-wrapper ${sidebarOpen ? 'open' : 'closed'}`}>
+        <div className="main-ui-container">
 
-        {/* Container 1: Header & Search (Top Island) */}
-        <div className="panel-card header-island">
-
-          <div className="sidebar-header">
-            <div className="brand">
-              <h1>KIIT Campus 25</h1>
-            </div>
-            <button className="close-btn-mini" onClick={() => setSidebarOpen(false)}>
-              <ChevronLeft size={20} />
-            </button>
-          </div>
-
-          <div className="search-section">
-            <div className="search-group">
-              <label className="search-label">
-                <div className="dot start-dot"></div> Start
-              </label>
-              <SearchBar
-                value={startLocation}
-                onChange={setStartLocation}
-                onSelect={handleStartSelect}
-                placeholder="Starting point..."
-                floor={currentFloor}
-              />
-            </div>
-
-            <div className="connector-gap">
-              <button
-                className="swap-button-floating"
-                onClick={handleSwapLocations}
-                disabled={!selectedStart || !selectedEnd}
-              >
-                <ArrowUpDown size={14} />
-              </button>
-            </div>
-
-            <div className="search-group">
-              <label className="search-label">
-                <div className="dot end-dot"></div> End
-              </label>
-              <SearchBar
-                value={endLocation}
-                onChange={setEndLocation}
-                onSelect={handleEndSelect}
-                placeholder="Destination..."
-                floor={currentFloor}
-              />
-            </div>
-
-            {error && (
-              <div className="error-message">
-                <span className="error-icon">⚠</span> {error}
-              </div>
-            )}
-
-            {(selectedStart || selectedEnd) && (
-              <button className="clear-route-link" onClick={handleClearRoute}>
-                Clear Route
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Container 2: Actions & Results (Bottom Island) */}
-        {/* Only show this container if there's content to show, or always show QuickActions */}
-        <div className="panel-card action-island">
-          <QuickActions
-            onQuickAction={handleQuickAction}
-            currentLocation={selectedStart}
-            minimized={path.length > 0}
-          />
-
-          {path.length > 0 && (
+          {currentView === 'overview' && (
             <>
-              <div className="divider"></div>
-              <RouteInfo
-                path={path}
-                distance={distance}
-                startLabel={startLocation}
-                endLabel={endLocation}
+              {/* Header Section */}
+              <div className="premium-header">
+                <div className="logo-section">
+                  <div className="app-logo">
+                    <MapPin size={22} color="#fff" />
+                  </div>
+                  <div className="app-titles">
+                    <h1>Campus 25</h1>
+                  </div>
+                </div>
+                <div className="header-actions">
+                  <div className="floor-selector-header">
+                    <button
+                      className="floor-mini-btn"
+                      onClick={() => setShowFloorDropdown(!showFloorDropdown)}
+                    >
+                      {currentFloor === 0 ? 'GF' : `${currentFloor}F`}
+                      <ChevronDown size={14} />
+                    </button>
+                    {showFloorDropdown && (
+                      <div className="floor-dropdown-mini glass-panel">
+                        {[3, 2, 1, 0].map(f => (
+                          <button
+                            key={f}
+                            className={f === currentFloor ? 'selected' : ''}
+                            onClick={() => { setCurrentFloor(f); setShowFloorDropdown(false); }}
+                          >
+                            {f === 0 ? 'GF' : `${f}F`}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="profile-wrapper">
+                    <button
+                      className={`profile-btn ${showProfileMenu ? 'active' : ''}`}
+                      onClick={() => setShowProfileMenu(!showProfileMenu)}
+                    >
+                      <User size={20} />
+                      {isAdmin && <div className="admin-badge-dot" />}
+                    </button>
+
+                    {showProfileMenu && (
+                      <div className="profile-dropdown glass-panel animate-in">
+                        <div className="dropdown-header">
+                          <div className="user-avatar">
+                            {isAdmin ? <Lock size={16} /> : <User size={16} />}
+                          </div>
+                          <div className="user-info">
+                            <span className="user-name">{isAdmin ? 'Administrator' : 'Guest User'}</span>
+                            <span className="user-role">{isAdmin ? 'Full Access' : 'View Only'}</span>
+                          </div>
+                        </div>
+
+                        <div className="dropdown-divider" />
+
+                        <div className="dropdown-actions">
+                          {isAdmin ? (
+                            <>
+                              <button
+                                className={`dropdown-item ${editorMode ? 'active' : ''}`}
+                                onClick={() => { setEditorMode(!editorMode); setShowProfileMenu(false); }}
+                              >
+                                <Building size={16} />
+                                <span>{editorMode ? 'Disable Editor' : 'Enable Editor'}</span>
+                              </button>
+                              <button className="dropdown-item logout" onClick={handleLogout}>
+                                <X size={16} />
+                                <span>Logout</span>
+                              </button>
+                            </>
+                          ) : (
+                            <button className="dropdown-item login" onClick={() => { setShowAdminLogin(true); setShowProfileMenu(false); }}>
+                              <Lock size={16} />
+                              <span>Admin Login</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {showAdminLogin && (
+                  <AdminLogin
+                    onLogin={handleAdminAuth}
+                    onClose={() => setShowAdminLogin(false)}
+                  />
+                )}
+              </div>
+
+              {/* Search Section */}
+              <div className="search-composite">
+                <div className="search-row">
+                  <div className="card-label">
+                    <Circle size={12} className="label-dot start" />
+                    <span>START LOCATION</span>
+                  </div>
+                  <SearchBar
+                    value={startLocation}
+                    onChange={setStartLocation}
+                    onSelect={handleStartSelect}
+                    placeholder="Search start point..."
+                    floor={currentFloor}
+                  />
+                </div>
+
+                <div className="search-row bottom">
+                  <div className="card-label">
+                    <Circle size={12} className="label-dot destination" fill="currentColor" />
+                    <span>DESTINATION</span>
+                  </div>
+                  <SearchBar
+                    value={endLocation}
+                    onChange={setEndLocation}
+                    onSelect={handleEndSelect}
+                    placeholder="Search destination..."
+                    floor={currentFloor}
+                  />
+                </div>
+              </div>
+
+              {/* Campus Overview Stat Block */}
+              <CampusOverview />
+
+              {/* Quick Navigation Section */}
+              <QuickActions
+                onQuickAction={handleQuickAction}
+                currentLocation={selectedStart}
+                minimized={path.length > 0}
               />
+
             </>
           )}
-        </div>
 
-      </div>
+          {currentView === 'preview' && (
+            <RoutePreview
+              path={path}
+              distance={distance}
+              startLabel={startLocation}
+              endLabel={endLocation}
+              onBack={handleGoBack}
+              onStartNavigation={handleStartNavigation}
+            />
+          )}
 
-      {/* --- Map Tool Layer (Top Right) --- */}
-      <div className="map-tool-layer">
-        {isAdmin && (
-          <>
-            <button
-              className={`glass-btn editor-toggle ${editorMode ? 'active' : ''}`}
-              onClick={toggleEditorMode}
-              title={editorMode ? 'Exit Editor Mode' : 'Enter Editor Mode'}
-            >
-              {editorMode ? <Eye size={20} /> : <Edit3 size={20} />}
-            </button>
-            <button
-              className="glass-btn logout-btn"
-              onClick={handleLogout}
-              title="Logout Admin"
-            >
-              <LogOut size={18} />
-            </button>
-          </>
-        )}
-
-        {/* Floor Dropdown */}
-        <div className="floor-dropdown-container">
-          <button
-            className="floor-dropdown-trigger glass-btn"
-            onClick={() => setShowFloorDropdown(!showFloorDropdown)}
-          >
-            <Building size={18} />
-            <span className="floor-label">{currentFloor === 0 ? 'GF' : `${currentFloor}F`}</span>
-            <ChevronDown size={14} className={showFloorDropdown ? 'rotate-180' : ''} />
-          </button>
-
-          {showFloorDropdown && (
-            <div className="floor-options-panel glass-panel">
-              {[3, 2, 1, 0].map((floor) => (
-                <button
-                  key={floor}
-                  className={`floor-option ${currentFloor === floor ? 'selected' : ''}`}
-                  onClick={() => {
-                    setCurrentFloor(floor);
-                    setShowFloorDropdown(false);
-                  }}
-                >
-                  <span className="floor-num">{floor === 0 ? 'G' : `${floor}F`}</span>
-                  <span className="floor-name">
-                    {floor === 0 ? 'Ground Floor' : `${floor}${floor === 1 ? 'st' : floor === 2 ? 'nd' : 'rd'} Floor`}
-                  </span>
-                </button>
-              ))}
+          {currentView === 'navigation' && (
+            <div className="navigation-view-empty">
+              {/* Sidebar is retracted, map is primary */}
             </div>
           )}
+
         </div>
       </div>
 
+      {/* Map Layer */}
       <div className="map-fullscreen">
         <FloorMap
           path={path}
@@ -344,10 +363,21 @@ function App({ isAdmin, setIsAdmin }) {
           selectedEnd={selectedEnd}
           editorMode={editorMode}
           currentFloor={currentFloor}
+          autoFitPath={currentView === 'navigation'}
         />
-      </div>
 
-      <NavigationOverlay path={path} />
+        {/* Floating Navigation Controls */}
+        {currentView === 'navigation' && (
+          <>
+            <div className="live-nav-controls">
+              <button className="exit-nav-fab" onClick={handleClearRoute}>
+                <X size={20} />
+              </button>
+            </div>
+            <NavigationOverlay path={path} />
+          </>
+        )}
+      </div>
     </div>
   );
 }

@@ -28,8 +28,8 @@ const AdminLogin = ({ onLogin, onClose }) => {
                     <div className="lock-icon">
                         <Lock size={32} />
                     </div>
-                    <h2>Admin Access</h2>
-                    <p>Enter credentials to access editor</p>
+                    <h2>Admin Services</h2>
+                    <p>Enter your KIIT credentials to proceed</p>
                 </div>
 
                 <form onSubmit={handleSubmit} className="login-form">
