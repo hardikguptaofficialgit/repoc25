@@ -468,16 +468,18 @@ const FloorMap = ({
     selectedStart = null,
     selectedEnd = null,
     editorMode = false,
-    currentFloor = 0
+    currentFloor = 0,
+    centerOnPath = false
 }) => {
     // Data State
     const [nodes, setNodes] = useState(initialNodes);
     const [edges, setEdges] = useState(initialEdges);
 
     // Viewport State
-    const [scale, setScale] = useState(0.85);
+    const [scale, setScale] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+    const [initialCentered, setInitialCentered] = useState(false);
 
     // Interaction State
     const [selectedNode, setSelectedNode] = useState(null);
@@ -492,10 +494,10 @@ const FloorMap = ({
     const [rotation, setRotation] = useState(0);
 
     const recenterMap = useCallback(() => {
-        setScale(0.85);
-        setPosition({ x: 0, y: 0 });
-        setRotation(0);
-    }, []);
+        if (stageSize.width > 0 && stageSize.height > 0) {
+            centerMapToFit();
+        }
+    }, [stageSize]);
 
     // Editor Tools State
     const [editorTool, setEditorTool] = useState('select');
@@ -509,8 +511,77 @@ const FloorMap = ({
     const fileInputRef = useRef(null);
 
     // -----------------------------------------------------------------------------
+    // Helper Functions
+    // -----------------------------------------------------------------------------
+
+    // Center map to fit all nodes or specific path
+    const centerMapToFit = useCallback((targetNodes = null) => {
+        if (stageSize.width === 0 || stageSize.height === 0) return;
+
+        const nodesToFit = targetNodes || Object.values(nodes);
+        if (nodesToFit.length === 0) return;
+
+        // Calculate bounding box
+        const xs = nodesToFit.map(n => n.x);
+        const ys = nodesToFit.map(n => n.y);
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        const minY = Math.min(...ys);
+        const maxY = Math.max(...ys);
+
+        const boundsWidth = maxX - minX;
+        const boundsHeight = maxY - minY;
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+
+        // Calculate scale to fit with padding
+        const padding = targetNodes ? 40 : 20; // Minimal padding for max zoom
+        const scaleX = (stageSize.width - padding * 2) / boundsWidth;
+        const scaleY = (stageSize.height - padding * 2) / boundsHeight;
+        const newScale = Math.min(scaleX, scaleY, 5); // Max 5x zoom for closer view
+
+        // Calculate position to center
+        const newPosition = {
+            x: stageSize.width / 2 - centerX * newScale,
+            y: stageSize.height / 2 - centerY * newScale
+        };
+
+        setScale(newScale);
+        setPosition(newPosition);
+    }, [nodes, stageSize]);
+
+    // -----------------------------------------------------------------------------
     // Effects
     // -----------------------------------------------------------------------------
+
+    // Initial centering on load
+    useEffect(() => {
+        if (!initialCentered && stageSize.width > 0 && stageSize.height > 0 && Object.keys(nodes).length > 0) {
+            centerMapToFit();
+            setInitialCentered(true);
+        }
+    }, [stageSize, nodes, initialCentered, centerMapToFit]);
+
+    // Auto-center on path selection
+    useEffect(() => {
+        if (centerOnPath && path.length > 0 && stageSize.width > 0 && stageSize.height > 0) {
+            const pathNodes = path.map(id => nodes[id]).filter(Boolean);
+            if (pathNodes.length > 0) {
+                centerMapToFit(pathNodes);
+            }
+        }
+    }, [centerOnPath, path, nodes, stageSize, centerMapToFit]);
+
+    // Re-center when floor changes
+    useEffect(() => {
+        if (initialCentered && stageSize.width > 0 && stageSize.height > 0) {
+            // Small delay to let nodes update
+            const timer = setTimeout(() => {
+                centerMapToFit();
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [currentFloor, initialCentered, stageSize, centerMapToFit]);
 
     // Load background image
     useEffect(() => {
