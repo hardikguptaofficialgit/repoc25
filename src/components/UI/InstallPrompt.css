@@ -1,0 +1,137 @@
+.install-prompt {
+    position: fixed;
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    transition: bottom 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    max-width: 90%;
+    width: 400px;
+}
+
+.install-prompt.show {
+    bottom: 24px;
+}
+
+.install-prompt-content {
+    background: linear-gradient(135deg, rgba(211, 74, 9, 0.95) 0%, rgba(216, 131, 13, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 10px 40px rgba(211, 74, 9, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.install-icon {
+    width: 48px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    flex-shrink: 0;
+}
+
+.install-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.install-text h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.2;
+}
+
+.install-text p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.9);
+    line-height: 1.3;
+}
+
+.install-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.install-btn {
+    background: rgba(255, 255, 255, 0.95);
+    color: #D34A09;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.install-btn:hover {
+    background: #fff;
+    transform: scale(1.05);
+}
+
+.install-btn:active {
+    transform: scale(0.98);
+}
+
+.dismiss-btn {
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dismiss-btn:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+@media (max-width: 768px) {
+    .install-prompt {
+        width: calc(100% - 32px);
+        max-width: none;
+    }
+
+    .install-prompt.show {
+        bottom: 16px;
+    }
+
+    .install-prompt-content {
+        padding: 14px 16px;
+        gap: 12px;
+    }
+
+    .install-icon {
+        width: 44px;
+        height: 44px;
+    }
+
+    .install-text h3 {
+        font-size: 15px;
+    }
+
+    .install-text p {
+        font-size: 12px;
+    }
+
+    .install-btn {
+        padding: 8px 16px;
+        font-size: 13px;
+    }
+}

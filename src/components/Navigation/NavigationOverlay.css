@@ -1,3 +1,140 @@
+/* Integrated Navigation Overlay (inside sidebar) */
+.nav-overlay-integrated {
+    width: 100%;
+}
+
+.nav-card-integrated {
+    background: rgba(18, 18, 18, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 12px;
+}
+
+.nav-content-integrated {
+    display: flex;
+    align-items: center;
+    padding: 14px 16px;
+    gap: 12px;
+}
+
+.nav-content-integrated .nav-icon-wrapper {
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.nav-card-integrated.turn-right .nav-icon-wrapper,
+.nav-card-integrated.turn-left .nav-icon-wrapper {
+    background: rgba(211, 74, 9, 0.15);
+    color: #D34A09;
+    border-color: rgba(211, 74, 9, 0.3);
+}
+
+.nav-card-integrated.end .nav-icon-wrapper {
+    background: rgba(16, 185, 129, 0.15);
+    color: #10B981;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.nav-content-integrated .nav-text {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0;
+}
+
+.nav-content-integrated .step-count {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+    color: #888;
+    margin-bottom: 2px;
+}
+
+.nav-content-integrated .instruction-text {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+    line-height: 1.3;
+}
+
+.nav-content-integrated .nav-controls {
+    display: flex;
+    gap: 6px;
+    padding-left: 8px;
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.nav-content-integrated .nav-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.nav-content-integrated .nav-btn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-content-integrated .nav-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.nav-content-integrated .nav-btn.finish {
+    background: #10B981;
+    color: #000;
+}
+
+.nav-content-integrated .nav-btn.finish:hover {
+    background: #059669;
+}
+
+.nav-minimize-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    margin-left: 4px;
+}
+
+.nav-minimize-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+}
+
+/* Minimized state - show only on mobile */
+.nav-overlay-integrated.minimized .nav-card-integrated {
+    margin-bottom: 0;
+}
+
+/* Old standalone overlay styles (keep for desktop if needed) */
 .nav-overlay-container {
     position: absolute;
     bottom: 24px;
@@ -7,9 +144,9 @@
     max-width: 480px;
     z-index: 1000;
     pointer-events: none;
-    /* Let clicks pass through outside the card */
     display: flex;
     justify-content: center;
+    display: none; /* Hidden by default, now integrated */
 }
 
 .nav-card {
@@ -154,32 +291,37 @@
     background: #059669;
 }
 
-@media (max-width: 640px) {
+/* When sidebar is open on mobile */
+@media (max-width: 768px) {
     .nav-overlay-container {
-        bottom: 16px;
-        width: 92%;
+        transition: bottom 0.3s ease;
     }
 
-    .nav-content {
+    .nav-content-integrated {
         padding: 12px 14px;
-        gap: 12px;
+        gap: 10px;
     }
 
-    .nav-icon-wrapper {
-        width: 44px;
-        height: 44px;
+    .nav-content-integrated .nav-icon-wrapper {
+        width: 40px;
+        height: 40px;
     }
 
-    .instruction-text {
+    .nav-content-integrated .instruction-text {
         font-size: 14px;
     }
 
-    .nav-btn {
-        width: 36px;
-        height: 36px;
+    .nav-content-integrated .nav-btn {
+        width: 32px;
+        height: 32px;
     }
 
-    .nav-controls {
+    .nav-minimize-btn {
+        width: 32px;
+        height: 32px;
+    }
+
+    .nav-content-integrated .nav-controls {
         padding-left: 6px;
         gap: 4px;
     }
