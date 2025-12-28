@@ -3,16 +3,33 @@
 
 <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/icon-512.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="description"
-        content="Campus Indoor Navigation - Navigate through your college building with ease. Find shortest paths between classrooms, locate nearest facilities like stairs, lifts, and washrooms." />
-    <title>Campus Indoor Navigation</title>
+        content="Campus-25 Indoor Navigation - Navigate through your college building with ease. Find shortest paths between classrooms, locate nearest facilities like stairs, lifts, and washrooms." />
+    <meta name="theme-color" content="#D34A09" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icon-512.png" />
+    <title>Campus-25 Indoor Navigation</title>
 </head>
 
 <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered:', registration);
+                    })
+                    .catch((error) => {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 
 </html>

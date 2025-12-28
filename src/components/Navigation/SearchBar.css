@@ -241,23 +241,36 @@
    =============================== */
 @media (max-width: 768px) {
     .search-input {
-        padding: 12px 40px 12px 40px;
-        font-size: 13px;
+        padding: 11px 38px 11px 38px;
+        font-size: 14px;
     }
 
     .search-icon {
         left: 12px;
+        width: 16px;
+        height: 16px;
+    }
+
+    .clear-button {
+        right: 10px;
+        width: 24px;
+        height: 24px;
     }
 
     .suggestion-item {
-        padding: 11px 12px;
+        padding: 12px 12px;
+        min-height: 48px; /* Touch-friendly */
     }
 
     .suggestion-label {
-        font-size: 13px;
+        font-size: 14px;
     }
 
     .suggestion-type {
-        font-size: 10px;
+        font-size: 11px;
+    }
+
+    .suggestions-list {
+        max-height: 50vh; /* Better for mobile screens */
     }
 }
