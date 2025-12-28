@@ -72,6 +72,23 @@
     gap: 10px;
 }
 
+/* Mobile - 3 columns for better layout */
+@media (max-width: 768px) {
+    .quick-actions-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .quick-action-button {
+        padding: 12px 8px;
+        gap: 4px;
+    }
+
+    .quick-actions-container {
+        padding: 12px;
+    }
+}
+
 /* ===============================
    BUTTON
    =============================== */

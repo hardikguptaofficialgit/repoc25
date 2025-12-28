@@ -468,16 +468,18 @@ const FloorMap = ({
     selectedStart = null,
     selectedEnd = null,
     editorMode = false,
-    currentFloor = 0
+    currentFloor = 0,
+    centerOnPath = false
 }) => {
     // Data State
     const [nodes, setNodes] = useState(initialNodes);
     const [edges, setEdges] = useState(initialEdges);
 
     // Viewport State
-    const [scale, setScale] = useState(0.85);
+    const [scale, setScale] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
     const [stageSize, setStageSize] = useState({ width: 0, height: 0 });
+    const [initialCentered, setInitialCentered] = useState(false);
 
     // Interaction State
     const [selectedNode, setSelectedNode] = useState(null);
@@ -492,10 +494,11 @@ const FloorMap = ({
     const [rotation, setRotation] = useState(0);
 
     const recenterMap = useCallback(() => {
-        setScale(0.85);
-        setPosition({ x: 0, y: 0 });
-        setRotation(0);
-    }, []);
+        if (stageSize.width > 0 && stageSize.height > 0) {
+            centerMapToFit();
+            setRotation(0); // Reset rotation when recentering
+        }
+    }, [stageSize]);
 
     // Editor Tools State
     const [editorTool, setEditorTool] = useState('select');
@@ -509,8 +512,77 @@ const FloorMap = ({
     const fileInputRef = useRef(null);
 
     // -----------------------------------------------------------------------------
+    // Helper Functions
+    // -----------------------------------------------------------------------------
+
+    // Center map to fit all nodes or specific path
+    const centerMapToFit = useCallback((targetNodes = null) => {
+        if (stageSize.width === 0 || stageSize.height === 0) return;
+
+        const nodesToFit = targetNodes || Object.values(nodes);
+        if (nodesToFit.length === 0) return;
+
+        // Calculate bounding box
+        const xs = nodesToFit.map(n => n.x);
+        const ys = nodesToFit.map(n => n.y);
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        const minY = Math.min(...ys);
+        const maxY = Math.max(...ys);
+
+        const boundsWidth = maxX - minX;
+        const boundsHeight = maxY - minY;
+        const centerX = (minX + maxX) / 2;
+        const centerY = (minY + maxY) / 2;
+
+        // Calculate scale to fit with padding
+        const padding = targetNodes ? 40 : 20; // Minimal padding for max zoom
+        const scaleX = (stageSize.width - padding * 2) / boundsWidth;
+        const scaleY = (stageSize.height - padding * 2) / boundsHeight;
+        const newScale = Math.min(scaleX, scaleY, 5); // Max 5x zoom for closer view
+
+        // Calculate position to center
+        const newPosition = {
+            x: stageSize.width / 2 - centerX * newScale,
+            y: stageSize.height / 2 - centerY * newScale
+        };
+
+        setScale(newScale);
+        setPosition(newPosition);
+    }, [nodes, stageSize]);
+
+    // -----------------------------------------------------------------------------
     // Effects
     // -----------------------------------------------------------------------------
+
+    // Initial centering on load
+    useEffect(() => {
+        if (!initialCentered && stageSize.width > 0 && stageSize.height > 0 && Object.keys(nodes).length > 0) {
+            centerMapToFit();
+            setInitialCentered(true);
+        }
+    }, [stageSize, nodes, initialCentered, centerMapToFit]);
+
+    // Auto-center on path selection
+    useEffect(() => {
+        if (centerOnPath && path.length > 0 && stageSize.width > 0 && stageSize.height > 0) {
+            const pathNodes = path.map(id => nodes[id]).filter(Boolean);
+            if (pathNodes.length > 0) {
+                centerMapToFit(pathNodes);
+            }
+        }
+    }, [centerOnPath, path, nodes, stageSize, centerMapToFit]);
+
+    // Re-center when floor changes
+    useEffect(() => {
+        if (initialCentered && stageSize.width > 0 && stageSize.height > 0) {
+            // Small delay to let nodes update
+            const timer = setTimeout(() => {
+                centerMapToFit();
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [currentFloor, initialCentered, stageSize, centerMapToFit]);
 
     // Load background image
     useEffect(() => {
@@ -648,6 +720,7 @@ const FloorMap = ({
     // Multi-touch Gesture Handling (Pinch & Rotate)
     const lastDist = useRef(0);
     const lastRotation = useRef(0);
+    const rotationCenter = useRef({ x: 0, y: 0 });
 
     const handleTouch = (e) => {
         if (e.evt.touches.length !== 2) return;
@@ -656,29 +729,44 @@ const FloorMap = ({
         const touch1 = e.evt.touches[0];
         const touch2 = e.evt.touches[1];
 
+        // Calculate center point for rotation
+        const centerX = (touch1.clientX + touch2.clientX) / 2;
+        const centerY = (touch1.clientY + touch2.clientY) / 2;
+
         const dist = Math.sqrt(Math.pow(touch2.clientX - touch1.clientX, 2) + Math.pow(touch2.clientY - touch1.clientY, 2));
         const angle = Math.atan2(touch2.clientY - touch1.clientY, touch2.clientX - touch1.clientX) * 180 / Math.PI;
 
         if (!lastDist.current) {
             lastDist.current = dist;
             lastRotation.current = angle;
+            rotationCenter.current = { x: centerX, y: centerY };
             return;
         }
 
-        // Scaling
+        // Scaling (pinch zoom)
         const scaleFactor = dist / lastDist.current;
-        setScale(prev => Math.min(Math.max(prev * scaleFactor, 0.1), 5));
+        setScale(prev => Math.min(Math.max(prev * scaleFactor, 0.1), 10));
         lastDist.current = dist;
 
-        // Rotation
-        const rotationDiff = angle - lastRotation.current;
-        setRotation(prev => prev + rotationDiff);
+        // Rotation (twist)
+        let rotationDiff = angle - lastRotation.current;
+        
+        // Normalize rotation difference to [-180, 180] for smooth rotation
+        if (rotationDiff > 180) rotationDiff -= 360;
+        if (rotationDiff < -180) rotationDiff += 360;
+        
+        setRotation(prev => {
+            const newRotation = prev + rotationDiff;
+            // Keep rotation in 0-360 range for display
+            return ((newRotation % 360) + 360) % 360;
+        });
         lastRotation.current = angle;
     };
 
     const handleTouchEnd = () => {
         lastDist.current = 0;
         lastRotation.current = 0;
+        rotationCenter.current = { x: 0, y: 0 };
     };
 
     const exportData = () => {

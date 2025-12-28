@@ -38,19 +38,7 @@ export const generateNavigationInstructions = (pathIds) => {
 
     // 1. Initial Instruction
     const startNode = pathNodes[0];
-    let currentDistance = 0;
-
-    const addStraightInstruction = (dist, nodeId) => {
-        if (dist >= 3) { // Only show straight for detectable distance
-            const pixels = dist;
-            const steps = Math.round(pixels * 0.2); // Approx 0.2 steps per pixel unit
-            instructions.push({
-                type: 'straight',
-                text: `Go straight for approx ${steps} steps`,
-                nodeId: nodeId
-            });
-        }
-    };
+    let accumulatedDistance = 0;
 
     instructions.push({
         type: 'start',
@@ -58,13 +46,15 @@ export const generateNavigationInstructions = (pathIds) => {
         nodeId: pathIds[0]
     });
 
+    // Scan for turns and accumulate distances between them
     for (let i = 0; i < pathNodes.length - 1; i++) {
         const p1 = pathNodes[i];
         const p2 = pathNodes[i + 1];
 
         const dist = getDistance(p1, p2);
-        currentDistance += dist;
+        accumulatedDistance += dist;
 
+        // Check if there's a turn at the next node
         if (i < pathNodes.length - 2) {
             const p3 = pathNodes[i + 2];
             const angle = getTurnAngle(p1, p2, p3);
@@ -75,34 +65,44 @@ export const generateNavigationInstructions = (pathIds) => {
             else if (angle < -35) turnType = 'left';
 
             if (turnType) {
-                // We are at p2 turning towards p3
+                // Add straight instruction with accumulated distance
+                if (accumulatedDistance >= 3) {
+                    const steps = Math.round(accumulatedDistance * 0.2);
+                    instructions.push({
+                        type: 'straight',
+                        text: `Go straight for approx ${steps} steps`,
+                        nodeId: pathIds[i + 1]
+                    });
+                }
 
-                // 1. Flush the straight segment leading to this turn
-                addStraightInstruction(currentDistance, pathIds[i + 1]);
-                currentDistance = 0;
-
-                // 2. Add the Turn Instruction
+                // Add turn instruction
                 const turnNode = pathNodes[i + 1];
                 let locationName = "";
-
-                // If the node itself has a meaningful label (not just a corridor/code)
                 if (turnNode.label && !turnNode.type.includes('corridor') && turnNode.label.length > 3) {
                     locationName = ` at ${turnNode.label}`;
                 }
-                // We could also look for nearby landmarks in a real spatial graph, 
-                // but for now we rely on the node's own label.
 
                 instructions.push({
                     type: `turn-${turnType}`,
                     text: `Turn ${turnType}${locationName}`,
                     nodeId: pathIds[i + 1]
                 });
+
+                // Reset accumulated distance after turn
+                accumulatedDistance = 0;
             }
         }
     }
 
-    // Flush remaining straight distance after the last turn
-    addStraightInstruction(currentDistance, pathIds[pathIds.length - 1]);
+    // Add final straight segment if there's remaining distance
+    if (accumulatedDistance >= 3) {
+        const steps = Math.round(accumulatedDistance * 0.2);
+        instructions.push({
+            type: 'straight',
+            text: `Go straight for approx ${steps} steps`,
+            nodeId: pathIds[pathIds.length - 1]
+        });
+    }
 
     // Final arrival
     const endNode = pathNodes[pathNodes.length - 1];
