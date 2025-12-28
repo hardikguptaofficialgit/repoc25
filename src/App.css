@@ -37,7 +37,9 @@ body {
 .app {
     position: relative;
     width: 100vw;
-    height: 100vh;
+    /* Avoid mobile 100vh issues (content under system/browser bars) */
+    height: 100svh;
+    height: 100dvh;
 }
 
 /* ===============================
@@ -316,6 +318,9 @@ body {
     max-height: calc(100vh - 220px);
     overflow-y: auto;
 
+    /* Makes it easier to scroll last item above bottom insets */
+    scroll-padding-bottom: 24px;
+
     /* Custom Scrollbar */
     scrollbar-width: thin;
     scrollbar-color: #333333 transparent;
@@ -577,13 +582,13 @@ body {
         padding: 0;
         gap: 0;
         z-index: 50;
-        /* Add safe area padding at bottom */
-        padding-bottom: env(safe-area-inset-bottom, 0px);
+        /* Keep the whole sheet above system UI */
+        padding-bottom: var(--safe-area-bottom);
     }
 
     .sidebar-wrapper.closed {
-        /* Adjusted transform to account for safe area */
-        transform: translateY(calc(100% - 50px));
+        /* Leave the grab-handle visible above the system bar */
+        transform: translateY(calc(100% - 50px - var(--safe-area-bottom)));
     }
 
     /* Minimized state - shows only navigation card */
@@ -614,8 +619,11 @@ body {
         border-radius: 20px 20px 0 0;
         max-height: 65vh;
         overflow-y: auto;
-        /* Ensure proper padding at bottom for safe area */
-        padding-bottom: max(16px, env(safe-area-inset-bottom, 16px));
+        /* Ensure content (Quick Navigation) never sits under system bar */
+        padding-bottom: calc(16px + var(--safe-area-bottom));
+
+        /* Ensure the last row can scroll fully above the system bar */
+        scroll-padding-bottom: calc(16px + var(--safe-area-bottom));
     }
 
     /* Top search bar visible on mobile */
@@ -634,11 +642,9 @@ body {
     /* Map tool layer repositioned */
     .map-tool-layer {
         top: auto;
-        bottom: 70px;
+        bottom: calc(70px + var(--safe-area-bottom));
         right: 12px;
         transition: bottom 0.3s ease;
-        /* Account for safe area on mobile */
-        bottom: max(70px, calc(70px + env(safe-area-inset-bottom, 0px)));
     }
 
     .sidebar-wrapper:not(.closed) ~ .map-tool-layer {
@@ -646,7 +652,7 @@ body {
     }
 
     .sidebar-wrapper.minimized ~ .map-tool-layer {
-        bottom: max(120px, calc(120px + env(safe-area-inset-bottom, 0px)));
+        bottom: calc(120px + var(--safe-area-bottom));
     }
 
     .floating-menu-trigger {
