@@ -22,6 +22,7 @@ function App({ isAdmin, setIsAdmin }) {
 
   const [editorMode, setEditorMode] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarMinimized, setSidebarMinimized] = useState(false);
   const [currentFloor, setCurrentFloor] = useState(0);
   const [showFloorDropdown, setShowFloorDropdown] = useState(false);
 
@@ -179,6 +180,50 @@ function App({ isAdmin, setIsAdmin }) {
   return (
     <div className="app">
 
+      {/* --- Top Search Bar (Mobile-First) --- */}
+      <div className="top-search-bar">
+        <div className="top-search-card">
+          <div className="search-compact-group">
+            <div className="search-row">
+              <SearchBar
+                value={startLocation}
+                onChange={setStartLocation}
+                onSelect={handleStartSelect}
+                placeholder="From..."
+                floor={currentFloor}
+              />
+            </div>
+            <div className="search-row">
+              <SearchBar
+                value={endLocation}
+                onChange={setEndLocation}
+                onSelect={handleEndSelect}
+                placeholder="To..."
+                floor={currentFloor}
+              />
+              <button
+                className="swap-btn-compact"
+                onClick={handleSwapLocations}
+                disabled={!selectedStart || !selectedEnd}
+                title="Swap locations"
+              >
+                <ArrowUpDown size={18} />
+              </button>
+            </div>
+            {error && (
+              <div className="error-message">
+                <span className="error-icon">⚠</span> {error}
+              </div>
+            )}
+            {(selectedStart || selectedEnd) && (
+              <button className="clear-route-btn-mobile" onClick={handleClearRoute}>
+                <Trash2 size={14} /> Clear Route
+              </button>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* --- 1. Independent Floating Toggle Button --- */}
       {/* detached from the sidebar structure */}
       <div className={`floating-menu-trigger ${!sidebarOpen && !editorMode ? 'visible' : ''}`}>
@@ -192,7 +237,14 @@ function App({ isAdmin, setIsAdmin }) {
       </div>
 
       {/* --- 2. Detached Sidebar Wrapper --- */}
-      <div className={`sidebar-wrapper ${sidebarOpen ? 'open' : 'closed'}`}>
+      <div className={`sidebar-wrapper ${sidebarOpen ? 'open' : 'closed'} ${sidebarMinimized ? 'minimized' : ''}`}>
+        <div className="sheet-handle" onClick={() => {
+          if (sidebarMinimized) {
+            setSidebarMinimized(false);
+          } else {
+            setSidebarOpen(!sidebarOpen);
+          }
+        }}></div>
 
         {/* Container 1: Header & Search (Top Island) */}
         <div className="panel-card header-island">
@@ -260,21 +312,43 @@ function App({ isAdmin, setIsAdmin }) {
         {/* Container 2: Actions & Results (Bottom Island) */}
         {/* Only show this container if there's content to show, or always show QuickActions */}
         <div className="panel-card action-island">
-          <QuickActions
-            onQuickAction={handleQuickAction}
-            currentLocation={selectedStart}
-            minimized={path.length > 0}
-          />
-
+          {/* Navigation Instructions at top when route exists */}
           {path.length > 0 && (
-            <>
-              <div className="divider"></div>
-              <RouteInfo
-                path={path}
-                distance={distance}
-                startLabel={startLocation}
-                endLabel={endLocation}
+            <div className="navigation-integrated">
+              <NavigationOverlay 
+                path={path} 
+                isMinimized={sidebarMinimized}
+                onToggleMinimize={() => setSidebarMinimized(!sidebarMinimized)}
               />
+            </div>
+          )}
+
+          {/* Show QuickActions always when minimized, or full content when expanded */}
+          {sidebarMinimized ? (
+            <QuickActions
+              onQuickAction={handleQuickAction}
+              currentLocation={selectedStart}
+              minimized={false}
+            />
+          ) : (
+            <>
+              <QuickActions
+                onQuickAction={handleQuickAction}
+                currentLocation={selectedStart}
+                minimized={path.length > 0}
+              />
+
+              {path.length > 0 && (
+                <>
+                  <div className="divider"></div>
+                  <RouteInfo
+                    path={path}
+                    distance={distance}
+                    startLabel={startLocation}
+                    endLabel={endLocation}
+                  />
+                </>
+              )}
             </>
           )}
         </div>
@@ -344,10 +418,9 @@ function App({ isAdmin, setIsAdmin }) {
           selectedEnd={selectedEnd}
           editorMode={editorMode}
           currentFloor={currentFloor}
+          centerOnPath={path.length > 0}
         />
       </div>
-
-      <NavigationOverlay path={path} />
     </div>
   );
 }
