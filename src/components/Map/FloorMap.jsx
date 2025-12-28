@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Stage, Layer, Rect, Circle, Line, Text, Group, Image, RegularPolygon } from 'react-konva';
 import { nodes as initialNodes, edges as initialEdges } from '../../data/buildingData';
 import { getNodesByFloor } from '../../utils/graphBuilder';
-import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, Maximize, Minimize, X, Plus, Trash2, Link, MousePointer, Upload, Trash, Layers, RefreshCw } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, X, Plus, Trash2, Link, MousePointer, Upload, Trash, RefreshCw } from 'lucide-react';
 import './FloorMap.css';
 
 // -----------------------------------------------------------------------------
@@ -867,16 +867,6 @@ const FloorMap = ({
 
             {/* Controls Header */}
             <div className="map-ui-header">
-                <div className="ui-group">
-                    <button
-                        onClick={() => setIs3D(!is3D)}
-                        className={is3D ? 'active' : ''}
-                        title="Toggle 3D View"
-                    >
-                        <Layers size={18} />
-                    </button>
-                    <button onClick={() => setIsFullscreen(!isFullscreen)} title="Fullscreen">{isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}</button>
-                </div>
                 <div className="ui-group">
                     <button onClick={() => setScale(s => Math.min(s * 1.2, 5))} title="Zoom In"><ZoomIn size={18} /></button>
                     <button onClick={() => setScale(s => Math.max(s / 1.2, 0.1))} title="Zoom Out"><ZoomOut size={18} /></button>
