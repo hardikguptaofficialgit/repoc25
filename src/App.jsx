@@ -4,6 +4,7 @@ import SearchBar from './components/Navigation/SearchBar';
 import RouteInfo from './components/Navigation/RouteInfo';
 import QuickActions from './components/Navigation/QuickActions';
 import NavigationOverlay from './components/Navigation/NavigationOverlay';
+import InstallPrompt from './components/UI/InstallPrompt';
 import { buildGraph, getNodesByFloor } from './utils/graphBuilder';
 import { findShortestPath, findNearestPOI } from './utils/pathfinding';
 import { nodes, poiCategories } from './data/buildingData';
@@ -421,6 +422,8 @@ function App({ isAdmin, setIsAdmin }) {
           centerOnPath={path.length > 0}
         />
       </div>
+
+      <InstallPrompt />
     </div>
   );
 }
