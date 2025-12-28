@@ -496,6 +496,7 @@ const FloorMap = ({
     const recenterMap = useCallback(() => {
         if (stageSize.width > 0 && stageSize.height > 0) {
             centerMapToFit();
+            setRotation(0); // Reset rotation when recentering
         }
     }, [stageSize]);
 
@@ -719,6 +720,7 @@ const FloorMap = ({
     // Multi-touch Gesture Handling (Pinch & Rotate)
     const lastDist = useRef(0);
     const lastRotation = useRef(0);
+    const rotationCenter = useRef({ x: 0, y: 0 });
 
     const handleTouch = (e) => {
         if (e.evt.touches.length !== 2) return;
@@ -727,29 +729,44 @@ const FloorMap = ({
         const touch1 = e.evt.touches[0];
         const touch2 = e.evt.touches[1];
 
+        // Calculate center point for rotation
+        const centerX = (touch1.clientX + touch2.clientX) / 2;
+        const centerY = (touch1.clientY + touch2.clientY) / 2;
+
         const dist = Math.sqrt(Math.pow(touch2.clientX - touch1.clientX, 2) + Math.pow(touch2.clientY - touch1.clientY, 2));
         const angle = Math.atan2(touch2.clientY - touch1.clientY, touch2.clientX - touch1.clientX) * 180 / Math.PI;
 
         if (!lastDist.current) {
             lastDist.current = dist;
             lastRotation.current = angle;
+            rotationCenter.current = { x: centerX, y: centerY };
             return;
         }
 
-        // Scaling
+        // Scaling (pinch zoom)
         const scaleFactor = dist / lastDist.current;
-        setScale(prev => Math.min(Math.max(prev * scaleFactor, 0.1), 5));
+        setScale(prev => Math.min(Math.max(prev * scaleFactor, 0.1), 10));
         lastDist.current = dist;
 
-        // Rotation
-        const rotationDiff = angle - lastRotation.current;
-        setRotation(prev => prev + rotationDiff);
+        // Rotation (twist)
+        let rotationDiff = angle - lastRotation.current;
+        
+        // Normalize rotation difference to [-180, 180] for smooth rotation
+        if (rotationDiff > 180) rotationDiff -= 360;
+        if (rotationDiff < -180) rotationDiff += 360;
+        
+        setRotation(prev => {
+            const newRotation = prev + rotationDiff;
+            // Keep rotation in 0-360 range for display
+            return ((newRotation % 360) + 360) % 360;
+        });
         lastRotation.current = angle;
     };
 
     const handleTouchEnd = () => {
         lastDist.current = 0;
         lastRotation.current = 0;
+        rotationCenter.current = { x: 0, y: 0 };
     };
 
     const exportData = () => {
