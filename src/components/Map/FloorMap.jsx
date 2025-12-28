@@ -712,15 +712,17 @@ const FloorMap = ({
         const oldScale = stage.scaleX();
         const pointer = stage.getPointerPosition();
         const mousePointTo = { x: (pointer.x - stage.x()) / oldScale, y: (pointer.y - stage.y()) / oldScale };
-        const newScale = Math.min(Math.max(oldScale * (e.evt.deltaY > 0 ? 0.9 : 1.1), 0.1), 5);
+        
+        // Smoother zoom with smaller increments
+        const zoomFactor = e.evt.deltaY > 0 ? 0.95 : 1.05;
+        const newScale = Math.min(Math.max(oldScale * zoomFactor, 0.1), 5);
+        
         setScale(newScale);
         setPosition({ x: pointer.x - mousePointTo.x * newScale, y: pointer.y - mousePointTo.y * newScale });
     }, []);
 
-    // Multi-touch Gesture Handling (Pinch & Rotate)
+    // Multi-touch Gesture Handling (Pinch Zoom - Like Photo)
     const lastDist = useRef(0);
-    const lastRotation = useRef(0);
-    const rotationCenter = useRef({ x: 0, y: 0 });
 
     const handleTouch = (e) => {
         if (e.evt.touches.length !== 2) return;
@@ -729,44 +731,21 @@ const FloorMap = ({
         const touch1 = e.evt.touches[0];
         const touch2 = e.evt.touches[1];
 
-        // Calculate center point for rotation
-        const centerX = (touch1.clientX + touch2.clientX) / 2;
-        const centerY = (touch1.clientY + touch2.clientY) / 2;
-
         const dist = Math.sqrt(Math.pow(touch2.clientX - touch1.clientX, 2) + Math.pow(touch2.clientY - touch1.clientY, 2));
-        const angle = Math.atan2(touch2.clientY - touch1.clientY, touch2.clientX - touch1.clientX) * 180 / Math.PI;
 
         if (!lastDist.current) {
             lastDist.current = dist;
-            lastRotation.current = angle;
-            rotationCenter.current = { x: centerX, y: centerY };
             return;
         }
 
-        // Scaling (pinch zoom)
+        // Simple direct zoom like photo apps
         const scaleFactor = dist / lastDist.current;
-        setScale(prev => Math.min(Math.max(prev * scaleFactor, 0.1), 10));
+        setScale(prev => Math.min(Math.max(prev * scaleFactor, 0.1), 5));
         lastDist.current = dist;
-
-        // Rotation (twist)
-        let rotationDiff = angle - lastRotation.current;
-        
-        // Normalize rotation difference to [-180, 180] for smooth rotation
-        if (rotationDiff > 180) rotationDiff -= 360;
-        if (rotationDiff < -180) rotationDiff += 360;
-        
-        setRotation(prev => {
-            const newRotation = prev + rotationDiff;
-            // Keep rotation in 0-360 range for display
-            return ((newRotation % 360) + 360) % 360;
-        });
-        lastRotation.current = angle;
     };
 
     const handleTouchEnd = () => {
         lastDist.current = 0;
-        lastRotation.current = 0;
-        rotationCenter.current = { x: 0, y: 0 };
     };
 
     const exportData = () => {
@@ -897,6 +876,8 @@ const FloorMap = ({
                         <Layers size={18} />
                     </button>
                     <button onClick={() => setIsFullscreen(!isFullscreen)} title="Fullscreen">{isFullscreen ? <Minimize size={18} /> : <Maximize size={18} />}</button>
+                </div>
+                <div className="ui-group">
                     <button onClick={() => setScale(s => Math.min(s * 1.2, 5))} title="Zoom In"><ZoomIn size={18} /></button>
                     <button onClick={() => setScale(s => Math.max(s / 1.2, 0.1))} title="Zoom Out"><ZoomOut size={18} /></button>
                     <button onClick={recenterMap} title="Recenter & Reset View"><RefreshCw size={18} /></button>

@@ -17,6 +17,14 @@
   transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
   transform-style: preserve-3d;
   background: #000;
+  /* Smooth zoom and rotation */
+  will-change: transform;
+}
+
+.canvas-wrapper canvas {
+  /* Smooth rendering for zoom */
+  image-rendering: high-quality;
+  image-rendering: -webkit-optimize-contrast;
 }
 
 .view-3d .canvas-wrapper {
@@ -81,15 +89,17 @@
   justify-content: center;
   background: transparent;
   border: none;
-  color: #737373;
+  color: #FFFFFF;
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
+  opacity: 0.8;
 }
 
 .ui-group button:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
   color: #fff;
+  opacity: 1;
 }
 
 .ui-group button.active {
@@ -367,7 +377,19 @@
 @media (max-width: 768px) {
   .map-ui-header {
     top: 10px;
+    left: 10px;
     right: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ui-group {
+    flex-shrink: 0;
+  }
+
+  .ui-group button {
+    width: 36px;
+    height: 36px;
   }
 
   .map-editor-toolbar {

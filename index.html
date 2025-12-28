@@ -4,12 +4,22 @@
 <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/icon-512.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!-- Enhanced viewport for PWA with safe area support -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
     <meta name="description"
         content="Campus-25 Indoor Navigation - Navigate through your college building with ease. Find shortest paths between classrooms, locate nearest facilities like stairs, lifts, and washrooms." />
+    
+    <!-- PWA Meta Tags -->
     <meta name="theme-color" content="#D34A09" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Campus Nav" />
+    
+    <!-- Manifest and Icons -->
     <link rel="manifest" href="/manifest.json" />
     <link rel="apple-touch-icon" href="/icon-512.png" />
+    
     <title>Campus-25 Indoor Navigation</title>
 </head>
 
@@ -22,10 +32,22 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('/sw.js')
                     .then((registration) => {
-                        console.log('SW registered:', registration);
+                        console.log('[PWA] Service Worker registered:', registration.scope);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            console.log('[PWA] New service worker found');
+                            
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'activated') {
+                                    console.log('[PWA] New service worker activated');
+                                }
+                            });
+                        });
                     })
                     .catch((error) => {
-                        console.log('SW registration failed:', error);
+                        console.error('[PWA] Service Worker registration failed:', error);
                     });
             });
         }

@@ -10,7 +10,8 @@
 }
 
 .install-prompt.show {
-    bottom: 24px;
+    /* Add safe area support for bottom */
+    bottom: max(24px, calc(24px + env(safe-area-inset-bottom, 0px)));
 }
 
 .install-prompt-content {
@@ -109,7 +110,8 @@
     }
 
     .install-prompt.show {
-        bottom: 16px;
+        /* Respect safe area on mobile devices */
+        bottom: max(16px, calc(16px + env(safe-area-inset-bottom, 0px)));
     }
 
     .install-prompt-content {
