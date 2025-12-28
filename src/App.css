@@ -38,8 +38,8 @@ body {
     position: relative;
     width: 100vw;
     /* Avoid mobile 100vh issues (content under system/browser bars) */
+    height: 100vh;
     height: 100svh;
-    height: 100dvh;
 }
 
 /* ===============================

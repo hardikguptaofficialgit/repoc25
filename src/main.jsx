@@ -11,12 +11,27 @@ import ErrorBoundary from './components/ErrorBoundary.jsx'
 const installSafeAreaVars = () => {
   const root = document.documentElement;
 
+  // Keep the last "non-keyboard" bottom inset so the bottom sheet stays under
+  // the keyboard (keyboard should overlay UI), but still respects system bars.
+  let lastNonKeyboardBottom = 0;
+
+  const KEYBOARD_OPEN_THRESHOLD_PX = 140;
+
   const update = () => {
     const vv = window.visualViewport;
     if (!vv) return;
 
     const top = Math.max(0, vv.offsetTop || 0);
-    const bottom = Math.max(0, window.innerHeight - (vv.height + (vv.offsetTop || 0)));
+    const bottomCandidate = Math.max(0, window.innerHeight - (vv.height + (vv.offsetTop || 0)));
+
+    // When the keyboard opens, visualViewport height shrinks a lot; we do NOT
+    // want to treat that as "safe area" (otherwise bottom UI jumps above keyboard).
+    const keyboardLikelyOpen = (window.innerHeight - vv.height) > KEYBOARD_OPEN_THRESHOLD_PX;
+    if (!keyboardLikelyOpen) {
+      lastNonKeyboardBottom = bottomCandidate;
+    }
+
+    const bottom = lastNonKeyboardBottom;
 
     // Left/right are usually 0 on mobile browsers; keep for completeness.
     const left = 0;
