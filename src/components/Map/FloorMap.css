@@ -38,7 +38,8 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100svh;
+  height: 100dvh;
   z-index: 990;
   /* high but below App button if App button is 1000? No, full screen should probably be top. */
   background: #000000;

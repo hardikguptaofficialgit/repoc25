@@ -1,10 +1,57 @@
-import { StrictMode, useState } from 'react'
+import { StrictMode, useEffect, useState } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
+
+// Compute safe-area insets for browsers where env(safe-area-inset-*) is 0 (common on Android).
+// Uses visualViewport to estimate the occluded bottom area (system bars / dynamic UI).
+const installSafeAreaVars = () => {
+  const root = document.documentElement;
+
+  const update = () => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const top = Math.max(0, vv.offsetTop || 0);
+    const bottom = Math.max(0, window.innerHeight - (vv.height + (vv.offsetTop || 0)));
+
+    // Left/right are usually 0 on mobile browsers; keep for completeness.
+    const left = 0;
+    const right = 0;
+
+    root.style.setProperty('--vv-safe-top', `${top}px`);
+    root.style.setProperty('--vv-safe-bottom', `${bottom}px`);
+    root.style.setProperty('--vv-safe-left', `${left}px`);
+    root.style.setProperty('--vv-safe-right', `${right}px`);
+  };
+
+  // Throttle via rAF to avoid spamming layout on scroll/resize.
+  let rafId = 0;
+  const schedule = () => {
+    if (rafId) return;
+    rafId = requestAnimationFrame(() => {
+      rafId = 0;
+      update();
+    });
+  };
+
+  update();
+  window.addEventListener('resize', schedule);
+  window.addEventListener('orientationchange', schedule);
+  window.visualViewport?.addEventListener('resize', schedule);
+  window.visualViewport?.addEventListener('scroll', schedule);
+
+  return () => {
+    if (rafId) cancelAnimationFrame(rafId);
+    window.removeEventListener('resize', schedule);
+    window.removeEventListener('orientationchange', schedule);
+    window.visualViewport?.removeEventListener('resize', schedule);
+    window.visualViewport?.removeEventListener('scroll', schedule);
+  };
+};
 
 // Suppress Vite HMR iframe-related errors (common with canvas libraries like React Konva)
 window.addEventListener('error', (event) => {
@@ -25,6 +72,11 @@ window.addEventListener('unhandledrejection', (event) => {
 
 function Root() {
   const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const cleanup = installSafeAreaVars();
+    return cleanup;
+  }, []);
 
   return (
     <BrowserRouter>

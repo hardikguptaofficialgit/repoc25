@@ -13,6 +13,20 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+
+        /* Safe-area helpers
+             - iOS uses env(safe-area-inset-*)
+             - Many Android browsers report 0 for env(), so we also compute
+                 insets via visualViewport in JS (see src/main.jsx) */
+        --vv-safe-top: 0px;
+        --vv-safe-bottom: 0px;
+        --vv-safe-left: 0px;
+        --vv-safe-right: 0px;
+
+        --safe-area-top: max(env(safe-area-inset-top, 0px), var(--vv-safe-top));
+        --safe-area-bottom: max(env(safe-area-inset-bottom, 0px), var(--vv-safe-bottom));
+        --safe-area-left: max(env(safe-area-inset-left, 0px), var(--vv-safe-left));
+        --safe-area-right: max(env(safe-area-inset-right, 0px), var(--vv-safe-right));
 }
 
 * {
@@ -29,8 +43,7 @@ body {
     scroll-behavior: smooth;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    /* Support for safe areas on iOS/Android */
-    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+    padding: 0;
 }
 
 #root {
