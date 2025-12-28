@@ -580,7 +580,7 @@ body {
     }
 
     .sidebar-wrapper.closed {
-        transform: translateY(calc(100% - 50px));
+        transform: translateY(calc(100% - 50px - env(safe-area-inset-bottom)));
     }
 
     /* Minimized state - shows only navigation card */
@@ -611,6 +611,7 @@ body {
         border-radius: 20px 20px 0 0;
         max-height: 65vh;
         overflow-y: auto;
+        padding-bottom: calc(16px + env(safe-area-inset-bottom));
     }
 
     /* Top search bar visible on mobile */
