@@ -338,6 +338,10 @@ body {
     background: #444444;
 }
 
+.navigation-integrated {
+    margin-bottom: 0;
+}
+
 .card-label {
     font-size: 10px;
     font-weight: 600;
@@ -480,65 +484,195 @@ body {
 }
 
 /* ===============================
+   TOP SEARCH BAR (Mobile-First)
+   =============================== */
+.top-search-bar {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    z-index: 30;
+    pointer-events: auto;
+}
+
+.top-search-card {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-float);
+    padding: 12px;
+}
+
+.search-compact-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.search-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.search-row .search-bar-container {
+    flex: 1;
+}
+
+.swap-btn-compact {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    border-radius: 8px;
+    background: #181818;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.swap-btn-compact:hover:not(:disabled) {
+    background: var(--accent-gradient);
+    color: #fff;
+    transform: rotate(180deg);
+}
+
+.swap-btn-compact:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.clear-route-btn-mobile {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #FCA5A5;
+    font-size: 12px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clear-route-btn-mobile:hover {
+    background: rgba(239, 68, 68, 0.25);
+    color: #EF4444;
+}
+
+/* ===============================
    MOBILE
    =============================== */
 @media (max-width: 768px) {
+    /* Sidebar becomes bottom sheet */
     .sidebar-wrapper {
         inset: auto 0 0 0;
         width: 100%;
         padding: 0;
         gap: 0;
         z-index: 50;
-        /* Higher than map controls */
     }
 
     .sidebar-wrapper.closed {
-        transform: translateY(100%);
+        transform: translateY(calc(100% - 50px));
+    }
+
+    /* Minimized state - shows only navigation card */
+    .sidebar-wrapper.minimized {
+        transform: translateY(0);
+    }
+
+    .sidebar-wrapper.minimized .action-island {
+        padding: 12px;
+        max-height: auto;
+    }
+
+    .sidebar-wrapper.minimized .sheet-handle {
+        display: none;
     }
 
     .panel-card {
         border-radius: 20px 20px 0 0;
         border-bottom: none;
         box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.4);
-        max-height: 80vh;
-        /* Max height for mobile sheet */
     }
 
     .header-island {
-        border-radius: 0;
-        /* Full width header */
-        margin-bottom: -1px;
-        /* Connect to next panel if needed */
+        display: none; /* Hide on mobile, use top search instead */
     }
 
     .action-island {
-        border-radius: 0;
-        max-height: 50vh;
+        border-radius: 20px 20px 0 0;
+        max-height: 65vh;
+        overflow-y: auto;
     }
 
+    /* Top search bar visible on mobile */
+    .top-search-bar {
+        display: block;
+    }
+
+    .top-search-card {
+        padding: 10px;
+    }
+
+    .search-compact-group {
+        gap: 6px;
+    }
+
+    /* Map tool layer repositioned */
     .map-tool-layer {
         top: auto;
-        bottom: 140px;
-        /* Position above the bottom sheet/overlay */
-        right: 16px;
+        bottom: 70px;
+        right: 12px;
         transition: bottom 0.3s ease;
     }
 
-    /* When sidebar is open, move controls up */
-    .sidebar-wrapper:not(.closed)~.map-tool-layer {
-        bottom: 300px;
-        /* Approximate height of open sidebar */
+    .sidebar-wrapper:not(.closed) ~ .map-tool-layer {
+        bottom: calc(65vh + 20px);
+    }
+
+    .sidebar-wrapper.minimized ~ .map-tool-layer {
+        bottom: 120px;
     }
 
     .floating-menu-trigger {
-        top: 16px;
-        bottom: auto;
-        right: 16px;
-        left: auto;
+        display: none; /* Use drag handle instead */
     }
 
     .glass-btn {
         width: 44px;
         height: 44px;
+    }
+
+    /* Bottom sheet drag handle */
+    .sheet-handle {
+        width: 40px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 2px;
+        margin: 8px auto 12px;
+        cursor: grab;
+    }
+
+    .sheet-handle:active {
+        cursor: grabbing;
+    }
+}
+
+/* Desktop - hide top search, show sidebar */
+@media (min-width: 769px) {
+    .top-search-bar {
+        display: none;
+    }
+
+    .sheet-handle {
+        display: none;
     }
 }
