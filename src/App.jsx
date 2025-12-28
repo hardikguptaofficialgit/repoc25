@@ -4,9 +4,11 @@ import SearchBar from './components/Navigation/SearchBar';
 import RouteInfo from './components/Navigation/RouteInfo';
 import QuickActions from './components/Navigation/QuickActions';
 import NavigationOverlay from './components/Navigation/NavigationOverlay';
+import FloorTransitionChoice from './components/Navigation/FloorTransitionChoice';
 import InstallPrompt from './components/UI/InstallPrompt';
 import { buildGraph, getNodesByFloor } from './utils/graphBuilder';
 import { findShortestPath, findNearestPOI } from './utils/pathfinding';
+import { createMultiFloorPath, getNodeFloor } from './utils/multiFloorPathfinding';
 import { nodes, poiCategories } from './data/buildingData';
 import { ArrowUpDown, Trash2, Edit3, Eye, Menu, ChevronLeft, Building, ChevronDown, LogOut } from 'lucide-react';
 import './App.css';
@@ -20,6 +22,11 @@ function App({ isAdmin, setIsAdmin }) {
   const [path, setPath] = useState([]);
   const [distance, setDistance] = useState(0);
   const [error, setError] = useState('');
+  
+  // Multi-floor navigation state
+  const [multiFloorPath, setMultiFloorPath] = useState(null);
+  const [showTransitionChoice, setShowTransitionChoice] = useState(false);
+  const [pendingMultiFloorRoute, setPendingMultiFloorRoute] = useState(null);
 
   const [editorMode, setEditorMode] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -60,15 +67,99 @@ function App({ isAdmin, setIsAdmin }) {
 
   const calculateRoute = (startId, endId) => {
     if (!graph) return;
-    const result = findShortestPath(graph, startId, endId);
-    if (result.error) {
-      setError(result.error);
-      setPath([]);
-      setDistance(0);
+    
+    // Get floor from selected locations (they include floor info from search)
+    const startFloor = selectedStart?.floor !== undefined ? selectedStart.floor : getNodeFloor(startId);
+    const endFloor = selectedEnd?.floor !== undefined ? selectedEnd.floor : getNodeFloor(endId);
+    
+    // Check if multi-floor navigation is needed
+    if (startFloor !== endFloor) {
+      // Multi-floor navigation - show transition choice
+      const multiPath = createMultiFloorPath(graph, startId, endId);
+      
+      if (multiPath.error || !multiPath.availableTransitions) {
+        setError(multiPath.error || 'Unable to find route between floors');
+        setPath([]);
+        setDistance(0);
+        setMultiFloorPath(null);
+        return;
+      }
+      
+      // Check if both stairs and lift are available
+      if (multiPath.availableTransitions.stairs && multiPath.availableTransitions.lift) {
+        // Show choice dialog
+        setPendingMultiFloorRoute({ startId, endId, multiPath });
+        setShowTransitionChoice(true);
+      } else {
+        // Use the only available transition
+        applyMultiFloorPath(multiPath);
+      }
     } else {
-      setPath(result.path);
-      setDistance(result.distance);
-      setError('');
+      // Single floor navigation
+      const result = findShortestPath(graph, startId, endId);
+      if (result.error) {
+        setError(result.error);
+        setPath([]);
+        setDistance(0);
+        setMultiFloorPath(null);
+      } else {
+        setPath(result.path);
+        setDistance(result.distance);
+        setError('');
+        setMultiFloorPath(null);
+      }
+    }
+  };
+  
+  const applyMultiFloorPath = (multiPath) => {
+    // Set the first segment's path for map display
+    const firstSegment = multiPath.segments[0];
+    setPath(firstSegment.path);
+    setDistance(multiPath.totalDistance);
+    setMultiFloorPath(multiPath);
+    setError('');
+    
+    // Set floor to start floor
+    setCurrentFloor(multiPath.startFloor);
+  };
+  
+  const handleTransitionChoice = (transitionType) => {
+    if (!pendingMultiFloorRoute) return;
+    
+    const { startId, endId } = pendingMultiFloorRoute;
+    const multiPath = createMultiFloorPath(graph, startId, endId, transitionType);
+    
+    applyMultiFloorPath(multiPath);
+    setShowTransitionChoice(false);
+    setPendingMultiFloorRoute(null);
+  };
+  
+  const handleTransitionCancel = () => {
+    setShowTransitionChoice(false);
+    setPendingMultiFloorRoute(null);
+    setPath([]);
+    setDistance(0);
+    setMultiFloorPath(null);
+  };
+  
+  const handleFloorChange = (newFloor, segmentIndex) => {
+    setCurrentFloor(newFloor);
+    
+    // Update path display for new floor and segment
+    if (multiFloorPath && !multiFloorPath.isSingleFloor) {
+      // If segmentIndex is provided, use that specific segment
+      if (segmentIndex !== undefined && multiFloorPath.segments[segmentIndex]) {
+        const segment = multiFloorPath.segments[segmentIndex];
+        if (segment.path && segment.path.length > 0) {
+          setPath(segment.path);
+        }
+      } else {
+        // Otherwise, find segment by floor
+        const segment = multiFloorPath.segments.find(s => s.floor === newFloor && s.type !== 'transition');
+        if (segment && segment.path) {
+          setPath(segment.path);
+        }
+      }
     }
   };
 
@@ -146,6 +237,9 @@ function App({ isAdmin, setIsAdmin }) {
     setPath([]);
     setDistance(0);
     setError('');
+    setMultiFloorPath(null);
+    setShowTransitionChoice(false);
+    setPendingMultiFloorRoute(null);
   };
 
   const handleMapNodeClick = (nodeId, node) => {
@@ -317,9 +411,11 @@ function App({ isAdmin, setIsAdmin }) {
           {path.length > 0 && (
             <div className="navigation-integrated">
               <NavigationOverlay 
-                path={path} 
+                path={path}
+                multiFloorPath={multiFloorPath}
                 isMinimized={sidebarMinimized}
                 onToggleMinimize={() => setSidebarMinimized(!sidebarMinimized)}
+                onFloorChange={handleFloorChange}
               />
             </div>
           )}
@@ -422,6 +518,15 @@ function App({ isAdmin, setIsAdmin }) {
           centerOnPath={path.length > 0}
         />
       </div>
+
+      {/* Floor Transition Choice Dialog */}
+      {showTransitionChoice && pendingMultiFloorRoute && (
+        <FloorTransitionChoice
+          transitions={pendingMultiFloorRoute.multiPath.availableTransitions}
+          onSelect={handleTransitionChoice}
+          onCancel={handleTransitionCancel}
+        />
+      )}
 
       <InstallPrompt />
     </div>

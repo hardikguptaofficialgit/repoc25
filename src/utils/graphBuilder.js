@@ -130,37 +130,54 @@ function fuzzyMatchScore(query, text) {
 
 /**
  * Search for locations by query string with fuzzy matching
+ * Searches across ALL floors to allow multi-floor navigation
  */
 export function searchLocations(query, floor = 0) {
     if (!query || query.length === 0) return [];
 
     const searchTerm = query.toLowerCase().trim();
     const results = [];
-    const floorNodes = getNodesByFloor(floor);
+    
+    // Search across all floors (0, 1, 2, 3) for multi-floor navigation
+    const allFloors = [0, 1, 2, 3];
+    const seenLabels = new Set(); // Avoid duplicates across floors
+    
+    for (let searchFloor of allFloors) {
+        const floorNodes = getNodesByFloor(searchFloor);
+        
+        for (let [nodeId, node] of Object.entries(floorNodes)) {
+            if (node.type === 'corridor') continue;
+            
+            // Skip if we've already added this label (same room on different floor)
+            const uniqueKey = `${node.label}_${searchFloor}`;
+            if (seenLabels.has(uniqueKey)) continue;
+            seenLabels.add(uniqueKey);
 
-    for (let [nodeId, node] of Object.entries(floorNodes)) {
-        if (node.type === 'corridor') continue;
+            const labelScore = fuzzyMatchScore(searchTerm, node.label);
+            const typeScore = fuzzyMatchScore(searchTerm, node.type.replace(/_/g, ' '));
+            const idScore = fuzzyMatchScore(searchTerm, nodeId);
 
-        const labelScore = fuzzyMatchScore(searchTerm, node.label);
-        const typeScore = fuzzyMatchScore(searchTerm, node.type.replace(/_/g, ' '));
-        const idScore = fuzzyMatchScore(searchTerm, nodeId);
+            const bestScore = Math.max(labelScore, typeScore * 0.8, idScore * 0.6);
 
-        const bestScore = Math.max(labelScore, typeScore * 0.8, idScore * 0.6);
+            if (bestScore > 0) {
+                let typePriority = 1;
+                if (node.type === 'classroom') typePriority = 1.2;
+                if (node.type === 'washroom_gents' || node.type === 'washroom_ladies') typePriority = 1.3;
+                if (node.type === 'stairs' || node.type === 'lift') typePriority = 1.4;
+                if (node.type === 'entrance') typePriority = 1.5;
+                
+                // Boost priority for current floor slightly
+                if (searchFloor === floor) typePriority *= 1.1;
 
-        if (bestScore > 0) {
-            let typePriority = 1;
-            if (node.type === 'classroom') typePriority = 1.2;
-            if (node.type === 'washroom_gents' || node.type === 'washroom_ladies') typePriority = 1.3;
-            if (node.type === 'stairs' || node.type === 'lift') typePriority = 1.4;
-            if (node.type === 'entrance') typePriority = 1.5;
-
-            results.push({
-                id: nodeId,
-                label: node.label,
-                type: node.type,
-                score: bestScore * typePriority,
-                matchType: labelScore > typeScore ? 'label' : 'type'
-            });
+                results.push({
+                    id: nodeId,
+                    label: node.label,
+                    type: node.type,
+                    floor: searchFloor,
+                    score: bestScore * typePriority,
+                    matchType: labelScore > typeScore ? 'label' : 'type'
+                });
+            }
         }
     }
 

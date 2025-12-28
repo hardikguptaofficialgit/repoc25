@@ -10,24 +10,62 @@ import {
     ChevronRight,
     Navigation as NavIcon,
     ChevronDown,
-    ChevronUp
+    ChevronUp,
+    ArrowUpDown,
+    MoveVertical
 } from 'lucide-react';
-import { generateNavigationInstructions } from '../../utils/navigationInstructions';
+import { generateMultiFloorInstructions } from '../../utils/navigationInstructions';
 import './NavigationOverlay.css';
 
-const NavigationOverlay = ({ path, isMinimized, onToggleMinimize }) => {
+const NavigationOverlay = ({ 
+    path, 
+    multiFloorPath, 
+    isMinimized, 
+    onToggleMinimize,
+    onFloorChange 
+}) => {
     const [instructions, setInstructions] = useState([]);
     const [currentStep, setCurrentStep] = useState(0);
 
     useEffect(() => {
-        if (path && path.length > 0) {
-            const steps = generateNavigationInstructions(path);
+        if (multiFloorPath) {
+            // Use multi-floor instructions
+            const steps = generateMultiFloorInstructions(multiFloorPath);
+            setInstructions(steps);
+            setCurrentStep(0);
+        } else if (path && path.length > 0) {
+            // Fallback to single-floor path
+            const steps = generateMultiFloorInstructions({
+                isSingleFloor: true,
+                segments: [{ path, floor: 0 }]
+            });
             setInstructions(steps);
             setCurrentStep(0);
         } else {
             setInstructions([]);
         }
-    }, [path]);
+    }, [path, multiFloorPath]);
+
+    // Auto-switch floor and path when stepping through multi-floor navigation
+    useEffect(() => {
+        if (instructions.length > 0 && currentStep < instructions.length) {
+            const instruction = instructions[currentStep];
+            
+            // Update floor and path based on current instruction
+            if (instruction.floor !== undefined && onFloorChange) {
+                onFloorChange(instruction.floor, instruction.segmentIndex);
+            }
+            
+            // When on a floor transition step, prepare for next floor
+            if (instruction.isFloorTransition && instruction.targetFloor !== undefined) {
+                // The NEXT step after transition will be on the new floor
+                // So we switch the floor on the transition step itself
+                if (onFloorChange) {
+                    onFloorChange(instruction.targetFloor, instruction.segmentIndex + 1);
+                }
+            }
+        }
+    }, [currentStep, instructions, onFloorChange]);
 
     if (!instructions.length) return null;
 
@@ -53,11 +91,16 @@ const NavigationOverlay = ({ path, isMinimized, onToggleMinimize }) => {
             case 'turn-left': return CornerUpLeft;
             case 'turn-right': return CornerUpRight;
             case 'end': return CheckCircle;
+            case 'floor_change': return step.transitionType === 'stairs' ? MoveVertical : ArrowUpDown;
             default: return NavIcon;
         }
     };
 
     const Icon = getIcon(step.type);
+    
+    // Show floor indicator for multi-floor navigation
+    const showFloorInfo = step.floor !== undefined;
+    const floorLabel = step.floor === 0 ? 'GF' : `${step.floor}F`;
 
     return (
         <div className={`nav-overlay-integrated ${isMinimized ? 'minimized' : ''}`}>
@@ -75,8 +118,18 @@ const NavigationOverlay = ({ path, isMinimized, onToggleMinimize }) => {
                     </div>
 
                     <div className="nav-text">
-                        <span className="step-count">Step {currentStep + 1} of {instructions.length}</span>
+                        <div className="step-header">
+                            <span className="step-count">Step {currentStep + 1} of {instructions.length}</span>
+                            {showFloorInfo && (
+                                <span className="floor-badge">{floorLabel}</span>
+                            )}
+                        </div>
                         <h2 className="instruction-text">{step.text}</h2>
+                        {step.isFloorTransition && (
+                            <p className="floor-transition-hint">
+                                Map will switch to {step.targetFloor === 0 ? 'Ground Floor' : `Floor ${step.targetFloor}`}
+                            </p>
+                        )}
                     </div>
 
                     <div className="nav-controls">

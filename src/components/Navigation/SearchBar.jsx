@@ -166,7 +166,7 @@ const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location..
                     {suggestions.length > 0 ? (
                         suggestions.map((location, index) => (
                             <div
-                                key={location.id}
+                                key={`${location.id}_${location.floor}_${index}`}
                                 className={`suggestion-item ${index === selectedIndex ? 'selected' : ''}`}
                                 onClick={() => handleSelectSuggestion(location)}
                                 onMouseEnter={() => setSelectedIndex(index)}
@@ -177,8 +177,10 @@ const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location..
                                 <div className="suggestion-content">
                                     <div className="suggestion-label">
                                         {location.label}
-                                        {location.matchType && location.score > 700 && (
-                                            <span className="match-badge">{location.matchType === 'label' ? 'exact' : 'type'}</span>
+                                        {location.floor !== undefined && (
+                                            <span className="floor-indicator">
+                                                {location.floor === 0 ? 'GF' : `${location.floor}F`}
+                                            </span>
                                         )}
                                     </div>
                                     <div className="suggestion-type">{getTypeLabel(location.type)}</div>
