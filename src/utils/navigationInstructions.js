@@ -114,3 +114,70 @@ export const generateNavigationInstructions = (pathIds) => {
 
     return instructions;
 };
+
+/**
+ * Generate navigation instructions for multi-floor path
+ * @param {Object} multiFloorPath - Result from createMultiFloorPath
+ * @returns {Array} Array of instruction objects with floor info
+ */
+export const generateMultiFloorInstructions = (multiFloorPath) => {
+    if (!multiFloorPath || multiFloorPath.isSingleFloor) {
+        // Use regular single-floor instructions
+        if (multiFloorPath.segments && multiFloorPath.segments[0]) {
+            return generateNavigationInstructions(multiFloorPath.segments[0].path);
+        }
+        return [];
+    }
+    
+    const allInstructions = [];
+    
+    multiFloorPath.segments.forEach((segment, segmentIndex) => {
+        if (segment.type === 'to_transition') {
+            // Navigate to stairs/lift on source floor
+            const segmentInstructions = generateNavigationInstructions(segment.path);
+            
+            // Add floor info to each instruction
+            segmentInstructions.forEach((instruction, index) => {
+                allInstructions.push({
+                    ...instruction,
+                    floor: segment.floor,
+                    segmentIndex: segmentIndex,
+                    isFloorTransition: false
+                });
+            });
+            
+        } else if (segment.type === 'transition') {
+            // Floor change instruction
+            const floorText = segment.targetFloor === 0 ? 'Ground Floor' : `Floor ${segment.targetFloor}`;
+            const transitionText = segment.transitionType === 'stairs' ? 'stairs' : 'lift';
+            
+            allInstructions.push({
+                type: 'floor_change',
+                text: `Take ${transitionText} to ${floorText}`,
+                nodeId: segment.transitionNode,
+                floor: segment.floor,
+                targetFloor: segment.targetFloor,
+                transitionType: segment.transitionType,
+                transitionLabel: segment.transitionLabel,
+                segmentIndex: segmentIndex,
+                isFloorTransition: true
+            });
+            
+        } else if (segment.type === 'from_transition') {
+            // Navigate from stairs/lift to destination on target floor
+            const segmentInstructions = generateNavigationInstructions(segment.path);
+            
+            // Skip the first instruction (it's the transition point itself)
+            segmentInstructions.slice(1).forEach((instruction, index) => {
+                allInstructions.push({
+                    ...instruction,
+                    floor: segment.floor,
+                    segmentIndex: segmentIndex,
+                    isFloorTransition: false
+                });
+            });
+        }
+    });
+    
+    return allInstructions;
+};

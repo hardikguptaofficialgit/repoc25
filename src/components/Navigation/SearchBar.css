@@ -169,6 +169,20 @@
     gap: 0.5rem;
 }
 
+.floor-indicator {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    background: rgba(139, 92, 246, 0.2);
+    color: #A78BFA;
+    font-size: 10px;
+    font-weight: 700;
+    border-radius: 6px;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
 .match-badge {
     display: inline-block;
     padding: 0.125rem 0.375rem;
