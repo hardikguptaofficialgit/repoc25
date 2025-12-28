@@ -8,12 +8,14 @@ import {
     CheckCircle,
     ChevronLeft,
     ChevronRight,
-    Navigation as NavIcon
+    Navigation as NavIcon,
+    ChevronDown,
+    ChevronUp
 } from 'lucide-react';
 import { generateNavigationInstructions } from '../../utils/navigationInstructions';
 import './NavigationOverlay.css';
 
-const NavigationOverlay = ({ path }) => {
+const NavigationOverlay = ({ path, isMinimized, onToggleMinimize }) => {
     const [instructions, setInstructions] = useState([]);
     const [currentStep, setCurrentStep] = useState(0);
 
@@ -50,7 +52,7 @@ const NavigationOverlay = ({ path }) => {
             case 'straight': return ArrowUp;
             case 'turn-left': return CornerUpLeft;
             case 'turn-right': return CornerUpRight;
-            case 'end': return CheckCircle; // or NavIcon
+            case 'end': return CheckCircle;
             default: return NavIcon;
         }
     };
@@ -58,8 +60,8 @@ const NavigationOverlay = ({ path }) => {
     const Icon = getIcon(step.type);
 
     return (
-        <div className="nav-overlay-container">
-            <div className={`nav-card ${step.type}`}>
+        <div className={`nav-overlay-integrated ${isMinimized ? 'minimized' : ''}`}>
+            <div className={`nav-card-integrated ${step.type}`}>
                 <div className="nav-progress">
                     <div
                         className="nav-progress-bar"
@@ -67,9 +69,9 @@ const NavigationOverlay = ({ path }) => {
                     />
                 </div>
 
-                <div className="nav-content">
+                <div className="nav-content-integrated">
                     <div className="nav-icon-wrapper">
-                        <Icon size={32} strokeWidth={2.5} />
+                        <Icon size={28} strokeWidth={2.5} />
                     </div>
 
                     <div className="nav-text">
@@ -83,16 +85,26 @@ const NavigationOverlay = ({ path }) => {
                             onClick={prevStep}
                             disabled={currentStep === 0}
                         >
-                            <ChevronLeft size={24} />
+                            <ChevronLeft size={20} />
                         </button>
                         <button
                             className={`nav-btn next ${isLastStep ? 'finish' : ''}`}
                             onClick={nextStep}
-                            disabled={isLastStep && currentStep === instructions.length - 1} // Keep finish state or disable?
+                            disabled={isLastStep}
                         >
-                            {isLastStep ? <Check size={24} /> : <ChevronRight size={24} />}
+                            {isLastStep ? <Check size={20} /> : <ChevronRight size={20} />}
                         </button>
                     </div>
+
+                    {onToggleMinimize && (
+                        <button 
+                            className="nav-minimize-btn"
+                            onClick={onToggleMinimize}
+                            title={isMinimized ? "Expand" : "Minimize"}
+                        >
+                            {isMinimized ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>
