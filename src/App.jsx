@@ -172,7 +172,8 @@ function App({ isAdmin, setIsAdmin }) {
     if (nextPhase === 2) {
       // Transition phase - show message to take lift/stairs
       setNavigationPhase(2);
-      setPath([]); // No path during transition
+      // Keep the phase 1 path visible on the map so user can see the route to lift/stairs
+      // The path is already set from phase 1, so we don't clear it
     } else if (nextPhase === 3) {
       // Phase 3 - navigate to destination on target floor
       setNavigationPhase(3);
@@ -511,42 +512,40 @@ function App({ isAdmin, setIsAdmin }) {
         {/* Container 2: Actions & Results (Bottom Island) */}
         {/* Only show this container if there's content to show, or always show QuickActions */}
         <div className="panel-card action-island">
-          {/* Cross-floor navigation indicator */}
-          {crossFloorNavigation && (
+          {/* Cross-floor navigation indicator - only show for phase 0 (selection) */}
+          {crossFloorNavigation && navigationPhase === 0 && (
             <div className="cross-floor-indicator">
               <div className="cross-floor-header">
-                <span className="cross-floor-title">
-                  🏢 Multi-Floor Navigation
-                </span>
                 <span className="cross-floor-info">
                   Floor {startFloor === 0 ? 'G' : startFloor} → Floor {endFloor === 0 ? 'G' : endFloor}
                 </span>
               </div>
 
               {/* Phase 0: Selection of lift or stairs */}
-              {navigationPhase === 0 && crossFloorNavigation.options && (
+              {crossFloorNavigation.options && (
                 <div className="transition-selection">
-                  <p className="selection-title">Choose how to change floors:</p>
+                  {/* <p className="selection-title">Multi-Floor Navigation</p> */}
                   <div className="transition-options">
                     {crossFloorNavigation.options.lift && (
                       <button 
                         className="transition-option lift-option"
                         onClick={() => handleSelectTransition('lift')}
                       >
-                        <span className="option-icon">🛗</span>
-                        <span className="option-label">Take Lift</span>
+                        <span className="option-label">Lift</span>
                         <span className="option-distance">
                           ~{Math.round(crossFloorNavigation.options.lift.totalDistance * 0.2)} steps
                         </span>
                       </button>
+                    )}
+                    {crossFloorNavigation.options.lift && crossFloorNavigation.options.stairs && (
+                      <span className="transition-or">OR</span>
                     )}
                     {crossFloorNavigation.options.stairs && (
                       <button 
                         className="transition-option stairs-option"
                         onClick={() => handleSelectTransition('stairs')}
                       >
-                        <span className="option-icon">🪜</span>
-                        <span className="option-label">Take Stairs</span>
+                        <span className="option-label">Stairs</span>
                         <span className="option-distance">
                           ~{Math.round(crossFloorNavigation.options.stairs.totalDistance * 0.2)} steps
                         </span>
@@ -555,58 +554,11 @@ function App({ isAdmin, setIsAdmin }) {
                   </div>
                 </div>
               )}
-
-              {/* Show phase progress only after selection */}
-              {navigationPhase > 0 && (
-                <>
-                  <div className="cross-floor-phases">
-                    <div className={`phase-step ${navigationPhase === 1 ? 'active' : navigationPhase > 1 ? 'completed' : ''}`}>
-                      <span className="phase-num">1</span>
-                      <span className="phase-text">To {crossFloorNavigation.transitionType}</span>
-                    </div>
-                    <div className="phase-connector"></div>
-                    <div className={`phase-step ${navigationPhase === 2 ? 'active' : navigationPhase > 2 ? 'completed' : ''}`}>
-                      <span className="phase-num">2</span>
-                      <span className="phase-text">Change Floor</span>
-                    </div>
-                    <div className="phase-connector"></div>
-                    <div className={`phase-step ${navigationPhase === 3 ? 'active' : ''}`}>
-                      <span className="phase-num">3</span>
-                      <span className="phase-text">To Destination</span>
-                    </div>
-                  </div>
-                  {navigationPhase === 2 && (
-                    <div className="transition-message">
-                      <div className="transition-icon">
-                        {crossFloorNavigation.transitionType === 'lift' ? '🛗' : '🪜'}
-                      </div>
-                      <p>Take the {crossFloorNavigation.transitionType} from Floor {startFloor === 0 ? 'G' : startFloor} to Floor {endFloor === 0 ? 'G' : endFloor}</p>
-                      <button className="continue-btn" onClick={handleNextPhase}>
-                        I've reached Floor {endFloor === 0 ? 'G' : endFloor}
-                      </button>
-                    </div>
-                  )}
-                  {navigationPhase !== 2 && (
-                    <div className="phase-navigation">
-                      {navigationPhase >= 1 && (
-                        <button className="phase-btn prev" onClick={() => setNavigationPhase(0)}>
-                          ← Change Option
-                        </button>
-                      )}
-                      {navigationPhase < 3 && path.length > 0 && (
-                        <button className="phase-btn next" onClick={handleNextPhase}>
-                          {navigationPhase === 1 ? 'Reached ' + crossFloorNavigation.transitionType : 'Next'} →
-                        </button>
-                      )}
-                    </div>
-                  )}
-                </>
-              )}
             </div>
           )}
 
-          {/* Navigation Instructions at top when route exists */}
-          {path.length > 0 && (
+          {/* Navigation Instructions - handles both single-floor and multi-floor navigation */}
+          {(path.length > 0 || (crossFloorNavigation && navigationPhase === 2)) && (
             <div className="navigation-integrated">
               <NavigationOverlay 
                 path={path} 
@@ -615,6 +567,10 @@ function App({ isAdmin, setIsAdmin }) {
                 crossFloorPhase={navigationPhase}
                 crossFloorNavigation={crossFloorNavigation}
                 currentFloor={currentFloor}
+                onNextPhase={handleNextPhase}
+                onPrevPhase={handlePrevPhase}
+                startFloor={startFloor}
+                endFloor={endFloor}
               />
             </div>
           )}

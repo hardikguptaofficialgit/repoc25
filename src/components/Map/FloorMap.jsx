@@ -578,11 +578,19 @@ const FloorMap = ({
         if (initialCentered && stageSize.width > 0 && stageSize.height > 0) {
             // Small delay to let nodes update
             const timer = setTimeout(() => {
+                // If there's a path, center on path nodes, otherwise center on all
+                if (path.length > 0) {
+                    const pathNodes = path.map(id => nodes[id]).filter(Boolean);
+                    if (pathNodes.length > 0) {
+                        centerMapToFit(pathNodes);
+                        return;
+                    }
+                }
                 centerMapToFit();
             }, 100);
             return () => clearTimeout(timer);
         }
-    }, [currentFloor, initialCentered, stageSize, centerMapToFit]);
+    }, [currentFloor, initialCentered, stageSize, centerMapToFit, path, nodes]);
 
     // Load background image
     useEffect(() => {
