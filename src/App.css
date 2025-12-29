@@ -561,6 +561,7 @@ body {
     font-weight: 500;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -569,6 +570,79 @@ body {
 .clear-route-btn-mobile:hover {
     background: rgba(239, 68, 68, 0.25);
     color: #EF4444;
+}
+
+/* ===============================
+   COMPACT SELECTED MODE
+   =============================== */
+.search-compact-selected {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.search-inline-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.location-pill {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #0F0F0F;
+    border: 1px solid #2A2A2A;
+    border-radius: 10px;
+    padding: 10px 12px;
+    min-width: 0;
+}
+
+.pill-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.pill-dot.start {
+    background: #22C55E;
+}
+
+.pill-dot.end {
+    background: #EF4444;
+}
+
+.pill-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #FFFFFF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.swap-btn-inline {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 50%;
+    background: #181818;
+    border: 1px solid #2A2A2A;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.swap-btn-inline:hover {
+    background: var(--accent-gradient);
+    color: #fff;
+    transform: rotate(180deg);
 }
 
 /* ===============================
