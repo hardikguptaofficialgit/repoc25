@@ -130,37 +130,59 @@ function fuzzyMatchScore(query, text) {
 
 /**
  * Search for locations by query string with fuzzy matching
+ * @param {string} query - Search query
+ * @param {number} floor - Current floor number
+ * @param {boolean} searchAllFloors - If true, search across all floors
  */
-export function searchLocations(query, floor = 0) {
+export function searchLocations(query, floor = 0, searchAllFloors = false) {
     if (!query || query.length === 0) return [];
 
     const searchTerm = query.toLowerCase().trim();
     const results = [];
-    const floorNodes = getNodesByFloor(floor);
+    
+    // If searching all floors, iterate through floors 0-3
+    const floorsToSearch = searchAllFloors ? [0, 1, 2, 3] : [floor];
+    
+    for (const floorNum of floorsToSearch) {
+        const floorNodes = getNodesByFloor(floorNum);
 
-    for (let [nodeId, node] of Object.entries(floorNodes)) {
-        if (node.type === 'corridor') continue;
+        for (let [nodeId, node] of Object.entries(floorNodes)) {
+            if (node.type === 'corridor') continue;
+            
+            // Skip lifts and stairs when searching all floors (they exist on all floors)
+            if (searchAllFloors && (node.type === 'lift' || node.type === 'stairs') && floorNum !== floor) {
+                continue;
+            }
 
-        const labelScore = fuzzyMatchScore(searchTerm, node.label);
-        const typeScore = fuzzyMatchScore(searchTerm, node.type.replace(/_/g, ' '));
-        const idScore = fuzzyMatchScore(searchTerm, nodeId);
+            const labelScore = fuzzyMatchScore(searchTerm, node.label);
+            const typeScore = fuzzyMatchScore(searchTerm, node.type.replace(/_/g, ' '));
+            const idScore = fuzzyMatchScore(searchTerm, nodeId);
 
-        const bestScore = Math.max(labelScore, typeScore * 0.8, idScore * 0.6);
+            const bestScore = Math.max(labelScore, typeScore * 0.8, idScore * 0.6);
 
-        if (bestScore > 0) {
-            let typePriority = 1;
-            if (node.type === 'classroom') typePriority = 1.2;
-            if (node.type === 'washroom_gents' || node.type === 'washroom_ladies') typePriority = 1.3;
-            if (node.type === 'stairs' || node.type === 'lift') typePriority = 1.4;
-            if (node.type === 'entrance') typePriority = 1.5;
+            if (bestScore > 0) {
+                let typePriority = 1;
+                if (node.type === 'classroom') typePriority = 1.2;
+                if (node.type === 'washroom_gents' || node.type === 'washroom_ladies') typePriority = 1.3;
+                if (node.type === 'stairs' || node.type === 'lift') typePriority = 1.4;
+                if (node.type === 'entrance') typePriority = 1.5;
+                
+                // Slightly lower priority for results from other floors
+                const floorPenalty = floorNum === floor ? 1 : 0.9;
 
-            results.push({
-                id: nodeId,
-                label: node.label,
-                type: node.type,
-                score: bestScore * typePriority,
-                matchType: labelScore > typeScore ? 'label' : 'type'
-            });
+                // Check if this location already exists in results (avoid duplicates from same node on different floors)
+                const existingIndex = results.findIndex(r => r.id === nodeId);
+                if (existingIndex === -1) {
+                    results.push({
+                        id: nodeId,
+                        label: node.label,
+                        type: node.type,
+                        floor: floorNum,
+                        score: bestScore * typePriority * floorPenalty,
+                        matchType: labelScore > typeScore ? 'label' : 'type'
+                    });
+                }
+            }
         }
     }
 
