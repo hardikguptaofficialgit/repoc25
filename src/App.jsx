@@ -379,46 +379,72 @@ function App({ isAdmin, setIsAdmin }) {
       {/* --- Top Search Bar (Mobile-First) --- */}
       <div className="top-search-bar">
         <div className="top-search-card">
-          <div className="search-compact-group">
-            <div className="search-row">
-              <SearchBar
-                value={startLocation}
-                onChange={setStartLocation}
-                onSelect={handleStartSelect}
-                placeholder="From..."
-                floor={currentFloor}
-                searchAllFloors={true}
-              />
-            </div>
-            <div className="search-row">
-              <SearchBar
-                value={endLocation}
-                onChange={setEndLocation}
-                onSelect={handleEndSelect}
-                placeholder="To..."
-                floor={currentFloor}
-                searchAllFloors={true}
-              />
-              <button
-                className="swap-btn-compact"
-                onClick={handleSwapLocations}
-                disabled={!selectedStart || !selectedEnd}
-                title="Swap locations"
-              >
-                <ArrowUpDown size={18} />
-              </button>
-            </div>
-            {error && (
-              <div className="error-message">
-                <span className="error-icon">⚠</span> {error}
+          {/* Compact mode when both locations are selected */}
+          {selectedStart && selectedEnd ? (
+            <div className="search-compact-selected">
+              <div className="search-inline-row">
+                <div className="location-pill source-pill">
+                  <span className="pill-dot start"></span>
+                  <span className="pill-text">{selectedStart.label}</span>
+                </div>
+                <button
+                  className="swap-btn-inline"
+                  onClick={handleSwapLocations}
+                  title="Swap locations"
+                >
+                  <ArrowUpDown size={14} />
+                </button>
+                <div className="location-pill dest-pill">
+                  <span className="pill-dot end"></span>
+                  <span className="pill-text">{selectedEnd.label}</span>
+                </div>
               </div>
-            )}
-            {(selectedStart || selectedEnd) && (
               <button className="clear-route-btn-mobile" onClick={handleClearRoute}>
                 <Trash2 size={14} /> Clear Route
               </button>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="search-compact-group">
+              <div className="search-row">
+                <SearchBar
+                  value={startLocation}
+                  onChange={setStartLocation}
+                  onSelect={handleStartSelect}
+                  placeholder="From..."
+                  floor={currentFloor}
+                  searchAllFloors={true}
+                />
+              </div>
+              <div className="search-row">
+                <SearchBar
+                  value={endLocation}
+                  onChange={setEndLocation}
+                  onSelect={handleEndSelect}
+                  placeholder="To..."
+                  floor={currentFloor}
+                  searchAllFloors={true}
+                />
+                <button
+                  className="swap-btn-compact"
+                  onClick={handleSwapLocations}
+                  disabled={!selectedStart || !selectedEnd}
+                  title="Swap locations"
+                >
+                  <ArrowUpDown size={18} />
+                </button>
+              </div>
+              {error && (
+                <div className="error-message">
+                  <span className="error-icon">⚠</span> {error}
+                </div>
+              )}
+              {(selectedStart || selectedEnd) && (
+                <button className="clear-route-btn-mobile" onClick={handleClearRoute}>
+                  <Trash2 size={14} /> Clear Route
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
