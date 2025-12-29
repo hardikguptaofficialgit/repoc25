@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import './SearchBar.css';
 
-const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location...", floor = 0 }) => {
+const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location...", floor = 0, searchAllFloors = false }) => {
     const [query, setQuery] = useState(value || '');
     const [suggestions, setSuggestions] = useState([]);
     const [showSuggestions, setShowSuggestions] = useState(false);
@@ -21,14 +21,14 @@ const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location..
 
     useEffect(() => {
         if (query.length > 0) {
-            const results = searchLocations(query, floor);
+            const results = searchLocations(query, floor, searchAllFloors);
             setSuggestions(results);
             // Don't automatically show suggestions if they were explicitly hidden
         } else {
             setSuggestions([]);
             setShowSuggestions(false);
         }
-    }, [query, floor]);
+    }, [query, floor, searchAllFloors]);
 
     useEffect(() => {
         setQuery(value || '');
@@ -166,7 +166,7 @@ const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location..
                     {suggestions.length > 0 ? (
                         suggestions.map((location, index) => (
                             <div
-                                key={location.id}
+                                key={`${location.id}-${location.floor}`}
                                 className={`suggestion-item ${index === selectedIndex ? 'selected' : ''}`}
                                 onClick={() => handleSelectSuggestion(location)}
                                 onMouseEnter={() => setSelectedIndex(index)}
@@ -177,6 +177,11 @@ const SearchBar = ({ value, onChange, onSelect, placeholder = "Search location..
                                 <div className="suggestion-content">
                                     <div className="suggestion-label">
                                         {location.label}
+                                        {location.floor !== undefined && location.floor !== floor && (
+                                            <span className="floor-badge">
+                                                {location.floor === 0 ? 'GF' : `${location.floor}F`}
+                                            </span>
+                                        )}
                                         {location.matchType && location.score > 700 && (
                                             <span className="match-badge">{location.matchType === 'label' ? 'exact' : 'type'}</span>
                                         )}
