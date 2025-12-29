@@ -694,32 +694,26 @@ body {
    CROSS-FLOOR NAVIGATION
    =============================== */
 .cross-floor-indicator {
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.15) 100%);
-    border: 1px solid rgba(168, 85, 247, 0.3);
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.15) 100%);
+    border: 1px solid rgba(249, 115, 22, 0.3);
     border-radius: var(--radius-md);
-    padding: 16px;
-    margin-bottom: 12px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
 }
 
 .cross-floor-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
-    margin-bottom: 16px;
-}
-
-.cross-floor-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--text-primary);
+    margin-bottom: 8px;
 }
 
 .cross-floor-info {
-    font-size: 12px;
-    color: rgba(168, 85, 247, 1);
-    font-weight: 500;
-    background: rgba(168, 85, 247, 0.2);
-    padding: 4px 10px;
+    font-size: 13px;
+    color: #fff;
+    font-weight: 600;
+    background: rgba(249, 115, 22, 1);
+    padding: 4px 12px;
     border-radius: 20px;
 }
 
@@ -858,30 +852,38 @@ body {
    TRANSITION SELECTION (Lift/Stairs)
    =============================== */
 .transition-selection {
-    margin-top: 12px;
+    margin-top: 4px;
 }
 
 .selection-title {
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-secondary);
-    margin-bottom: 12px;
+    margin-bottom: 8px;
     text-align: center;
 }
 
 .transition-options {
     display: flex;
-    gap: 12px;
+    gap: 8px;
+    align-items: center;
+}
+
+.transition-or {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .transition-option {
     flex: 1;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    justify-content: center;
     gap: 8px;
-    padding: 16px 12px;
-    border-radius: var(--radius-md);
-    border: 2px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(255, 255, 255, 0.03);
     cursor: pointer;
     transition: all 0.2s ease;
@@ -894,21 +896,17 @@ body {
 }
 
 .transition-option.lift-option:hover {
-    border-color: rgba(168, 85, 247, 0.5);
-    background: rgba(168, 85, 247, 0.1);
+    border-color: rgba(249, 115, 22, 0.5);
+    background: rgba(249, 115, 22, 0.1);
 }
 
 .transition-option.stairs-option:hover {
-    border-color: rgba(34, 197, 94, 0.5);
-    background: rgba(34, 197, 94, 0.1);
-}
-
-.option-icon {
-    font-size: 32px;
+    border-color: rgba(249, 115, 22, 0.5);
+    background: rgba(249, 115, 22, 0.1);
 }
 
 .option-label {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -916,7 +914,4 @@ body {
 .option-distance {
     font-size: 11px;
     color: var(--text-secondary);
-    background: rgba(255, 255, 255, 0.1);
-    padding: 4px 8px;
-    border-radius: 12px;
 }
