@@ -715,18 +715,18 @@ body {
 
     /* Map tool layer repositioned */
     .map-tool-layer {
-        top: auto;
-        bottom: calc(70px + var(--safe-area-bottom));
+        top: 130px;
+        bottom: auto;
         right: 12px;
-        transition: bottom 0.3s ease;
+        transition: top 0.3s ease;
     }
 
     .sidebar-wrapper:not(.closed) ~ .map-tool-layer {
-        bottom: calc(65vh + 20px);
+        top: 130px;
     }
 
     .sidebar-wrapper.minimized ~ .map-tool-layer {
-        bottom: calc(120px + var(--safe-area-bottom));
+        top: 130px;
     }
 
     .floating-menu-trigger {
