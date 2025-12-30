@@ -5,6 +5,7 @@ import RouteInfo from './components/Navigation/RouteInfo';
 import QuickActions from './components/Navigation/QuickActions';
 import NavigationOverlay from './components/Navigation/NavigationOverlay';
 import InstallPrompt from './components/UI/InstallPrompt';
+import TutorialGuide from './components/UI/TutorialGuide';
 import { buildGraph, getNodesByFloor } from './utils/graphBuilder';
 import { findShortestPath, findNearestPOI, calculateCrossFloorRoute } from './utils/pathfinding';
 import { nodes, poiCategories } from './data/buildingData';
@@ -32,6 +33,11 @@ function App({ isAdmin, setIsAdmin }) {
   const [navigationPhase, setNavigationPhase] = useState(0); // 0: not started, 1: to lift/stairs, 2: transition, 3: to destination
   const [startFloor, setStartFloor] = useState(null);
   const [endFloor, setEndFloor] = useState(null);
+
+  // Tutorial guide state
+  const [showTutorial, setShowTutorial] = useState(() => {
+    return localStorage.getItem('tutorialShown') !== 'true';
+  });
 
   // Check for existing admin session
   useEffect(() => {
@@ -705,6 +711,10 @@ function App({ isAdmin, setIsAdmin }) {
       </div>
 
       <InstallPrompt />
+      
+      {showTutorial && (
+        <TutorialGuide onClose={() => setShowTutorial(false)} />
+      )}
     </div>
   );
 }
