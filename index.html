@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/icon-512.png" />
+    <link rel="icon" type="image/png" href="./icon-192.png" />
     <!-- Enhanced viewport for PWA with safe area support -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no" />
     <meta name="description"
@@ -17,8 +17,8 @@
     <meta name="apple-mobile-web-app-title" content="C25Go" />
     
     <!-- Manifest and Icons -->
-    <link rel="manifest" href="/manifest.json" />
-    <link rel="apple-touch-icon" href="/icon-512.png" />
+    <link rel="manifest" href="./manifest.json" />
+    <link rel="apple-touch-icon" href="./icon-192.png" />
     
     <title>C25Go - Campus Navigation</title>
 </head>
@@ -26,50 +26,6 @@
 <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
-    <script>
-        // Register service worker for PWA
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js', { scope: '/' })
-                    .then((registration) => {
-                        console.log('[PWA] Service Worker registered successfully:', registration.scope);
-                        
-                        // Check for updates every hour
-                        setInterval(() => {
-                            registration.update();
-                        }, 3600000);
-                        
-                        // Check for updates
-                        registration.addEventListener('updatefound', () => {
-                            const newWorker = registration.installing;
-                            console.log('[PWA] New service worker found, updating...');
-                            
-                            newWorker.addEventListener('statechange', () => {
-                                if (newWorker.state === 'activated') {
-                                    console.log('[PWA] New service worker activated');
-                                    if (confirm('New version available! Reload to update?')) {
-                                        window.location.reload();
-                                    }
-                                }
-                            });
-                        });
-                    })
-                    .catch((error) => {
-                        console.error('[PWA] Service Worker registration failed:', error);
-                    });
-            });
-        } else {
-            console.warn('[PWA] Service Workers not supported in this browser');
-        }
-
-        // Handle installation prompt
-        let deferredPrompt;
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            console.log('[PWA] Install prompt ready');
-        });
-    </script>
 </body>
 
 </html>

@@ -6,6 +6,28 @@ import App from './App.jsx'
 import AdminPage from './pages/AdminPage.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 
+if (import.meta.env.PROD) {
+  import('virtual:pwa-register').then(({ registerSW }) => {
+    const updateSW = registerSW({
+      onRegisteredSW(_swUrl, registration) {
+        if (!registration) return;
+        // Check for updates every hour
+        setInterval(() => {
+          registration.update();
+        }, 3600000);
+      },
+      onNeedRefresh() {
+        if (confirm('New version available! Reload to update?')) {
+          updateSW(true);
+        }
+      },
+      onOfflineReady() {
+        console.log('[PWA] App is ready to work offline');
+      },
+    });
+  });
+}
+
 // Compute safe-area insets for browsers where env(safe-area-inset-*) is 0 (common on Android).
 // Uses visualViewport to estimate the occluded bottom area (system bars / dynamic UI).
 const installSafeAreaVars = () => {
