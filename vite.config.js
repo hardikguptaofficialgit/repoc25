@@ -10,5 +10,14 @@ export default defineConfig({
     hmr: {
       overlay: false, // Disabled to prevent iframe-related errors with React Konva
     }
-  }
+  },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
+  },
+  // Ensure public folder assets are correctly copied
+  publicDir: 'public'
 })

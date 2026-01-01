@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#D34A09">
+    <title>PWA Installation Test - C25Go</title>
+    <link rel="manifest" href="/manifest.json">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            color: #D34A09;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .status {
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .status-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .success { background: #4CAF50; }
+        .error { background: #f44336; }
+        .warning { background: #ff9800; }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px 0;
+        }
+        
+        .install-btn {
+            background: #D34A09;
+            color: white;
+        }
+        
+        .install-btn:hover {
+            background: #b33d07;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(211, 74, 9, 0.3);
+        }
+        
+        .install-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .test-btn {
+            background: #667eea;
+            color: white;
+        }
+        
+        .test-btn:hover {
+            background: #5568d3;
+        }
+        
+        .info {
+            background: #e3f2fd;
+            padding: 15px;
+            border-left: 4px solid #2196F3;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .info h3 {
+            color: #1976D2;
+            margin-bottom: 10px;
+        }
+        
+        .info ul {
+            margin-left: 20px;
+        }
+        
+        .info li {
+            margin: 5px 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 PWA Installation Test</h1>
+        
+        <div class="status" id="status">
+            <div class="status-item">
+                <span class="icon" id="https-status"></span>
+                <span>HTTPS/Localhost: <strong id="https-text">Checking...</strong></span>
+            </div>
+            <div class="status-item">
+                <span class="icon" id="sw-status"></span>
+                <span>Service Worker: <strong id="sw-text">Checking...</strong></span>
+            </div>
+            <div class="status-item">
+                <span class="icon" id="manifest-status"></span>
+                <span>Manifest: <strong id="manifest-text">Checking...</strong></span>
+            </div>
+            <div class="status-item">
+                <span class="icon" id="install-status"></span>
+                <span>Install Prompt: <strong id="install-text">Waiting...</strong></span>
+            </div>
+        </div>
+        
+        <button id="installBtn" class="install-btn" disabled>
+            ⏳ Waiting for install prompt...
+        </button>
+        
+        <button id="testBtn" class="test-btn">
+            🔍 Run Diagnostics
+        </button>
+        
+        <div class="info">
+            <h3>ℹ️ Requirements for PWA Installation:</h3>
+            <ul>
+                <li>Must be served over HTTPS or localhost</li>
+                <li>Must have a valid manifest.json</li>
+                <li>Must have a registered service worker</li>
+                <li>Must have icons in the manifest</li>
+                <li>User must not have already installed the app</li>
+            </ul>
+        </div>
+        
+        <div id="diagnostics" style="display: none;" class="info">
+            <h3>📊 Diagnostics:</h3>
+            <pre id="diagnosticsOutput" style="font-size: 12px; overflow-x: auto;"></pre>
+        </div>
+    </div>
+
+    <script>
+        let deferredPrompt = null;
+        
+        // Check HTTPS
+        const isSecure = location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+        document.getElementById('https-status').className = 'icon ' + (isSecure ? 'success' : 'error');
+        document.getElementById('https-text').textContent = isSecure ? 'Secure ✓' : 'Not Secure ✗';
+        
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+                .then(registration => {
+                    console.log('[PWA] Service Worker registered:', registration.scope);
+                    document.getElementById('sw-status').className = 'icon success';
+                    document.getElementById('sw-text').textContent = 'Registered ✓';
+                })
+                .catch(error => {
+                    console.error('[PWA] Service Worker registration failed:', error);
+                    document.getElementById('sw-status').className = 'icon error';
+                    document.getElementById('sw-text').textContent = 'Failed ✗';
+                });
+        } else {
+            document.getElementById('sw-status').className = 'icon error';
+            document.getElementById('sw-text').textContent = 'Not Supported ✗';
+        }
+        
+        // Check Manifest
+        fetch('/manifest.json')
+            .then(response => response.json())
+            .then(manifest => {
+                console.log('[PWA] Manifest loaded:', manifest);
+                document.getElementById('manifest-status').className = 'icon success';
+                document.getElementById('manifest-text').textContent = 'Valid ✓';
+            })
+            .catch(error => {
+                console.error('[PWA] Manifest error:', error);
+                document.getElementById('manifest-status').className = 'icon error';
+                document.getElementById('manifest-text').textContent = 'Error ✗';
+            });
+        
+        // Listen for install prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('[PWA] beforeinstallprompt event fired');
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            document.getElementById('install-status').className = 'icon success';
+            document.getElementById('install-text').textContent = 'Ready ✓';
+            
+            const installBtn = document.getElementById('installBtn');
+            installBtn.disabled = false;
+            installBtn.textContent = '📥 Install App';
+        });
+        
+        // Check if already installed
+        window.addEventListener('appinstalled', () => {
+            console.log('[PWA] App was installed');
+            document.getElementById('install-status').className = 'icon success';
+            document.getElementById('install-text').textContent = 'Installed ✓';
+            
+            const installBtn = document.getElementById('installBtn');
+            installBtn.disabled = true;
+            installBtn.textContent = '✓ Already Installed';
+        });
+        
+        // Check if running in standalone mode
+        if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+            console.log('[PWA] Running in standalone mode');
+            document.getElementById('install-status').className = 'icon success';
+            document.getElementById('install-text').textContent = 'Installed ✓';
+            
+            const installBtn = document.getElementById('installBtn');
+            installBtn.disabled = true;
+            installBtn.textContent = '✓ Already Installed';
+        }
+        
+        // Install button click handler
+        document.getElementById('installBtn').addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                alert('Installation prompt is not available. See diagnostics for details.');
+                return;
+            }
+            
+            try {
+                await deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                console.log('[PWA] User choice:', outcome);
+                
+                if (outcome === 'accepted') {
+                    document.getElementById('installBtn').textContent = '✓ Installed!';
+                    document.getElementById('installBtn').disabled = true;
+                } else {
+                    document.getElementById('installBtn').textContent = '❌ Installation Cancelled';
+                }
+                
+                deferredPrompt = null;
+            } catch (error) {
+                console.error('[PWA] Installation error:', error);
+                alert('Installation failed: ' + error.message);
+            }
+        });
+        
+        // Diagnostics button
+        document.getElementById('testBtn').addEventListener('click', async () => {
+            const diagnosticsDiv = document.getElementById('diagnostics');
+            const output = document.getElementById('diagnosticsOutput');
+            
+            const diagnostics = {
+                userAgent: navigator.userAgent,
+                platform: navigator.platform,
+                standalone: window.matchMedia('(display-mode: standalone)').matches,
+                serviceWorkerSupported: 'serviceWorker' in navigator,
+                protocol: location.protocol,
+                hostname: location.hostname,
+                deferredPromptAvailable: !!deferredPrompt,
+            };
+            
+            // Check service worker state
+            if ('serviceWorker' in navigator) {
+                const registration = await navigator.serviceWorker.getRegistration();
+                diagnostics.serviceWorkerState = registration ? registration.active?.state : 'not registered';
+            }
+            
+            output.textContent = JSON.stringify(diagnostics, null, 2);
+            diagnosticsDiv.style.display = 'block';
+        });
+        
+        // Timeout fallback for install prompt
+        setTimeout(() => {
+            if (!deferredPrompt) {
+                document.getElementById('install-status').className = 'icon warning';
+                document.getElementById('install-text').textContent = 'Not Available';
+                
+                const installBtn = document.getElementById('installBtn');
+                installBtn.textContent = '⚠️ Install Not Available';
+                installBtn.disabled = true;
+            }
+        }, 5000);
+    </script>
+</body>
+</html>
