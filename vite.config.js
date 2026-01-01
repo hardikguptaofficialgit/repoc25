@@ -16,8 +16,12 @@ export default defineConfig({
       output: {
         manualChunks: undefined
       }
-    }
+    },
+    // Generate service worker compatible builds
+    sourcemap: false,
+    minify: 'esbuild'
   },
   // Ensure public folder assets are correctly copied
-  publicDir: 'public'
+  publicDir: 'public',
+  base: './' // Use relative paths for better PWA compatibility
 })
