@@ -1,9 +1,48 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    VitePWA({
+      filename: 'sw.js',
+      manifestFilename: 'manifest.json',
+      injectRegister: null,
+      registerType: 'prompt',
+      manifest: {
+        name: 'C25Go - Campus Navigation',
+        short_name: 'C25Go',
+        description:
+          'Navigate through Campus 25 with ease. Find shortest paths between classrooms and locate facilities.',
+        start_url: './',
+        scope: './',
+        display: 'standalone',
+        background_color: '#ffffff',
+        theme_color: '#D34A09',
+        orientation: 'portrait',
+        categories: ['navigation', 'education', 'utilities'],
+        icons: [
+          { src: 'icon-72.png', sizes: '72x72', type: 'image/png', purpose: 'any maskable' },
+          { src: 'icon-96.png', sizes: '96x96', type: 'image/png', purpose: 'any maskable' },
+          { src: 'icon-128.png', sizes: '128x128', type: 'image/png', purpose: 'any maskable' },
+          { src: 'icon-144.png', sizes: '144x144', type: 'image/png', purpose: 'any maskable' },
+          { src: 'icon-152.png', sizes: '152x152', type: 'image/png', purpose: 'any maskable' },
+          { src: 'icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
+          { src: 'icon-384.png', sizes: '384x384', type: 'image/png', purpose: 'any maskable' },
+          { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' },
+        ],
+      },
+      workbox: {
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json,txt,woff2}'],
+        navigateFallback: 'index.html',
+        cleanupOutdatedCaches: true,
+        clientsClaim: true,
+        skipWaiting: true,
+      },
+    }),
+  ],
   server: {
     host: true, // Listen on all network interfaces
     port: 5173,
