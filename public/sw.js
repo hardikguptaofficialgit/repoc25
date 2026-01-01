@@ -14,7 +14,9 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[Service Worker] Caching app shell');
-        return cache.addAll(urlsToCache);
+        return cache.addAll(urlsToCache).catch(err => {
+          console.error('[Service Worker] Cache addAll error:', err);
+        });
       })
       .then(() => {
         console.log('[Service Worker] Skip waiting');
@@ -45,6 +47,11 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event - serve from cache, fallback to network
 self.addEventListener('fetch', (event) => {
+  // Skip cross-origin requests
+  if (!event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((response) => {
@@ -72,8 +79,11 @@ self.addEventListener('fetch', (event) => {
 
           return response;
         }).catch(() => {
-          // Fallback for offline
-          return caches.match('/index.html');
+          // Fallback for offline - return index.html for navigation requests
+          if (event.request.mode === 'navigate') {
+            return caches.match('/index.html');
+          }
+          return new Response('Offline', { status: 503 });
         });
       })
   );

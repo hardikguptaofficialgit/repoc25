@@ -2,12 +2,11 @@
   "name": "C25Go - Campus Navigation",
   "short_name": "C25Go",
   "description": "Navigate through Campus 25 with ease. Find shortest paths between classrooms and locate facilities.",
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#D34A09",
   "orientation": "portrait",
-  "scope": "/",
   "icons": [
     {
       "src": "/icon-72.png",
