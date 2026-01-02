@@ -603,6 +603,7 @@ function App({ isAdmin, setIsAdmin }) {
                 onPrevPhase={handlePrevPhase}
                 startFloor={startFloor}
                 endFloor={endFloor}
+                onSwitchTransitionType={handleSelectTransition}
               />
             </div>
           )}
@@ -628,13 +629,13 @@ function App({ isAdmin, setIsAdmin }) {
 
               {path.length > 0 && (
                 <>
-                  <div className="divider"></div>
+                  {/* <div className="divider"></div>
                   <RouteInfo
                     path={path}
                     distance={distance}
                     startLabel={startLocation}
                     endLabel={endLocation}
-                  />
+                  /> */}
                 </>
               )}
             </>
