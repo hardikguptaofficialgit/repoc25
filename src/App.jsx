@@ -6,6 +6,8 @@ import QuickActions from './components/Navigation/QuickActions';
 import NavigationOverlay from './components/Navigation/NavigationOverlay';
 import InstallPrompt from './components/UI/InstallPrompt';
 import TutorialGuide from './components/UI/TutorialGuide';
+import ThemeToggle from './components/UI/ThemeToggle';
+import SettingsPanel from './components/UI/SettingsPanel';
 import { buildGraph, getNodesByFloor } from './utils/graphBuilder';
 import { findShortestPath, findNearestPOI, calculateCrossFloorRoute } from './utils/pathfinding';
 import { nodes, poiCategories } from './data/buildingData';
@@ -72,11 +74,11 @@ function App({ isAdmin, setIsAdmin }) {
 
   const calculateRoute = (startId, endId) => {
     if (!graph) return;
-    
+
     // Check if start and end are on the same floor
     const startFloorNum = selectedStart?.floor ?? currentFloor;
     const endFloorNum = selectedEnd?.floor ?? currentFloor;
-    
+
     // If same floor, use normal routing
     if (startFloorNum === endFloorNum) {
       const result = findShortestPath(graph, startId, endId);
@@ -98,7 +100,7 @@ function App({ isAdmin, setIsAdmin }) {
       // Cross-floor navigation
       const startFloorNodes = getNodesByFloor(startFloorNum);
       const endFloorNodes = getNodesByFloor(endFloorNum);
-      
+
       const crossFloorResult = calculateCrossFloorRoute(
         graph,
         startId,
@@ -109,7 +111,7 @@ function App({ isAdmin, setIsAdmin }) {
         startFloorNum,
         endFloorNum
       );
-      
+
       if (crossFloorResult.error) {
         setError(crossFloorResult.error);
         setPath([]);
@@ -121,7 +123,7 @@ function App({ isAdmin, setIsAdmin }) {
         setNavigationPhase(0); // Phase 0 = selection phase
         setStartFloor(startFloorNum);
         setEndFloor(endFloorNum);
-        
+
         // Don't set path yet - wait for user to select lift or stairs
         setPath([]);
         setDistance(crossFloorResult.totalDistance);
@@ -133,14 +135,14 @@ function App({ isAdmin, setIsAdmin }) {
   // Handle selecting a transition type (lift or stairs)
   const handleSelectTransition = (transitionType) => {
     if (!crossFloorNavigation || !selectedStart || !selectedEnd) return;
-    
+
     // Use floor info from crossFloorNavigation (more reliable than state)
     const srcFloor = crossFloorNavigation.startFloor ?? startFloor;
     const dstFloor = crossFloorNavigation.endFloor ?? endFloor;
-    
+
     const startFloorNodes = getNodesByFloor(srcFloor);
     const endFloorNodes = getNodesByFloor(dstFloor);
-    
+
     // Recalculate route with the selected transition type
     const crossFloorResult = calculateCrossFloorRoute(
       graph,
@@ -153,17 +155,17 @@ function App({ isAdmin, setIsAdmin }) {
       dstFloor,
       transitionType // Pass the preferred transition type
     );
-    
+
     if (crossFloorResult.error) {
       setError(crossFloorResult.error);
       return;
     }
-    
+
     setCrossFloorNavigation(crossFloorResult);
     setNavigationPhase(1); // Move to phase 1 (navigation to lift/stairs)
     setPath(crossFloorResult.phases[0].path);
     setDistance(crossFloorResult.totalDistance);
-    
+
     // Ensure floor states are set
     setStartFloor(srcFloor);
     setEndFloor(dstFloor);
@@ -172,9 +174,9 @@ function App({ isAdmin, setIsAdmin }) {
   // Handle navigation phase transitions
   const handleNextPhase = () => {
     if (!crossFloorNavigation) return;
-    
+
     const nextPhase = navigationPhase + 1;
-    
+
     if (nextPhase === 2) {
       // Transition phase - show message to take lift/stairs
       setNavigationPhase(2);
@@ -186,7 +188,7 @@ function App({ isAdmin, setIsAdmin }) {
       // Use floor info from crossFloorNavigation (more reliable)
       const targetFloor = crossFloorNavigation.endFloor ?? endFloor;
       setCurrentFloor(targetFloor); // Automatically switch to destination floor
-      
+
       // Get the path for phase 3 (index 2 in the phases array)
       const phase3Path = crossFloorNavigation.phases[2]?.path || [];
       console.log('Phase 3 path:', phase3Path, 'Target floor:', targetFloor);
@@ -200,9 +202,9 @@ function App({ isAdmin, setIsAdmin }) {
 
   const handlePrevPhase = () => {
     if (!crossFloorNavigation || navigationPhase <= 1) return;
-    
+
     const prevPhase = navigationPhase - 1;
-    
+
     if (prevPhase === 1) {
       setNavigationPhase(1);
       // Use floor info from crossFloorNavigation (more reliable)
@@ -289,7 +291,7 @@ function App({ isAdmin, setIsAdmin }) {
 
     if (result.target) {
       const targetNode = nodes[result.target];
-      
+
       // Update start location to current position if we were in cross-floor navigation
       if (crossFloorNavigation && navigationPhase === 3) {
         setSelectedStart({
@@ -301,7 +303,7 @@ function App({ isAdmin, setIsAdmin }) {
         setStartLocation(currentPositionLabel);
         setStartFloor(currentFloor);
       }
-      
+
       setSelectedEnd({
         id: result.target,
         label: targetNode.label,
@@ -559,7 +561,7 @@ function App({ isAdmin, setIsAdmin }) {
                   {/* <p className="selection-title">Multi-Floor Navigation</p> */}
                   <div className="transition-options">
                     {crossFloorNavigation.options.lift && (
-                      <button 
+                      <button
                         className="transition-option lift-option"
                         onClick={() => handleSelectTransition('lift')}
                       >
@@ -573,7 +575,7 @@ function App({ isAdmin, setIsAdmin }) {
                       <span className="transition-or">OR</span>
                     )}
                     {crossFloorNavigation.options.stairs && (
-                      <button 
+                      <button
                         className="transition-option stairs-option"
                         onClick={() => handleSelectTransition('stairs')}
                       >
@@ -592,8 +594,8 @@ function App({ isAdmin, setIsAdmin }) {
           {/* Navigation Instructions - handles both single-floor and multi-floor navigation */}
           {(path.length > 0 || (crossFloorNavigation && navigationPhase === 2)) && (
             <div className="navigation-integrated">
-              <NavigationOverlay 
-                path={path} 
+              <NavigationOverlay
+                path={path}
                 isMinimized={sidebarMinimized}
                 onToggleMinimize={() => setSidebarMinimized(!sidebarMinimized)}
                 crossFloorPhase={navigationPhase}
@@ -664,36 +666,42 @@ function App({ isAdmin, setIsAdmin }) {
           </>
         )}
 
-        {/* Floor Dropdown */}
-        <div className="floor-dropdown-container">
-          <button
-            className="floor-dropdown-trigger glass-btn"
-            onClick={() => setShowFloorDropdown(!showFloorDropdown)}
-          >
-            <Building size={18} />
-            <span className="floor-label">{currentFloor === 0 ? 'GF' : `${currentFloor}F`}</span>
-            <ChevronDown size={14} className={showFloorDropdown ? 'rotate-180' : ''} />
-          </button>
+        {/* Settings & Floor Control Group */}
+        <div className="map-controls-group">
+          {/* Settings Panel */}
+          <SettingsPanel />
 
-          {showFloorDropdown && (
-            <div className="floor-options-panel glass-panel">
-              {[3, 2, 1, 0].map((floor) => (
-                <button
-                  key={floor}
-                  className={`floor-option ${currentFloor === floor ? 'selected' : ''}`}
-                  onClick={() => {
-                    setCurrentFloor(floor);
-                    setShowFloorDropdown(false);
-                  }}
-                >
-                  <span className="floor-num">{floor === 0 ? 'G' : `${floor}F`}</span>
-                  <span className="floor-name">
-                    {floor === 0 ? 'Ground Floor' : `${floor}${floor === 1 ? 'st' : floor === 2 ? 'nd' : 'rd'} Floor`}
-                  </span>
-                </button>
-              ))}
-            </div>
-          )}
+          {/* Floor Dropdown */}
+          <div className="floor-dropdown-container">
+            <button
+              className="floor-dropdown-trigger glass-btn"
+              onClick={() => setShowFloorDropdown(!showFloorDropdown)}
+            >
+              <Building size={18} />
+              <span className="floor-label">{currentFloor === 0 ? 'GF' : `${currentFloor}F`}</span>
+              <ChevronDown size={14} className={showFloorDropdown ? 'rotate-180' : ''} />
+            </button>
+
+            {showFloorDropdown && (
+              <div className="floor-options-panel glass-panel">
+                {[3, 2, 1, 0].map((floor) => (
+                  <button
+                    key={floor}
+                    className={`floor-option ${currentFloor === floor ? 'selected' : ''}`}
+                    onClick={() => {
+                      setCurrentFloor(floor);
+                      setShowFloorDropdown(false);
+                    }}
+                  >
+                    <span className="floor-num">{floor === 0 ? 'G' : `${floor}F`}</span>
+                    <span className="floor-name">
+                      {floor === 0 ? 'Ground Floor' : `${floor}${floor === 1 ? 'st' : floor === 2 ? 'nd' : 'rd'} Floor`}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -711,7 +719,7 @@ function App({ isAdmin, setIsAdmin }) {
       </div>
 
       <InstallPrompt />
-      
+
       {showTutorial && (
         <TutorialGuide onClose={() => setShowTutorial(false)} />
       )}

@@ -1,3 +1,6 @@
+/* ===============================
+   INSTALL PROMPT
+   =============================== */
 .install-prompt {
     position: fixed;
     bottom: -100px;
@@ -28,14 +31,16 @@
 .install-icon {
     width: 48px;
     height: 48px;
-    background: rgba(255, 255, 255, 0.15);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
     flex-shrink: 0;
+    border: 2px solid #ffffff;
+    background: transparent;
 }
+
 
 .install-text {
     flex: 1;
@@ -72,36 +77,40 @@
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, opacity 0.2s ease;
 }
 
 .install-btn:hover {
     background: #fff;
-    transform: scale(1.05);
+    opacity: 0.9;
 }
 
 .install-btn:active {
-    transform: scale(0.98);
+    opacity: 0.8;
 }
 
 .dismiss-btn {
     width: 36px;
     height: 36px;
-    background: rgba(255, 255, 255, 0.15);
-    border: none;
-    border-radius: 8px;
+    background: black;
+    border: 2px solid #ffffff;
+    border-radius: 30px;
     color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: border-color 0.2s ease;
 }
+
 
 .dismiss-btn:hover {
     background: rgba(255, 255, 255, 0.25);
 }
 
+/* ===============================
+   MOBILE RESPONSIVE
+   =============================== */
 @media (max-width: 768px) {
     .install-prompt {
         width: calc(100% - 32px);

@@ -1,0 +1,125 @@
+/* Theme Toggle - Button Variant */
+.theme-toggle-buttons {
+    display: flex;
+    gap: 8px;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 4px;
+}
+
+.theme-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: transparent;
+    border: none;
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.theme-btn:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+}
+
+.theme-btn.active {
+    background: var(--primary-color);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px var(--primary-shadow);
+}
+
+.theme-btn svg {
+    flex-shrink: 0;
+}
+
+/* Theme Toggle - Switch Variant */
+.theme-toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.theme-toggle-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.theme-icon {
+    color: var(--text-secondary);
+    transition: color 0.2s ease;
+}
+
+.theme-toggle-label:hover .theme-icon {
+    color: var(--text-primary);
+}
+
+.theme-toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+}
+
+.theme-toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-slider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--toggle-bg);
+    border-radius: 24px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+}
+
+.theme-slider:before {
+    content: '';
+    position: absolute;
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 2px;
+    background: var(--toggle-knob);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.theme-toggle-switch input:checked+.theme-slider {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.theme-toggle-switch input:checked+.theme-slider:before {
+    transform: translateX(20px);
+    background: #FFFFFF;
+}
+
+.theme-toggle-switch:hover .theme-slider {
+    border-color: var(--primary-color);
+}
+
+/* Mobile Adjustments */
+@media (max-width: 768px) {
+    .theme-toggle-buttons {
+        width: 100%;
+    }
+
+    .theme-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}

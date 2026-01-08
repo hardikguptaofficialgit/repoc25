@@ -1,26 +1,12 @@
 /* ===============================
-   GLOBAL THEME VARIABLES (REFINED)
+   APP-SPECIFIC VARIABLES
    =============================== */
 :root {
-    --bg-primary: #000000;
-    --bg-secondary: #0A0A0A;
-
-    --glass-bg: rgba(18, 18, 18, 0.92);
-    --glass-border: rgba(255, 255, 255, 0.06);
-
-    --text-primary: #FFFFFF;
-    --text-secondary: #9A9A9A;
-
-    --accent-primary: #D34A09;
-    --accent-secondary: #D8830D;
+    /* App-specific variables that complement the theme system */
     --accent-gradient: linear-gradient(135deg, #D34A09 0%, #D8830D 100%);
-
-    --shadow-float: 0 6px 24px rgba(0, 0, 0, 0.55);
-
     --radius-sm: 10px;
     --radius-md: 14px;
     --radius-lg: 16px;
-
     --font-family: 'Inter', sans-serif;
 }
 
@@ -28,8 +14,6 @@
    BASE
    =============================== */
 body {
-    background: var(--bg-primary);
-    color: var(--text-primary);
     font-family: var(--font-family);
     overflow: hidden;
 }
@@ -78,9 +62,9 @@ body {
     width: 40px;
     height: 40px;
 
-    background: var(--glass-bg);
+    background: var(--surface-elevated);
     backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
 
     color: var(--text-primary);
@@ -89,13 +73,13 @@ body {
     justify-content: center;
 
     cursor: pointer;
-    box-shadow: var(--shadow-float);
+    box-shadow: var(--shadow-md);
 
     transition: background 0.15s ease, transform 0.15s ease;
 }
 
 .glass-btn:hover {
-    background: #1E1E1E;
+    background: var(--hover-bg);
 }
 
 .glass-btn.active {
@@ -130,11 +114,11 @@ body {
    FLOATING PANELS (ISLANDS)
    =============================== */
 .panel-card {
-    background: var(--glass-bg);
+    background: var(--surface-elevated);
     backdrop-filter: blur(14px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-float);
+    box-shadow: var(--shadow-lg);
 
     pointer-events: auto;
     overflow: hidden;
@@ -168,7 +152,7 @@ body {
     justify-content: space-between;
     align-items: center;
 
-    border-bottom: 1px solid var(--glass-border);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .brand {
@@ -257,8 +241,8 @@ body {
     height: 24px;
 
     border-radius: 50%;
-    background: #181818;
-    border: 1px solid var(--glass-border);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
 
     color: var(--text-secondary);
     display: flex;
@@ -359,7 +343,7 @@ body {
 
 .divider {
     height: 1px;
-    background: var(--glass-border);
+    background: var(--border-color);
     margin: 10px 0;
 }
 
@@ -375,6 +359,15 @@ body {
     display: flex;
     flex-direction: column;
     gap: 12px;
+}
+
+.map-controls-group {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    justify-content: flex-end;
+    /* Align to right */
 }
 
 .admin-controls-group {
@@ -445,11 +438,11 @@ body {
 }
 
 .glass-panel {
-    background: var(--glass-bg);
+    background: var(--surface-elevated);
     backdrop-filter: blur(16px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-md);
-    box-shadow: var(--shadow-float);
+    box-shadow: var(--shadow-lg);
 }
 
 .floor-option {
@@ -467,7 +460,7 @@ body {
 }
 
 .floor-option:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--hover-bg);
     color: var(--text-primary);
 }
 
@@ -488,6 +481,37 @@ body {
     font-weight: 500;
 }
 
+/* Theme Toggle Wrapper */
+.theme-toggle-wrapper {
+    width: auto !important;
+    padding: 4px !important;
+    height: auto !important;
+}
+
+.theme-toggle-wrapper .theme-toggle-buttons {
+    background: transparent;
+    border: none;
+    padding: 0;
+    gap: 4px;
+}
+
+.theme-toggle-wrapper .theme-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+}
+
+.theme-toggle-wrapper .theme-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.theme-toggle-wrapper .theme-btn.active {
+    background: var(--accent-gradient);
+    color: #FFFFFF;
+}
+
+
 /* ===============================
    TOP SEARCH BAR (Mobile-First)
    =============================== */
@@ -501,11 +525,11 @@ body {
 }
 
 .top-search-card {
-    background: var(--glass-bg);
+    background: var(--surface-elevated);
     backdrop-filter: blur(20px);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-float);
+    box-shadow: var(--shadow-lg);
     padding: 12px;
 }
 
@@ -530,8 +554,8 @@ body {
     height: 36px;
     min-width: 36px;
     border-radius: 8px;
-    background: #181818;
-    border: 1px solid var(--glass-border);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     color: var(--text-secondary);
     display: flex;
     align-items: center;
@@ -592,8 +616,8 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: #0F0F0F;
-    border: 1px solid #2A2A2A;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 10px 12px;
     min-width: 0;
@@ -649,6 +673,7 @@ body {
    MOBILE
    =============================== */
 @media (max-width: 768px) {
+
     /* Sidebar becomes bottom sheet */
     .sidebar-wrapper {
         inset: auto 0 0 0;
@@ -686,7 +711,8 @@ body {
     }
 
     .header-island {
-        display: none; /* Hide on mobile, use top search instead */
+        display: none;
+        /* Hide on mobile, use top search instead */
     }
 
     .action-island {
@@ -721,16 +747,17 @@ body {
         transition: top 0.3s ease;
     }
 
-    .sidebar-wrapper:not(.closed) ~ .map-tool-layer {
+    .sidebar-wrapper:not(.closed)~.map-tool-layer {
         top: 130px;
     }
 
-    .sidebar-wrapper.minimized ~ .map-tool-layer {
+    .sidebar-wrapper.minimized~.map-tool-layer {
         top: 130px;
     }
 
     .floating-menu-trigger {
-        display: none; /* Use drag handle instead */
+        display: none;
+        /* Use drag handle instead */
     }
 
     .glass-btn {
