@@ -761,8 +761,12 @@ body {
         transition: top 0.3s ease;
     }
 
-    .map-tool-layer.route-active {
-        top: 240px;
+    .app.route-active .map-tool-layer {
+        top: 250px;
+    }
+
+    .app.route-active .map-ui-header {
+        top: 250px !important;
     }
 
     .sidebar-wrapper:not(.closed)~.map-tool-layer {

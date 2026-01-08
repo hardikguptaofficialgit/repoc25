@@ -178,3 +178,18 @@
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+.quick-attribution-mobile {
+    display: none;
+    text-align: center;
+    font-size: 10px;
+    color: var(--text-tertiary);
+    margin-top: 12px;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .quick-attribution-mobile {
+        display: block;
+    }
+}
