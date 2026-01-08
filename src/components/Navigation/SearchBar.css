@@ -131,7 +131,7 @@
    ICON
    =============================== */
 .suggestion-icon {
-    color: #D8870C;
+    color: var(--text-tertiary);
     flex-shrink: 0;
 
     display: flex;
@@ -175,8 +175,8 @@
     font-size: 0.65rem;
     font-weight: 700;
     text-transform: uppercase;
-    background: rgba(211, 74, 9, 0.15);
-    color: #D34509;
+    background: var(--selected-bg);
+    color: var(--primary-color);
     border-radius: 4px;
     letter-spacing: 0.03em;
     flex-shrink: 0;
@@ -211,7 +211,7 @@
 }
 
 .no-results-icon {
-    color: #D34509;
+    color: var(--primary-color);
     margin-bottom: 6px;
 }
 

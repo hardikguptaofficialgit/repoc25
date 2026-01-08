@@ -646,7 +646,7 @@ function App({ isAdmin, setIsAdmin }) {
       </div>
 
       {/* --- Map Tool Layer (Top Right) --- */}
-      <div className="map-tool-layer">
+      <div className={`map-tool-layer ${(selectedStart || selectedEnd) ? 'route-active' : ''}`}>
         {isAdmin && (
           <>
             <button

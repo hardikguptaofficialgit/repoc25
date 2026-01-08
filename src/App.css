@@ -264,21 +264,28 @@ body {
    CLEAR ROUTE
    =============================== */
 .clear-route-link {
-    margin-top: 8px;
-    background: none;
-    border: none;
+    width: 100%;
+    margin-top: 12px;
+    padding: 10px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
 
-    font-size: 11px;
-    text-align: right;
-    color: #FCA5A5;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    color: var(--error);
 
     cursor: pointer;
-    opacity: 0.75;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .clear-route-link:hover {
-    opacity: 1;
-    text-decoration: underline;
+    background: rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.4);
 }
 
 /* ===============================
@@ -286,7 +293,7 @@ body {
    =============================== */
 .error-message {
     font-size: 11px;
-    color: #FCA5A5;
+    color: var(--error);
     margin-top: 6px;
 
     display: flex;
@@ -307,7 +314,7 @@ body {
 
     /* Custom Scrollbar */
     scrollbar-width: thin;
-    scrollbar-color: #333333 transparent;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
 .action-island::-webkit-scrollbar {
@@ -319,12 +326,12 @@ body {
 }
 
 .action-island::-webkit-scrollbar-thumb {
-    background: #333333;
+    background: var(--scrollbar-thumb);
     border-radius: 10px;
 }
 
 .action-island::-webkit-scrollbar-thumb:hover {
-    background: #444444;
+    background: var(--scrollbar-thumb-hover);
 }
 
 .navigation-integrated {
@@ -580,7 +587,7 @@ body {
     border: 1px solid rgba(239, 68, 68, 0.3);
     border-radius: 8px;
     padding: 8px 12px;
-    color: #FCA5A5;
+    color: var(--error);
     font-size: 12px;
     font-weight: 500;
     display: flex;
@@ -641,7 +648,7 @@ body {
 .pill-text {
     font-size: 13px;
     font-weight: 500;
-    color: #FFFFFF;
+    color: var(--text-primary);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -652,9 +659,9 @@ body {
     height: 28px;
     min-width: 28px;
     border-radius: 50%;
-    background: #181818;
-    border: 1px solid #2A2A2A;
-    color: #888;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    color: var(--text-tertiary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -747,6 +754,10 @@ body {
         transition: top 0.3s ease;
     }
 
+    .map-tool-layer.route-active {
+        top: 200px;
+    }
+
     .sidebar-wrapper:not(.closed)~.map-tool-layer {
         top: 130px;
     }
@@ -769,7 +780,7 @@ body {
     .sheet-handle {
         width: 40px;
         height: 4px;
-        background: rgba(255, 255, 255, 0.2);
+        background: var(--border-hover);
         border-radius: 2px;
         margin: 8px auto 12px;
         cursor: grab;

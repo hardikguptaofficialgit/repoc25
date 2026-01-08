@@ -78,7 +78,7 @@
     gap: 6px;
     padding-left: 10px;
     margin-left: auto;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 1px solid var(--border-color);
     flex-shrink: 0;
 }
 
@@ -157,14 +157,14 @@
 }
 
 .nav-card {
-    background: rgba(22, 22, 22, 0.95);
+    background: var(--surface-elevated);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid var(--border-color);
     border-radius: 20px;
     padding: 0;
     width: 100%;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    box-shadow: var(--shadow-xl);
     overflow: hidden;
     pointer-events: auto;
 
@@ -252,7 +252,7 @@
 .instruction-text {
     font-size: 16px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-primary);
     margin: 0;
     white-space: normal;
     overflow: hidden;
@@ -263,7 +263,7 @@
     display: flex;
     gap: 8px;
     padding-left: 8px;
-    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 1px solid var(--border-color);
 }
 
 .nav-btn {

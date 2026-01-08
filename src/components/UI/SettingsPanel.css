@@ -229,19 +229,3 @@
         height: 44px;
     }
 }
-
-/* Dark Mode Specific Adjustments */
-:root[data-theme="dark"] .settings-panel {
-    background: rgba(15, 23, 42, 0.98);
-    backdrop-filter: blur(20px);
-}
-
-/* Light Mode Specific Adjustments */
-:root[data-theme="light"] .settings-panel {
-    background: rgba(255, 255, 255, 0.98);
-    backdrop-filter: blur(20px);
-}
-
-:root[data-theme="light"] .settings-overlay {
-    background: rgba(0, 0, 0, 0.4);
-}

@@ -1,9 +1,9 @@
 .route-info-container {
-    background: #121212;
-    border: 1px solid #2A2A2A;
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-color);
     border-radius: 14px;
     padding: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-lg);
     overflow: hidden;
 }
 
@@ -53,9 +53,9 @@
     font-weight: 700;
 
     background: linear-gradient(135deg,
-            rgba(211, 75, 9, 0.2),
-            rgba(215, 134, 12, 0.2));
-    color: #FFD6A0;
+            rgba(211, 75, 9, 0.15),
+            rgba(215, 134, 12, 0.15));
+    color: var(--primary-color);
 }
 
 /* ===============================
@@ -67,7 +67,7 @@
     gap: 10px;
 
     padding: 10px;
-    background: #0F0F0F;
+    background: var(--bg-tertiary);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -82,7 +82,7 @@
 
 .endpoint-icon {
     flex-shrink: 0;
-    color: #D34B09;
+    color: var(--primary-color);
 }
 
 .endpoint-text {
@@ -96,7 +96,7 @@
 .endpoint-label {
     font-size: 8px;
     font-weight: 700;
-    color: #6A6A6A;
+    color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -104,7 +104,7 @@
 .endpoint-name {
     font-size: 12px;
     font-weight: 700;
-    color: #FFFFFF;
+    color: var(--text-primary);
 
     white-space: nowrap;
     overflow: hidden;
@@ -112,7 +112,7 @@
 }
 
 .route-arrow {
-    color: #4A4A4A;
+    color: var(--text-tertiary);
     flex-shrink: 0;
 }
 
@@ -120,14 +120,14 @@
    DIRECTIONS
    =============================== */
 .directions-list {
-    border-top: 1px solid #2A2A2A;
+    border-top: 1px solid var(--border-color);
     padding-top: 10px;
 }
 
 .directions-title {
     font-size: 10px;
     font-weight: 800;
-    color: #8A8A8A;
+    color: var(--text-secondary);
     margin-bottom: 8px;
 
     text-transform: uppercase;
@@ -140,7 +140,7 @@
     gap: 8px;
 
     padding: 8px 0;
-    border-bottom: 1px solid #1F1F1F;
+    border-bottom: 1px solid var(--border-color);
 }
 
 .direction-item:last-child {
@@ -167,14 +167,14 @@
 }
 
 .direction-icon {
-    color: #9A9A9A;
+    color: var(--text-tertiary);
     flex-shrink: 0;
 }
 
 .direction-text {
     font-size: 12px;
     font-weight: 600;
-    color: #E5E5E5;
+    color: var(--text-primary);
     line-height: 1.4;
     flex: 1;
     min-width: 0;
