@@ -6,23 +6,32 @@ import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, X, Plus, Trash2, Link, M
 import './FloorMap.css';
 
 // -----------------------------------------------------------------------------
-// Color Palette System
+// Color Palette System - Theme Aware
 // -----------------------------------------------------------------------------
-const PALETTE = {
-    blockA: '#6366F1',       // Indigo for Block A
-    blockB: '#F97316',       // Orange for Block B
-    washroomG: '#0EA5E9',    // Sky Blue for Gents
-    washroomL: '#EC4899',    // Pink for Ladies
-    stairs: '#22C55E',       // Green
-    lift: '#A855F7',         // Purple
-    entrance: '#EAB308',     // Yellow
-    office: '#F43F5E',       // Rose
-    lab: '#14B8A6',          // Teal
-    library: '#8B5CF6',      // Violet for Library
-    corridor: '#404040',     // Dark Grey
-    default: '#64748B',      // Slate
-    highlight: '#0EA5E9'     // Sky Blue for path highlight
+const getThemeAwarePalette = () => {
+    const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+
+    return {
+        blockA: '#6366F1',       // Indigo for Block A
+        blockB: '#F97316',       // Orange for Block B
+        washroomG: '#0EA5E9',    // Sky Blue for Gents
+        washroomL: '#EC4899',    // Pink for Ladies
+        stairs: '#22C55E',       // Green
+        lift: '#A855F7',         // Purple
+        entrance: '#EAB308',     // Yellow
+        office: '#F43F5E',       // Rose
+        lab: '#14B8A6',          // Teal
+        library: '#8B5CF6',      // Violet for Library
+        corridor: isDark ? '#404040' : '#94A3B8',     // Dark Grey in dark mode, Slate in light mode
+        default: isDark ? '#64748B' : '#475569',      // Slate variations
+        highlight: '#0EA5E9',    // Sky Blue for path highlight
+        textColor: isDark ? '#FFFFFF' : '#0F172A',    // White in dark, Dark in light
+        edgeColor: isDark ? 'rgba(255, 255, 255, 0.3)' : 'rgba(0, 0, 0, 0.2)', // Edge visibility
+        facilityBg: isDark ? '#000000' : '#FFFFFF'    // Facility container background
+    };
 };
+
+// Palette moved to dynamic calculation inside component
 
 // -----------------------------------------------------------------------------
 // MapNode Component
@@ -40,7 +49,8 @@ const MapNode = memo(({
     onDrag,
     onClick,
     onHover,
-    onLeave
+    onLeave,
+    palette // Add palette prop
 }) => {
     const isCorridorNode = node.type === 'corridor';
     const isFacilityNode = ['washroom_gents', 'washroom_ladies', 'stairs', 'lift', 'entrance', 'water_cooler', 'cafeteria', 'seating', 'gate'].includes(node.type);
@@ -60,30 +70,30 @@ const MapNode = memo(({
 
     // COLOR LOGIC
     const getNodeStyle = (type, label) => {
-        let fill = PALETTE.default;
-        let stroke = 'rgba(255, 255, 255, 0.3)';
+        let fill = palette.default;
+        let stroke = palette.edgeColor;
 
-        // 1. Facility nodes get black containers by default
+        // 1. Facility nodes get theme-aware containers
         if (isFacilityNode) {
-            fill = '#000000'; // Black container for facilities
-            stroke = '#FFFFFF'; // White border for facilities
+            fill = palette.facilityBg; // Theme-aware container
+            stroke = palette.textColor; // Theme-aware border
         }
         // 2. Specific Functional Types take priority (for non-facility nodes)
-        else if (type === 'washroom_gents') fill = PALETTE.washroomG;
-        else if (type === 'washroom_ladies') fill = PALETTE.washroomL;
-        else if (type === 'stairs') fill = PALETTE.stairs;
-        else if (type === 'lift') fill = PALETTE.lift;
-        else if (type === 'entrance' || type === 'gate') fill = PALETTE.entrance;
-        else if (type === 'office') fill = PALETTE.office;
-        else if (type === 'lab') fill = PALETTE.lab;
-        else if (type === 'library') fill = PALETTE.library;
-        else if (type === 'corridor') fill = PALETTE.corridor;
+        else if (type === 'washroom_gents') fill = palette.washroomG;
+        else if (type === 'washroom_ladies') fill = palette.washroomL;
+        else if (type === 'stairs') fill = palette.stairs;
+        else if (type === 'lift') fill = palette.lift;
+        else if (type === 'entrance' || type === 'gate') fill = palette.entrance;
+        else if (type === 'office') fill = palette.office;
+        else if (type === 'lab') fill = palette.lab;
+        else if (type === 'library') fill = palette.library;
+        else if (type === 'corridor') fill = palette.corridor;
 
         // 3. Block Logic (if not a special type, check Label for A/B)
         else if (label) {
             const firstChar = label.trim().charAt(0).toUpperCase();
-            if (firstChar === 'A') fill = PALETTE.blockA;
-            else if (firstChar === 'B') fill = PALETTE.blockB;
+            if (firstChar === 'A') fill = palette.blockA;
+            else if (firstChar === 'B') fill = palette.blockB;
         }
 
         return { fill, stroke };
@@ -95,15 +105,15 @@ const MapNode = memo(({
 
     // Store original facility color for selection state
     const getFacilityCategoryColor = (type) => {
-        if (type === 'washroom_gents') return PALETTE.washroomG;
-        if (type === 'washroom_ladies') return PALETTE.washroomL;
-        if (type === 'stairs') return PALETTE.stairs;
-        if (type === 'lift') return PALETTE.lift;
-        if (type === 'entrance' || type === 'gate') return PALETTE.entrance;
-        if (type === 'water_cooler') return PALETTE.washroomG; // Using blue for water cooler
-        if (type === 'cafeteria') return PALETTE.lab; // Using teal for cafeteria
-        if (type === 'seating') return PALETTE.lift; // Using purple for seating
-        return PALETTE.default;
+        if (type === 'washroom_gents') return palette.washroomG;
+        if (type === 'washroom_ladies') return palette.washroomL;
+        if (type === 'stairs') return palette.stairs;
+        if (type === 'lift') return palette.lift;
+        if (type === 'entrance' || type === 'gate') return palette.entrance;
+        if (type === 'water_cooler') return palette.washroomG; // Using blue for water cooler
+        if (type === 'cafeteria') return palette.lab; // Using teal for cafeteria
+        if (type === 'seating') return palette.lift; // Using purple for seating
+        return palette.default;
     };
 
     let iconColor = '#FFFFFF'; // Default icon color (will be overridden for facilities)
@@ -124,10 +134,10 @@ const MapNode = memo(({
 
     // State Overrides
     if (isInPath) {
-        stroke = PALETTE.highlight;
+        stroke = palette.highlight;
         strokeWidth = 3;
         if (!isStart && !isEnd) {
-            fill = PALETTE.highlight;
+            fill = palette.highlight;
             width = Math.max(width * 0.7, 10);
             height = Math.max(height * 0.7, 10);
         }
@@ -450,7 +460,7 @@ const MapNode = memo(({
                     fontSize={10}
                     fontStyle="bold"
                     fontFamily="Inter, sans-serif"
-                    fill="#FFFFFF"
+                    fill={palette.textColor}
                     opacity={0.95}
                     listening={false}
                 />
@@ -475,6 +485,14 @@ const FloorMap = ({
     const [nodes, setNodes] = useState(initialNodes);
     const [edges, setEdges] = useState(initialEdges);
 
+    // Theme State - force re-render on theme change
+    const [currentTheme, setCurrentTheme] = useState(
+        document.documentElement.getAttribute('data-theme') || 'dark'
+    );
+
+    // Calculate theme-aware palette efficiently
+    const palette = React.useMemo(() => getThemeAwarePalette(), [currentTheme]);
+
     // Viewport State
     const [scale, setScale] = useState(1);
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -492,6 +510,25 @@ const FloorMap = ({
     const [is3D, setIs3D] = useState(false);
     const [pathOffset, setPathOffset] = useState(0);
     const [rotation, setRotation] = useState(0);
+
+    // Listen for theme changes
+    useEffect(() => {
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.attributeName === 'data-theme') {
+                    const newTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+                    setCurrentTheme(newTheme);
+                }
+            });
+        });
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme']
+        });
+
+        return () => observer.disconnect();
+    }, []);
 
     const recenterMap = useCallback(() => {
         if (stageSize.width > 0 && stageSize.height > 0) {
@@ -720,40 +757,264 @@ const FloorMap = ({
         const oldScale = stage.scaleX();
         const pointer = stage.getPointerPosition();
         const mousePointTo = { x: (pointer.x - stage.x()) / oldScale, y: (pointer.y - stage.y()) / oldScale };
-        
+
         // Smoother zoom with smaller increments
         const zoomFactor = e.evt.deltaY > 0 ? 0.95 : 1.05;
         const newScale = Math.min(Math.max(oldScale * zoomFactor, 0.1), 5);
-        
         setScale(newScale);
         setPosition({ x: pointer.x - mousePointTo.x * newScale, y: pointer.y - mousePointTo.y * newScale });
     }, []);
 
-    // Multi-touch Gesture Handling (Pinch Zoom - Like Photo)
-    const lastDist = useRef(0);
+    // Ultra-Smooth Multi-Touch Gestures (Google Maps Grade)
+    // Frame-to-frame delta tracking with exponential smoothing
+    const touchState = useRef({
+        // Current frame values
+        lastDist: 0,
+        lastAngle: 0,
+        lastCenter: null,
+
+        // Multi-level smoothing for ultra-smooth rotation
+        smoothedRotationVelocity: 0,
+        rotationSmoothingFactor: 0.15, // Lower = smoother (0.15 for ultra-smooth)
+        rotationBuffer: [], // Rolling buffer for additional smoothing
+        bufferSize: 3, // Average last 3 frames
+
+        // Gesture tracking
+        isGesturing: false,
+        gestureStartTime: 0,
+
+        // Minimum thresholds to filter noise
+        minRotationDelta: 0.3, // degrees (reduced for finer control)
+        minZoomDelta: 0.001
+    });
+
+    // Optimized distance calculation
+    const getTouchDistance = (touch1, touch2) => {
+        const dx = touch2.clientX - touch1.clientX;
+        const dy = touch2.clientY - touch1.clientY;
+        return Math.sqrt(dx * dx + dy * dy);
+    };
+
+    // Get center point between two touches
+    const getTouchCenter = (touch1, touch2) => ({
+        x: (touch1.clientX + touch2.clientX) * 0.5,
+        y: (touch1.clientY + touch2.clientY) * 0.5
+    });
+
+    // Get rotation angle between two touches (in radians for precision)
+    const getTouchAngle = (touch1, touch2) => {
+        return Math.atan2(
+            touch2.clientY - touch1.clientY,
+            touch2.clientX - touch1.clientX
+        );
+    };
+
+    // Normalize angle to -PI to PI range
+    const normalizeAngle = (angle) => {
+        while (angle > Math.PI) angle -= 2 * Math.PI;
+        while (angle < -Math.PI) angle += 2 * Math.PI;
+        return angle;
+    };
+
+    // Convert radians to degrees
+    const toDegrees = (rad) => rad * (180 / Math.PI);
+    const toRadians = (deg) => deg * (Math.PI / 180);
+
+    const handleTouchStart = (e) => {
+        if (e.evt.touches.length === 2) {
+            e.evt.preventDefault();
+            const touch1 = e.evt.touches[0];
+            const touch2 = e.evt.touches[1];
+
+            const center = getTouchCenter(touch1, touch2);
+            const dist = getTouchDistance(touch1, touch2);
+            const angle = getTouchAngle(touch1, touch2);
+
+            // Initialize with current frame values
+            touchState.current = {
+                lastDist: dist,
+                lastAngle: angle,
+                lastCenter: center,
+                smoothedRotationVelocity: 0,
+                rotationSmoothingFactor: 0.15,
+                rotationBuffer: [],
+                bufferSize: 3,
+                isGesturing: true,
+                gestureStartTime: Date.now(),
+                minRotationDelta: 0.3,
+                minZoomDelta: 0.001
+            };
+        }
+    };
 
     const handleTouch = (e) => {
-        if (e.evt.touches.length !== 2) return;
-
-        e.evt.preventDefault();
-        const touch1 = e.evt.touches[0];
-        const touch2 = e.evt.touches[1];
-
-        const dist = Math.sqrt(Math.pow(touch2.clientX - touch1.clientX, 2) + Math.pow(touch2.clientY - touch1.clientY, 2));
-
-        if (!lastDist.current) {
-            lastDist.current = dist;
+        // Only handle two-finger gestures
+        if (e.evt.touches.length !== 2) {
+            if (touchState.current.isGesturing) {
+                touchState.current.isGesturing = false;
+            }
             return;
         }
 
-        // Simple direct zoom like photo apps
-        const scaleFactor = dist / lastDist.current;
-        setScale(prev => Math.min(Math.max(prev * scaleFactor, 0.1), 5));
-        lastDist.current = dist;
+        e.evt.preventDefault();
+        e.evt.stopPropagation();
+
+        const touch1 = e.evt.touches[0];
+        const touch2 = e.evt.touches[1];
+
+        // Initialize if not already gesturing
+        if (!touchState.current.isGesturing) {
+            const center = getTouchCenter(touch1, touch2);
+            const dist = getTouchDistance(touch1, touch2);
+            const angle = getTouchAngle(touch1, touch2);
+
+            touchState.current = {
+                lastDist: dist,
+                lastAngle: angle,
+                lastCenter: center,
+                smoothedRotationVelocity: 0,
+                rotationSmoothingFactor: 0.15,
+                rotationBuffer: [],
+                bufferSize: 3,
+                isGesturing: true,
+                gestureStartTime: Date.now(),
+                minRotationDelta: 0.3,
+                minZoomDelta: 0.001
+            };
+            return;
+        }
+
+        const stage = stageRef.current;
+        if (!stage) return;
+
+        // Calculate current gesture values
+        const currentDist = getTouchDistance(touch1, touch2);
+        const currentCenter = getTouchCenter(touch1, touch2);
+        const currentAngle = getTouchAngle(touch1, touch2);
+
+        // Get stage bounding box for coordinate conversion
+        const stageBox = stage.container().getBoundingClientRect();
+        const centerPoint = {
+            x: currentCenter.x - stageBox.left,
+            y: currentCenter.y - stageBox.top
+        };
+
+        // === 1. SMOOTH PINCH ZOOM ===
+        if (touchState.current.lastDist > 0) {
+            // Calculate zoom delta from last frame
+            const distDelta = currentDist - touchState.current.lastDist;
+            const zoomDelta = distDelta / touchState.current.lastDist;
+
+            // Only apply if above noise threshold
+            if (Math.abs(zoomDelta) > touchState.current.minZoomDelta) {
+                const newScale = Math.min(Math.max(scale * (1 + zoomDelta), 0.1), 5);
+
+                // Calculate the point in canvas space that should stay fixed
+                const pointTo = {
+                    x: (centerPoint.x - position.x) / scale,
+                    y: (centerPoint.y - position.y) / scale
+                };
+
+                // Calculate new position to keep the pinch center fixed
+                const newPos = {
+                    x: centerPoint.x - pointTo.x * newScale,
+                    y: centerPoint.y - pointTo.y * newScale
+                };
+
+                setScale(newScale);
+                setPosition(newPos);
+            }
+        }
+
+        // === 2. SMOOTH TWO-FINGER PAN ===
+        if (touchState.current.lastCenter) {
+            const dx = currentCenter.x - touchState.current.lastCenter.x;
+            const dy = currentCenter.y - touchState.current.lastCenter.y;
+
+            // Apply panning
+            setPosition(prev => ({
+                x: prev.x + dx,
+                y: prev.y + dy
+            }));
+        }
+
+        // === 3. ULTRA-SMOOTH 360° ROTATION ===
+        if (touchState.current.lastAngle !== null) {
+            // Calculate frame-to-frame angle delta (in radians)
+            let angleDelta = normalizeAngle(currentAngle - touchState.current.lastAngle);
+            const angleDeltaDeg = toDegrees(angleDelta);
+
+            // Only apply if above noise threshold
+            if (Math.abs(angleDeltaDeg) > touchState.current.minRotationDelta) {
+                // LEVEL 1: Rolling buffer smoothing (average last N frames)
+                touchState.current.rotationBuffer.push(angleDeltaDeg);
+                if (touchState.current.rotationBuffer.length > touchState.current.bufferSize) {
+                    touchState.current.rotationBuffer.shift(); // Remove oldest
+                }
+
+                // Calculate buffer average
+                const bufferAverage = touchState.current.rotationBuffer.reduce((sum, val) => sum + val, 0) /
+                    touchState.current.rotationBuffer.length;
+
+                // LEVEL 2: Exponential moving average for additional smoothness
+                const smoothingFactor = touchState.current.rotationSmoothingFactor;
+                touchState.current.smoothedRotationVelocity =
+                    smoothingFactor * bufferAverage +
+                    (1 - smoothingFactor) * touchState.current.smoothedRotationVelocity;
+
+                // Apply ultra-smoothed rotation
+                const newRotation = rotation + touchState.current.smoothedRotationVelocity;
+
+                // Optional: Snap to cardinal directions when close (within 3°)
+                const snapThreshold = 3;
+                const cardinalAngles = [0, 90, 180, 270, -90, -180, -270];
+                let finalRotation = newRotation;
+
+                // Only snap if rotation velocity is low (user is settling)
+                if (Math.abs(touchState.current.smoothedRotationVelocity) < 0.8) {
+                    for (let snapAngle of cardinalAngles) {
+                        const normalizedNew = ((newRotation % 360) + 360) % 360;
+                        const normalizedSnap = ((snapAngle % 360) + 360) % 360;
+                        const diff = Math.min(
+                            Math.abs(normalizedNew - normalizedSnap),
+                            360 - Math.abs(normalizedNew - normalizedSnap)
+                        );
+                        if (diff < snapThreshold) {
+                            finalRotation = snapAngle;
+                            touchState.current.smoothedRotationVelocity = 0;
+                            touchState.current.rotationBuffer = []; // Clear buffer on snap
+                            break;
+                        }
+                    }
+                }
+
+                setRotation(finalRotation);
+            }
+        }
+
+        // Update state for next frame
+        touchState.current.lastDist = currentDist;
+        touchState.current.lastAngle = currentAngle;
+        touchState.current.lastCenter = currentCenter;
     };
 
-    const handleTouchEnd = () => {
-        lastDist.current = 0;
+    const handleTouchEnd = (e) => {
+        // Reset gesture state when fingers are lifted
+        if (e.evt.touches.length < 2) {
+            touchState.current = {
+                lastDist: 0,
+                lastAngle: null,
+                lastCenter: null,
+                smoothedRotationVelocity: 0,
+                rotationSmoothingFactor: 0.15,
+                rotationBuffer: [],
+                bufferSize: 3,
+                isGesturing: false,
+                gestureStartTime: 0,
+                minRotationDelta: 0.3,
+                minZoomDelta: 0.001
+            };
+        }
     };
 
     const exportData = () => {
@@ -794,21 +1055,7 @@ const FloorMap = ({
     const visibleNodes = React.useMemo(() => getNodesByFloor(currentFloor), [currentFloor]);
 
     // Internal Palette
-    const INTERNAL_PALETTE = {
-        blockA: '#6366F1',
-        blockB: '#F97316',
-        stairs: '#22C55E',
-        lift: '#A855F7',
-        washroomG: '#0EA5E9',
-        washroomL: '#EC4899',
-        entrance: '#EAB308',
-        office: '#F43F5E',
-        lab: '#14B8A6',
-        library: '#8B5CF6',
-        corridor: '#525252',     // Lighter Gray for corridors
-        default: '#94A3B8',
-        highlight: '#38BDF8'
-    };
+    // Internal Palette - REMOVED (using dynamic palette)
 
     // Render Helpers
     const renderedEdges = edges.map((edge, i) => {
@@ -816,11 +1063,15 @@ const FloorMap = ({
         if (!visibleNodes[n1] || !visibleNodes[n2]) return null;
         const isPathEdge = path.some((id, idx) => idx < path.length - 1 && ((id === n1 && path[idx + 1] === n2) || (id === n2 && path[idx + 1] === n1)));
 
-        let strokeColor = 'rgba(255, 255, 255, 0.3)'; // Increased from 0.15
-        let strokeWidth = 6;                          // Increased from 5
-        let opacity = 0.5;                             // Increased from 0.3
+        // Use dynamic palette
+        let strokeColor = palette.edgeColor;
+        let strokeWidth = 6;
+        let opacity = 0.5;
 
-        if (editorMode) { strokeColor = '#737373'; opacity = 0.8; }
+        if (editorMode) {
+            strokeColor = palette.textColor;
+            opacity = 0.4;
+        }
 
         if (isPathEdge) {
             const edgeIndex = path.findIndex((id, idx) => idx < path.length - 1 && ((id === n1 && path[idx + 1] === n2) || (id === n2 && path[idx + 1] === n1)));
@@ -834,7 +1085,7 @@ const FloorMap = ({
                     {/* Path glow */}
                     <Line
                         points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
-                        stroke={INTERNAL_PALETTE.highlight}
+                        stroke={palette.highlight}
                         strokeWidth={12}
                         opacity={0.2}
                         lineCap="round"
@@ -842,7 +1093,7 @@ const FloorMap = ({
                     {/* Animated flow line */}
                     <Line
                         points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
-                        stroke={INTERNAL_PALETTE.highlight}
+                        stroke={palette.highlight}
                         strokeWidth={5}
                         dash={[20, 20]}
                         dashOffset={-pathOffset}
@@ -854,7 +1105,7 @@ const FloorMap = ({
                         y={(fromNode.y + toNode.y) / 2}
                         sides={3}
                         radius={6}
-                        fill={INTERNAL_PALETTE.highlight}
+                        fill={palette.highlight}
                         rotation={angle + 90}
                     />
                 </Group>
@@ -1048,6 +1299,7 @@ const FloorMap = ({
                     rotation={rotation}
                     draggable={!editorMode || editorTool === 'select'}
                     onWheel={handleWheel} onClick={handleStageClick}
+                    onTouchStart={handleTouchStart}
                     onTouchMove={handleTouch}
                     onTouchEnd={handleTouchEnd}
                     onMouseMove={(e) => { if (connectingFrom) { const pt = stageRef.current.getPointerPosition(); setTempLineEnd({ x: (pt.x - position.x) / scale, y: (pt.y - position.y) / scale }); } }}
@@ -1074,6 +1326,7 @@ const FloorMap = ({
                                 isInPath={path.includes(id)} isStart={selectedStart?.id === id} isEnd={selectedEnd?.id === id}
                                 editorMode={editorMode} isConnecting={connectingFrom === id}
                                 onDrag={handleNodeDrag} onClick={handleNodeClick} onHover={setHoveredNode} onLeave={handleNodeLeave}
+                                palette={palette}
                             />
                         ))}
                     </Layer>
@@ -1084,16 +1337,16 @@ const FloorMap = ({
             {!editorMode && (
                 <div className="map-legend-colored">
                     <div className="legend-row">
-                        <div className="legend-item"><div className="dot" style={{ background: PALETTE.blockA }}></div> Block A</div>
-                        <div className="legend-item"><div className="dot" style={{ background: PALETTE.blockB }}></div> Block B</div>
-                        <div className="legend-item"><div className="dot" style={{ background: PALETTE.stairs }}></div> Stairs</div>
-                        <div className="legend-item"><div className="dot" style={{ background: PALETTE.lift }}></div> Lift</div>
+                        <div className="legend-item"><div className="dot" style={{ background: palette.blockA }}></div> Block A</div>
+                        <div className="legend-item"><div className="dot" style={{ background: palette.blockB }}></div> Block B</div>
+                        <div className="legend-item"><div className="dot" style={{ background: palette.stairs }}></div> Stairs</div>
+                        <div className="legend-item"><div className="dot" style={{ background: palette.lift }}></div> Lift</div>
                     </div>
                     <div className="legend-row">
-                        <div className="legend-item"><div className="dot" style={{ background: PALETTE.washroomG }}></div> Gents</div>
-                        <div className="legend-item"><div className="dot" style={{ background: PALETTE.washroomL }}></div> Ladies</div>
-                        <div className="legend-item"><div className="dot" style={{ background: PALETTE.entrance }}></div> Entry</div>
-                        <div className="legend-item"><div className="dot" style={{ background: PALETTE.highlight, border: '1px solid #000' }}></div> Path</div>
+                        <div className="legend-item"><div className="dot" style={{ background: palette.washroomG }}></div> Gents</div>
+                        <div className="legend-item"><div className="dot" style={{ background: palette.washroomL }}></div> Ladies</div>
+                        <div className="legend-item"><div className="dot" style={{ background: palette.entrance }}></div> Entry</div>
+                        <div className="legend-item"><div className="dot" style={{ background: palette.highlight, border: '1px solid #000' }}></div> Path</div>
                     </div>
                 </div>
             )}
