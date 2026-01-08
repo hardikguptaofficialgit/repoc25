@@ -1369,6 +1369,10 @@ const FloorMap = ({
                     </div>
                 </div>
             )}
+            {/* Attribution */}
+            <div className="map-attribution">
+                Developed by Fed Tech Team
+            </div>
         </div>
     );
 };

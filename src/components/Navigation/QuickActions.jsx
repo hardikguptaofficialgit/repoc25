@@ -88,6 +88,12 @@ const QuickActions = ({ onQuickAction, currentLocation, minimized = false, cross
                     ))}
                 </div>
             )}
+
+            {isExpanded && (
+                <div className="quick-attribution-mobile">
+                    Developed by Fed Tech Team
+                </div>
+            )}
         </div>
     );
 };
