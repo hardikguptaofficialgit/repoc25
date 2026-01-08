@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import FloorMap from './components/Map/FloorMap';
 import SearchBar from './components/Navigation/SearchBar';
-import RouteInfo from './components/Navigation/RouteInfo';
+
 import QuickActions from './components/Navigation/QuickActions';
 import NavigationOverlay from './components/Navigation/NavigationOverlay';
 import InstallPrompt from './components/UI/InstallPrompt';
@@ -382,7 +382,7 @@ function App({ isAdmin, setIsAdmin }) {
   };
 
   return (
-    <div className="app">
+    <div className={`app ${(selectedStart || selectedEnd) ? 'route-active' : ''}`}>
 
       {/* --- Top Search Bar (Mobile-First) --- */}
       <div className="top-search-bar">
@@ -391,7 +391,11 @@ function App({ isAdmin, setIsAdmin }) {
           {selectedStart && selectedEnd ? (
             <div className="search-compact-selected">
               <div className="search-inline-row">
-                <div className="location-pill source-pill">
+                <div
+                  className="location-pill source-pill"
+                  onClick={() => setSelectedStart(null)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <span className="pill-dot start"></span>
                   <span className="pill-text">{selectedStart.label}</span>
                 </div>
@@ -402,7 +406,11 @@ function App({ isAdmin, setIsAdmin }) {
                 >
                   <ArrowUpDown size={14} />
                 </button>
-                <div className="location-pill dest-pill">
+                <div
+                  className="location-pill dest-pill"
+                  onClick={() => setSelectedEnd(null)}
+                  style={{ cursor: 'pointer' }}
+                >
                   <span className="pill-dot end"></span>
                   <span className="pill-text">{selectedEnd.label}</span>
                 </div>
@@ -628,17 +636,7 @@ function App({ isAdmin, setIsAdmin }) {
                 isOnNewFloor={crossFloorNavigation !== null}
               />
 
-              {path.length > 0 && (
-                <>
-                  <div className="divider"></div>
-                  <RouteInfo
-                    path={path}
-                    distance={distance}
-                    startLabel={startLocation}
-                    endLabel={endLocation}
-                  />
-                </>
-              )}
+
             </>
           )}
         </div>

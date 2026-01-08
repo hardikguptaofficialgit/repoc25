@@ -14,7 +14,7 @@ export const ThemeProvider = ({ children }) => {
     // Initialize theme from localStorage or default to 'dark'
     const [theme, setTheme] = useState(() => {
         const savedTheme = localStorage.getItem('appTheme');
-        return savedTheme || 'light';
+        return savedTheme || 'dark';
     });
 
     // Apply theme to document root

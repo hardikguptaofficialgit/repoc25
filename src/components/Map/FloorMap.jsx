@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Stage, Layer, Rect, Circle, Line, Text, Group, Image, RegularPolygon } from 'react-konva';
 import { nodes as initialNodes, edges as initialEdges } from '../../data/buildingData';
 import { getNodesByFloor } from '../../utils/graphBuilder';
-import { ZoomIn, ZoomOut, RotateCcw, Download, Grid3X3, X, Plus, Trash2, Link, MousePointer, Upload, Trash, RefreshCw } from 'lucide-react';
+import { ZoomIn, ZoomOut, RotateCcw, RotateCw, Download, Grid3X3, X, Plus, Trash2, Link, MousePointer, Upload, Trash, RefreshCw } from 'lucide-react';
 import './FloorMap.css';
 
 // -----------------------------------------------------------------------------
@@ -1040,6 +1040,24 @@ const FloorMap = ({
             fileInputRef.current.value = '';
         }
     };
+    const handleRotateRight = useCallback(() => {
+        const cx = stageSize.width / 2;
+        const cy = stageSize.height / 2;
+        const angleDeg = 90;
+        const rad = angleDeg * Math.PI / 180;
+        const cos = Math.cos(rad);
+        const sin = Math.sin(rad);
+
+        // Rotate position around center
+        const dx = position.x - cx;
+        const dy = position.y - cy;
+
+        const newX = dx * cos - dy * sin + cx;
+        const newY = dx * sin + dy * cos + cy;
+
+        setRotation(prev => prev + 90);
+        setPosition({ x: newX, y: newY });
+    }, [stageSize, position]);
 
     const handleClearAll = () => {
         if (window.confirm('Are you sure you want to delete ALL nodes and edges? This cannot be undone.')) {
@@ -1129,6 +1147,7 @@ const FloorMap = ({
                 <div className="ui-group">
                     <button onClick={() => setScale(s => Math.min(s * 1.2, 5))} title="Zoom In"><ZoomIn size={18} /></button>
                     <button onClick={() => setScale(s => Math.max(s / 1.2, 0.1))} title="Zoom Out"><ZoomOut size={18} /></button>
+                    <button onClick={handleRotateRight} title="Rotate 90°"><RotateCw size={18} /></button>
                     <button onClick={recenterMap} title="Recenter & Reset View"><RefreshCw size={18} /></button>
                 </div>
 
