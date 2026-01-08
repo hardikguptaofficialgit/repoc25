@@ -766,7 +766,7 @@ body {
     }
 
     .app.route-active .map-ui-header {
-        top: 250px !important;
+        top: 254px !important;
     }
 
     .sidebar-wrapper:not(.closed)~.map-tool-layer {
