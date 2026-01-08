@@ -26,10 +26,10 @@
     position: relative;
     width: 100%;
     max-width: 420px;
-    background: var(--glass-bg);
-    border: 1px solid var(--glass-border);
+    background: var(--surface-elevated);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-lg);
-    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+    box-shadow: var(--shadow-xl);
     overflow: hidden;
     transform: scale(0.9) translateY(20px);
     opacity: 0;
@@ -49,8 +49,8 @@
     right: 16px;
     width: 36px;
     height: 36px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid var(--glass-border);
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
     border-radius: 50%;
     color: var(--text-secondary);
     display: flex;
@@ -62,7 +62,7 @@
 }
 
 .tutorial-close:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--hover-bg);
     color: var(--text-primary);
 }
 
@@ -104,7 +104,7 @@
     height: 72px;
     /* Removed background gradient, set to transparent */
     background: transparent;
-    border: 1px solid rgba(211, 74, 9, 0.3);
+    border: 1px solid var(--primary-shadow);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -143,7 +143,7 @@
     width: 8px;
     height: 8px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--border-color);
     border: none;
     cursor: pointer;
     padding: 0;
@@ -151,7 +151,7 @@
 }
 
 .progress-dot:hover {
-    background: rgba(255, 255, 255, 0.4);
+    background: var(--text-disabled);
 }
 
 .progress-dot.active {
@@ -202,13 +202,13 @@
 }
 
 .tutorial-btn.secondary {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-secondary);
     color: var(--text-primary);
-    border: 1px solid var(--glass-border);
+    border: 1px solid var(--border-color);
 }
 
 .tutorial-btn.secondary:hover {
-    background: rgba(255, 255, 255, 0.12);
+    background: var(--hover-bg);
 }
 
 .tutorial-btn.skip {
