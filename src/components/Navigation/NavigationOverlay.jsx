@@ -27,7 +27,8 @@ const NavigationOverlay = ({
     onNextPhase,
     onPrevPhase,
     startFloor,
-    endFloor
+    endFloor,
+    onSwitchTransitionType
 }) => {
     const [instructions, setInstructions] = useState([]);
     const [currentStep, setCurrentStep] = useState(0);
@@ -114,6 +115,17 @@ const NavigationOverlay = ({
                             <Check size={22} strokeWidth={2.5} />
                         </button>
                     </div>
+                    {/* Switch transition type option */}
+                    {onSwitchTransitionType && (
+                        <div className="transition-actions">
+                            <button 
+                                className="switch-transition-type full-width" 
+                                onClick={() => onSwitchTransitionType(crossFloorNavigation.transitionType === 'lift' ? 'stairs' : 'lift')}
+                            >
+                                <span>Use {crossFloorNavigation.transitionType === 'lift' ? 'Stairs' : 'Lift'} Instead</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
         );
@@ -238,12 +250,24 @@ const NavigationOverlay = ({
                     )}
                 </div>
 
-                {/* Skip to floor change option for phase 1 */}
-                {crossFloorNavigation && crossFloorPhase === 1 && !isAtTransitionPoint && (
-                    <button className="skip-to-transition" onClick={onNextPhase}>
-                        <ArrowUpDown size={14} />
-                        <span>Skip to {crossFloorNavigation.transitionType === 'lift' ? 'Lift' : 'Stairs'}</span>
-                    </button>
+                {/* Skip to floor change option and switch transition type for phase 1 */}
+                {crossFloorNavigation && crossFloorPhase === 1 && (
+                    <div className="transition-actions">
+                        {!isAtTransitionPoint && (
+                            <button className="skip-to-transition" onClick={onNextPhase}>
+                                <ArrowUpDown size={14} />
+                                <span>Skip to {crossFloorNavigation.transitionType === 'lift' ? 'Lift' : 'Stairs'}</span>
+                            </button>
+                        )}
+                        {onSwitchTransitionType && (
+                            <button 
+                                className={`switch-transition-type ${isAtTransitionPoint ? 'full-width' : ''}`}
+                                onClick={() => onSwitchTransitionType(crossFloorNavigation.transitionType === 'lift' ? 'stairs' : 'lift')}
+                            >
+                                <span>Use {crossFloorNavigation.transitionType === 'lift' ? 'Stairs' : 'Lift'}{isAtTransitionPoint ? ' Instead' : ''}</span>
+                            </button>
+                        )}
+                    </div>
                 )}
             </div>
         </div>
