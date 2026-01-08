@@ -37,7 +37,9 @@ body {
 .app {
     position: relative;
     width: 100vw;
+    /* Avoid mobile 100vh issues (content under system/browser bars) */
     height: 100vh;
+    height: 100svh;
 }
 
 /* ===============================
@@ -316,6 +318,9 @@ body {
     max-height: calc(100vh - 220px);
     overflow-y: auto;
 
+    /* Makes it easier to scroll last item above bottom insets */
+    scroll-padding-bottom: 24px;
+
     /* Custom Scrollbar */
     scrollbar-width: thin;
     scrollbar-color: #333333 transparent;
@@ -556,6 +561,7 @@ body {
     font-weight: 500;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -564,6 +570,79 @@ body {
 .clear-route-btn-mobile:hover {
     background: rgba(239, 68, 68, 0.25);
     color: #EF4444;
+}
+
+/* ===============================
+   COMPACT SELECTED MODE
+   =============================== */
+.search-compact-selected {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.search-inline-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.location-pill {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #0F0F0F;
+    border: 1px solid #2A2A2A;
+    border-radius: 10px;
+    padding: 10px 12px;
+    min-width: 0;
+}
+
+.pill-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.pill-dot.start {
+    background: #22C55E;
+}
+
+.pill-dot.end {
+    background: #EF4444;
+}
+
+.pill-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #FFFFFF;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.swap-btn-inline {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 50%;
+    background: #181818;
+    border: 1px solid #2A2A2A;
+    color: #888;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.swap-btn-inline:hover {
+    background: var(--accent-gradient);
+    color: #fff;
+    transform: rotate(180deg);
 }
 
 /* ===============================
@@ -577,10 +656,13 @@ body {
         padding: 0;
         gap: 0;
         z-index: 50;
+        /* Keep the whole sheet above system UI */
+        padding-bottom: var(--safe-area-bottom);
     }
 
     .sidebar-wrapper.closed {
-        transform: translateY(calc(100% - 50px - env(safe-area-inset-bottom)));
+        /* Leave the grab-handle visible above the system bar */
+        transform: translateY(calc(100% - 50px - var(--safe-area-bottom)));
     }
 
     /* Minimized state - shows only navigation card */
@@ -611,7 +693,11 @@ body {
         border-radius: 20px 20px 0 0;
         max-height: 65vh;
         overflow-y: auto;
-        padding-bottom: calc(16px + env(safe-area-inset-bottom));
+        /* Ensure content (Quick Navigation) never sits under system bar */
+        padding-bottom: calc(16px + var(--safe-area-bottom));
+
+        /* Ensure the last row can scroll fully above the system bar */
+        scroll-padding-bottom: calc(16px + var(--safe-area-bottom));
     }
 
     /* Top search bar visible on mobile */
@@ -629,18 +715,18 @@ body {
 
     /* Map tool layer repositioned */
     .map-tool-layer {
-        top: auto;
-        bottom: 70px;
+        top: 130px;
+        bottom: auto;
         right: 12px;
-        transition: bottom 0.3s ease;
+        transition: top 0.3s ease;
     }
 
     .sidebar-wrapper:not(.closed) ~ .map-tool-layer {
-        bottom: calc(65vh + 20px);
+        top: 130px;
     }
 
     .sidebar-wrapper.minimized ~ .map-tool-layer {
-        bottom: 120px;
+        top: 130px;
     }
 
     .floating-menu-trigger {
@@ -676,4 +762,230 @@ body {
     .sheet-handle {
         display: none;
     }
+}
+
+/* ===============================
+   CROSS-FLOOR NAVIGATION
+   =============================== */
+.cross-floor-indicator {
+    background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(234, 88, 12, 0.15) 100%);
+    border: 1px solid rgba(249, 115, 22, 0.3);
+    border-radius: var(--radius-md);
+    padding: 10px 12px;
+    margin-bottom: 8px;
+}
+
+.cross-floor-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.cross-floor-info {
+    font-size: 13px;
+    color: #fff;
+    font-weight: 600;
+    background: rgba(249, 115, 22, 1);
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.cross-floor-phases {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 12px;
+}
+
+.phase-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.phase-step.active {
+    background: rgba(168, 85, 247, 0.3);
+}
+
+.phase-step.completed {
+    background: rgba(34, 197, 94, 0.2);
+}
+
+.phase-step.completed .phase-num {
+    background: #22C55E;
+}
+
+.phase-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.phase-step.active .phase-num {
+    background: var(--accent-gradient);
+}
+
+.phase-text {
+    font-size: 10px;
+    color: var(--text-secondary);
+    text-transform: capitalize;
+}
+
+.phase-step.active .phase-text {
+    color: var(--text-primary);
+}
+
+.phase-connector {
+    width: 20px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.transition-message {
+    text-align: center;
+    padding: 16px;
+    background: rgba(168, 85, 247, 0.1);
+    border-radius: var(--radius-sm);
+    margin-top: 8px;
+}
+
+.transition-icon {
+    font-size: 32px;
+    margin-bottom: 8px;
+}
+
+.transition-message p {
+    font-size: 14px;
+    color: var(--text-primary);
+    margin-bottom: 16px;
+}
+
+.continue-btn {
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.continue-btn:hover {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(211, 74, 9, 0.4);
+}
+
+.phase-navigation {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.phase-btn {
+    padding: 8px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.phase-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.phase-btn.next {
+    background: var(--accent-gradient);
+    border: none;
+}
+
+.phase-btn.next:hover {
+    box-shadow: 0 4px 12px rgba(211, 74, 9, 0.4);
+}
+
+/* ===============================
+   TRANSITION SELECTION (Lift/Stairs)
+   =============================== */
+.transition-selection {
+    margin-top: 4px;
+}
+
+.selection-title {
+    font-size: 12px;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.transition-options {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.transition-or {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.transition-option {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.transition-option:hover {
+    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.transition-option.lift-option:hover {
+    border-color: rgba(249, 115, 22, 0.5);
+    background: rgba(249, 115, 22, 0.1);
+}
+
+.transition-option.stairs-option:hover {
+    border-color: rgba(249, 115, 22, 0.5);
+    background: rgba(249, 115, 22, 0.1);
+}
+
+.option-label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.option-distance {
+    font-size: 11px;
+    color: var(--text-secondary);
 }
