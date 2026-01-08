@@ -10,7 +10,7 @@
 }
 
 .install-prompt.show {
-    bottom: 24px;
+    bottom: calc(24px + var(--safe-area-bottom));
 }
 
 .install-prompt-content {
@@ -109,7 +109,7 @@
     }
 
     .install-prompt.show {
-        bottom: 16px;
+        bottom: calc(16px + var(--safe-area-bottom));
     }
 
     .install-prompt-content {

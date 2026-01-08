@@ -5,8 +5,9 @@ import RouteInfo from './components/Navigation/RouteInfo';
 import QuickActions from './components/Navigation/QuickActions';
 import NavigationOverlay from './components/Navigation/NavigationOverlay';
 import InstallPrompt from './components/UI/InstallPrompt';
+import TutorialGuide from './components/UI/TutorialGuide';
 import { buildGraph, getNodesByFloor } from './utils/graphBuilder';
-import { findShortestPath, findNearestPOI } from './utils/pathfinding';
+import { findShortestPath, findNearestPOI, calculateCrossFloorRoute } from './utils/pathfinding';
 import { nodes, poiCategories } from './data/buildingData';
 import { ArrowUpDown, Trash2, Edit3, Eye, Menu, ChevronLeft, Building, ChevronDown, LogOut } from 'lucide-react';
 import './App.css';
@@ -26,6 +27,17 @@ function App({ isAdmin, setIsAdmin }) {
   const [sidebarMinimized, setSidebarMinimized] = useState(false);
   const [currentFloor, setCurrentFloor] = useState(0);
   const [showFloorDropdown, setShowFloorDropdown] = useState(false);
+
+  // Cross-floor navigation state
+  const [crossFloorNavigation, setCrossFloorNavigation] = useState(null);
+  const [navigationPhase, setNavigationPhase] = useState(0); // 0: not started, 1: to lift/stairs, 2: transition, 3: to destination
+  const [startFloor, setStartFloor] = useState(null);
+  const [endFloor, setEndFloor] = useState(null);
+
+  // Tutorial guide state
+  const [showTutorial, setShowTutorial] = useState(() => {
+    return localStorage.getItem('tutorialShown') !== 'true';
+  });
 
   // Check for existing admin session
   useEffect(() => {
@@ -60,32 +72,192 @@ function App({ isAdmin, setIsAdmin }) {
 
   const calculateRoute = (startId, endId) => {
     if (!graph) return;
-    const result = findShortestPath(graph, startId, endId);
-    if (result.error) {
-      setError(result.error);
-      setPath([]);
-      setDistance(0);
+    
+    // Check if start and end are on the same floor
+    const startFloorNum = selectedStart?.floor ?? currentFloor;
+    const endFloorNum = selectedEnd?.floor ?? currentFloor;
+    
+    // If same floor, use normal routing
+    if (startFloorNum === endFloorNum) {
+      const result = findShortestPath(graph, startId, endId);
+      if (result.error) {
+        setError(result.error);
+        setPath([]);
+        setDistance(0);
+      } else {
+        setPath(result.path);
+        setDistance(result.distance);
+        setError('');
+      }
+      // Clear cross-floor navigation
+      setCrossFloorNavigation(null);
+      setNavigationPhase(0);
+      setStartFloor(null);
+      setEndFloor(null);
     } else {
-      setPath(result.path);
-      setDistance(result.distance);
-      setError('');
+      // Cross-floor navigation
+      const startFloorNodes = getNodesByFloor(startFloorNum);
+      const endFloorNodes = getNodesByFloor(endFloorNum);
+      
+      const crossFloorResult = calculateCrossFloorRoute(
+        graph,
+        startId,
+        endId,
+        nodes,
+        startFloorNodes,
+        endFloorNodes,
+        startFloorNum,
+        endFloorNum
+      );
+      
+      if (crossFloorResult.error) {
+        setError(crossFloorResult.error);
+        setPath([]);
+        setDistance(0);
+        setCrossFloorNavigation(null);
+      } else {
+        // Store the cross-floor navigation data - start at phase 0 (selection)
+        setCrossFloorNavigation(crossFloorResult);
+        setNavigationPhase(0); // Phase 0 = selection phase
+        setStartFloor(startFloorNum);
+        setEndFloor(endFloorNum);
+        
+        // Don't set path yet - wait for user to select lift or stairs
+        setPath([]);
+        setDistance(crossFloorResult.totalDistance);
+        setError('');
+      }
+    }
+  };
+
+  // Handle selecting a transition type (lift or stairs)
+  const handleSelectTransition = (transitionType) => {
+    if (!crossFloorNavigation || !selectedStart || !selectedEnd) return;
+    
+    // Use floor info from crossFloorNavigation (more reliable than state)
+    const srcFloor = crossFloorNavigation.startFloor ?? startFloor;
+    const dstFloor = crossFloorNavigation.endFloor ?? endFloor;
+    
+    const startFloorNodes = getNodesByFloor(srcFloor);
+    const endFloorNodes = getNodesByFloor(dstFloor);
+    
+    // Recalculate route with the selected transition type
+    const crossFloorResult = calculateCrossFloorRoute(
+      graph,
+      selectedStart.id,
+      selectedEnd.id,
+      nodes,
+      startFloorNodes,
+      endFloorNodes,
+      srcFloor,
+      dstFloor,
+      transitionType // Pass the preferred transition type
+    );
+    
+    if (crossFloorResult.error) {
+      setError(crossFloorResult.error);
+      return;
+    }
+    
+    setCrossFloorNavigation(crossFloorResult);
+    setNavigationPhase(1); // Move to phase 1 (navigation to lift/stairs)
+    setPath(crossFloorResult.phases[0].path);
+    setDistance(crossFloorResult.totalDistance);
+    
+    // Ensure floor states are set
+    setStartFloor(srcFloor);
+    setEndFloor(dstFloor);
+  };
+
+  // Handle navigation phase transitions
+  const handleNextPhase = () => {
+    if (!crossFloorNavigation) return;
+    
+    const nextPhase = navigationPhase + 1;
+    
+    if (nextPhase === 2) {
+      // Transition phase - show message to take lift/stairs
+      setNavigationPhase(2);
+      // Keep the phase 1 path visible on the map so user can see the route to lift/stairs
+      // The path is already set from phase 1, so we don't clear it
+    } else if (nextPhase === 3) {
+      // Phase 3 - navigate to destination on target floor
+      setNavigationPhase(3);
+      // Use floor info from crossFloorNavigation (more reliable)
+      const targetFloor = crossFloorNavigation.endFloor ?? endFloor;
+      setCurrentFloor(targetFloor); // Automatically switch to destination floor
+      
+      // Get the path for phase 3 (index 2 in the phases array)
+      const phase3Path = crossFloorNavigation.phases[2]?.path || [];
+      console.log('Phase 3 path:', phase3Path, 'Target floor:', targetFloor);
+      setPath(phase3Path);
+    } else if (nextPhase > 3) {
+      // Navigation complete
+      setNavigationPhase(0);
+      setCrossFloorNavigation(null);
+    }
+  };
+
+  const handlePrevPhase = () => {
+    if (!crossFloorNavigation || navigationPhase <= 1) return;
+    
+    const prevPhase = navigationPhase - 1;
+    
+    if (prevPhase === 1) {
+      setNavigationPhase(1);
+      // Use floor info from crossFloorNavigation (more reliable)
+      const srcFloor = crossFloorNavigation.startFloor ?? startFloor;
+      setCurrentFloor(srcFloor);
+      setPath(crossFloorNavigation.phases[0].path);
+    } else if (prevPhase === 2) {
+      setNavigationPhase(2);
+      setPath([]);
     }
   };
 
   const handleStartSelect = (location) => {
-    setSelectedStart(location);
+    // Store the floor with the location - use location.floor if available (from search), otherwise use currentFloor
+    const locationFloor = location.floor !== undefined ? location.floor : currentFloor;
+    setSelectedStart({ ...location, floor: locationFloor });
     setStartLocation(location.label);
+    setStartFloor(locationFloor);
+    // Switch to the start location's floor so user can see it on the map
+    if (locationFloor !== currentFloor) {
+      setCurrentFloor(locationFloor);
+    }
     setError('');
   };
 
   const handleEndSelect = (location) => {
-    setSelectedEnd(location);
+    // Store the floor with the location - use location.floor if available (from search), otherwise use currentFloor
+    const locationFloor = location.floor !== undefined ? location.floor : currentFloor;
+    setSelectedEnd({ ...location, floor: locationFloor });
     setEndLocation(location.label);
+    setEndFloor(locationFloor);
     setError('');
   };
 
   const handleQuickAction = (poiType) => {
-    if (!selectedStart || !graph) {
+    if (!graph) {
+      setError('Map not loaded yet');
+      setTimeout(() => setError(''), 3000);
+      return;
+    }
+
+    // Determine the current user position
+    // If in cross-floor navigation phase 3, use the transition node (lift/stairs) on current floor
+    // Otherwise, use the selected start location
+    let currentPositionId = null;
+    let currentPositionLabel = '';
+
+    if (crossFloorNavigation && navigationPhase === 3) {
+      // User is on the destination floor after taking lift/stairs
+      currentPositionId = crossFloorNavigation.transitionNodeId;
+      currentPositionLabel = nodes[currentPositionId]?.label || 'Current Location';
+    } else if (selectedStart) {
+      currentPositionId = selectedStart.id;
+      currentPositionLabel = selectedStart.label;
+    } else {
       setError('Please select a starting location first');
       setTimeout(() => setError(''), 3000);
       return;
@@ -106,7 +278,7 @@ function App({ isAdmin, setIsAdmin }) {
     // Filter targetNodes based on whether they exist on the current floor
     const availableTargets = (targetNodes || []).filter(id => floorNodes[id]);
 
-    const result = findNearestPOI(graph, selectedStart.id, availableTargets);
+    const result = findNearestPOI(graph, currentPositionId, availableTargets);
     if (result.error || !result.target) {
       setError(result.error || `No ${poiType.replace(/_/g, ' ')} found on ${currentFloor === 0 ? 'Ground' : currentFloor + 'F'}`);
       setTimeout(() => setError(''), 3000);
@@ -117,25 +289,45 @@ function App({ isAdmin, setIsAdmin }) {
 
     if (result.target) {
       const targetNode = nodes[result.target];
+      
+      // Update start location to current position if we were in cross-floor navigation
+      if (crossFloorNavigation && navigationPhase === 3) {
+        setSelectedStart({
+          id: currentPositionId,
+          label: currentPositionLabel,
+          type: nodes[currentPositionId]?.type || 'lift',
+          floor: currentFloor
+        });
+        setStartLocation(currentPositionLabel);
+        setStartFloor(currentFloor);
+      }
+      
       setSelectedEnd({
         id: result.target,
         label: targetNode.label,
         type: targetNode.type,
+        floor: currentFloor // Quick action targets are on current floor
       });
       setEndLocation(targetNode.label);
       setPath(result.path);
       setDistance(result.distance);
       setError('');
+      // Clear cross-floor navigation for same-floor quick actions
+      setCrossFloorNavigation(null);
+      setNavigationPhase(0);
     }
   };
 
   const handleSwapLocations = () => {
     const tempStart = selectedStart;
     const tempStartLocation = startLocation;
+    const tempStartFloor = startFloor;
     setSelectedStart(selectedEnd);
     setStartLocation(endLocation);
+    setStartFloor(endFloor);
     setSelectedEnd(tempStart);
     setEndLocation(tempStartLocation);
+    setEndFloor(tempStartFloor);
   };
 
   const handleClearRoute = () => {
@@ -146,6 +338,11 @@ function App({ isAdmin, setIsAdmin }) {
     setPath([]);
     setDistance(0);
     setError('');
+    // Clear cross-floor navigation state
+    setCrossFloorNavigation(null);
+    setNavigationPhase(0);
+    setStartFloor(null);
+    setEndFloor(null);
   };
 
   const handleMapNodeClick = (nodeId, node) => {
@@ -154,13 +351,14 @@ function App({ isAdmin, setIsAdmin }) {
 
     setSidebarOpen(true);
 
-    const location = { id: nodeId, label: node.label, type: node.type };
+    // Include the current floor when clicking on a node from the map
+    const location = { id: nodeId, label: node.label, type: node.type, floor: currentFloor };
 
     if (!selectedStart) {
       handleStartSelect(location);
       return;
     }
-    if (selectedStart.id === nodeId) {
+    if (selectedStart.id === nodeId && selectedStart.floor === currentFloor) {
       setError('Start and destination cannot be the same location');
       setTimeout(() => setError(''), 3000);
       return;
@@ -175,6 +373,9 @@ function App({ isAdmin, setIsAdmin }) {
       setPath([]);
       setDistance(0);
       setError('');
+      // Clear cross-floor navigation
+      setCrossFloorNavigation(null);
+      setNavigationPhase(0);
     }
   };
 
@@ -184,44 +385,72 @@ function App({ isAdmin, setIsAdmin }) {
       {/* --- Top Search Bar (Mobile-First) --- */}
       <div className="top-search-bar">
         <div className="top-search-card">
-          <div className="search-compact-group">
-            <div className="search-row">
-              <SearchBar
-                value={startLocation}
-                onChange={setStartLocation}
-                onSelect={handleStartSelect}
-                placeholder="From..."
-                floor={currentFloor}
-              />
-            </div>
-            <div className="search-row">
-              <SearchBar
-                value={endLocation}
-                onChange={setEndLocation}
-                onSelect={handleEndSelect}
-                placeholder="To..."
-                floor={currentFloor}
-              />
-              <button
-                className="swap-btn-compact"
-                onClick={handleSwapLocations}
-                disabled={!selectedStart || !selectedEnd}
-                title="Swap locations"
-              >
-                <ArrowUpDown size={18} />
-              </button>
-            </div>
-            {error && (
-              <div className="error-message">
-                <span className="error-icon">⚠</span> {error}
+          {/* Compact mode when both locations are selected */}
+          {selectedStart && selectedEnd ? (
+            <div className="search-compact-selected">
+              <div className="search-inline-row">
+                <div className="location-pill source-pill">
+                  <span className="pill-dot start"></span>
+                  <span className="pill-text">{selectedStart.label}</span>
+                </div>
+                <button
+                  className="swap-btn-inline"
+                  onClick={handleSwapLocations}
+                  title="Swap locations"
+                >
+                  <ArrowUpDown size={14} />
+                </button>
+                <div className="location-pill dest-pill">
+                  <span className="pill-dot end"></span>
+                  <span className="pill-text">{selectedEnd.label}</span>
+                </div>
               </div>
-            )}
-            {(selectedStart || selectedEnd) && (
               <button className="clear-route-btn-mobile" onClick={handleClearRoute}>
                 <Trash2 size={14} /> Clear Route
               </button>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="search-compact-group">
+              <div className="search-row">
+                <SearchBar
+                  value={startLocation}
+                  onChange={setStartLocation}
+                  onSelect={handleStartSelect}
+                  placeholder="From..."
+                  floor={currentFloor}
+                  searchAllFloors={true}
+                />
+              </div>
+              <div className="search-row">
+                <SearchBar
+                  value={endLocation}
+                  onChange={setEndLocation}
+                  onSelect={handleEndSelect}
+                  placeholder="To..."
+                  floor={currentFloor}
+                  searchAllFloors={true}
+                />
+                <button
+                  className="swap-btn-compact"
+                  onClick={handleSwapLocations}
+                  disabled={!selectedStart || !selectedEnd}
+                  title="Swap locations"
+                >
+                  <ArrowUpDown size={18} />
+                </button>
+              </div>
+              {error && (
+                <div className="error-message">
+                  <span className="error-icon">⚠</span> {error}
+                </div>
+              )}
+              {(selectedStart || selectedEnd) && (
+                <button className="clear-route-btn-mobile" onClick={handleClearRoute}>
+                  <Trash2 size={14} /> Clear Route
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -270,6 +499,7 @@ function App({ isAdmin, setIsAdmin }) {
                 onSelect={handleStartSelect}
                 placeholder="Starting point..."
                 floor={currentFloor}
+                searchAllFloors={true}
               />
             </div>
 
@@ -293,6 +523,7 @@ function App({ isAdmin, setIsAdmin }) {
                 onSelect={handleEndSelect}
                 placeholder="Destination..."
                 floor={currentFloor}
+                searchAllFloors={true}
               />
             </div>
 
@@ -313,13 +544,65 @@ function App({ isAdmin, setIsAdmin }) {
         {/* Container 2: Actions & Results (Bottom Island) */}
         {/* Only show this container if there's content to show, or always show QuickActions */}
         <div className="panel-card action-island">
-          {/* Navigation Instructions at top when route exists */}
-          {path.length > 0 && (
+          {/* Cross-floor navigation indicator - only show for phase 0 (selection) */}
+          {crossFloorNavigation && navigationPhase === 0 && (
+            <div className="cross-floor-indicator">
+              <div className="cross-floor-header">
+                <span className="cross-floor-info">
+                  Floor {startFloor === 0 ? 'G' : startFloor} → Floor {endFloor === 0 ? 'G' : endFloor}
+                </span>
+              </div>
+
+              {/* Phase 0: Selection of lift or stairs */}
+              {crossFloorNavigation.options && (
+                <div className="transition-selection">
+                  {/* <p className="selection-title">Multi-Floor Navigation</p> */}
+                  <div className="transition-options">
+                    {crossFloorNavigation.options.lift && (
+                      <button 
+                        className="transition-option lift-option"
+                        onClick={() => handleSelectTransition('lift')}
+                      >
+                        <span className="option-label">Lift</span>
+                        <span className="option-distance">
+                          ~{Math.round(crossFloorNavigation.options.lift.totalDistance * 0.2)} steps
+                        </span>
+                      </button>
+                    )}
+                    {crossFloorNavigation.options.lift && crossFloorNavigation.options.stairs && (
+                      <span className="transition-or">OR</span>
+                    )}
+                    {crossFloorNavigation.options.stairs && (
+                      <button 
+                        className="transition-option stairs-option"
+                        onClick={() => handleSelectTransition('stairs')}
+                      >
+                        <span className="option-label">Stairs</span>
+                        <span className="option-distance">
+                          ~{Math.round(crossFloorNavigation.options.stairs.totalDistance * 0.2)} steps
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Navigation Instructions - handles both single-floor and multi-floor navigation */}
+          {(path.length > 0 || (crossFloorNavigation && navigationPhase === 2)) && (
             <div className="navigation-integrated">
               <NavigationOverlay 
                 path={path} 
                 isMinimized={sidebarMinimized}
                 onToggleMinimize={() => setSidebarMinimized(!sidebarMinimized)}
+                crossFloorPhase={navigationPhase}
+                crossFloorNavigation={crossFloorNavigation}
+                currentFloor={currentFloor}
+                onNextPhase={handleNextPhase}
+                onPrevPhase={handlePrevPhase}
+                startFloor={startFloor}
+                endFloor={endFloor}
               />
             </div>
           )}
@@ -330,6 +613,8 @@ function App({ isAdmin, setIsAdmin }) {
               onQuickAction={handleQuickAction}
               currentLocation={selectedStart}
               minimized={false}
+              crossFloorPhase={navigationPhase}
+              isOnNewFloor={crossFloorNavigation !== null}
             />
           ) : (
             <>
@@ -337,6 +622,8 @@ function App({ isAdmin, setIsAdmin }) {
                 onQuickAction={handleQuickAction}
                 currentLocation={selectedStart}
                 minimized={path.length > 0}
+                crossFloorPhase={navigationPhase}
+                isOnNewFloor={crossFloorNavigation !== null}
               />
 
               {path.length > 0 && (
@@ -424,6 +711,10 @@ function App({ isAdmin, setIsAdmin }) {
       </div>
 
       <InstallPrompt />
+      
+      {showTutorial && (
+        <TutorialGuide onClose={() => setShowTutorial(false)} />
+      )}
     </div>
   );
 }

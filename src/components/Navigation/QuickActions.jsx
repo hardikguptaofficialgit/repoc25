@@ -2,12 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import './QuickActions.css';
 
-const QuickActions = ({ onQuickAction, currentLocation, minimized = false }) => {
+const QuickActions = ({ onQuickAction, currentLocation, minimized = false, crossFloorPhase = 0, isOnNewFloor = false }) => {
     const [isExpanded, setIsExpanded] = useState(!minimized);
 
     useEffect(() => {
         setIsExpanded(!minimized);
     }, [minimized]);
+
+    // Enable quick actions if user has a start location OR is on a new floor after cross-floor navigation
+    const canUseQuickActions = currentLocation || (crossFloorPhase === 3 && isOnNewFloor);
 
     const quickActions = [
         {
@@ -49,7 +52,7 @@ const QuickActions = ({ onQuickAction, currentLocation, minimized = false }) => 
     ];
 
     const handleClick = (action) => {
-        if (!currentLocation) {
+        if (!canUseQuickActions) {
             alert('Please select a starting location first');
             return;
         }
@@ -62,7 +65,9 @@ const QuickActions = ({ onQuickAction, currentLocation, minimized = false }) => 
                 className="quick-actions-header"
                 onClick={() => setIsExpanded(!isExpanded)}
             >
-                <h3 className="quick-actions-title">Quick Navigation</h3>
+                <h3 className="quick-actions-title">
+                    {isOnNewFloor && crossFloorPhase === 3 ? 'Find Nearby' : 'Quick Navigation'}
+                </h3>
                 <div className="toggle-icon">
                     {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 </div>
@@ -76,7 +81,7 @@ const QuickActions = ({ onQuickAction, currentLocation, minimized = false }) => 
                             className="quick-action-button"
                             onClick={() => handleClick(action.action)}
                             style={{ '--action-color': action.color }}
-                            disabled={!currentLocation}
+                            disabled={!canUseQuickActions}
                         >
                             <span className="action-label">{action.label}</span>
                         </button>
