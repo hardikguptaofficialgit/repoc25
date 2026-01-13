@@ -188,6 +188,16 @@
     font-weight: 500;
 }
 
+.fed-logo {
+    height: 18px;
+    width: auto;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 4px;
+    margin-bottom: 2px;
+    /* optical correction */
+}
+
 @media (max-width: 768px) {
     .quick-attribution-mobile {
         display: block;
