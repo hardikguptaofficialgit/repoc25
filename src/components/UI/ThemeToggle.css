@@ -1,44 +1,68 @@
-/* Theme Toggle - Button Variant */
+/* ===============================
+   SHARED DOUBLE-BORDER PRESET
+   =============================== */
+:root {
+    --accent-ring: rgba(211, 74, 9, 0.85);
+    --accent-border: rgba(211, 74, 9, 0.9);
+    --outer-ring: #ffffff;
+    --depth-shadow: 0 10px 26px rgba(211, 74, 9, 0.22);
+}
+
+/* ===============================
+   THEME TOGGLE – BUTTON VARIANT
+   =============================== */
 .theme-toggle-buttons {
     display: flex;
     gap: 8px;
     background: var(--surface-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 4px;
+    border-radius: 10px;
+    padding: 5px;
+
+    border: 1px solid var(--accent-border);
+    box-shadow:
+        0 0 0 3px var(--outer-ring),
+        0 0 0 5px var(--accent-ring),
+        var(--depth-shadow);
 }
 
 .theme-btn {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 12px;
+    padding: 6px 14px;
     background: transparent;
-    border: none;
-    border-radius: 6px;
+    border-radius: 8px;
+    border: 1px solid transparent;
     color: var(--text-secondary);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .theme-btn:hover {
-    background: var(--hover-bg);
+    background: rgba(211, 74, 9, 0.08);
     color: var(--text-primary);
 }
 
 .theme-btn.active {
-    background: var(--primary-color);
-    color: #FFFFFF;
-    box-shadow: 0 2px 8px var(--primary-shadow);
+    background: #ffffff;
+    color: #D34A09;
+
+    border: 1px solid var(--accent-border);
+    box-shadow:
+        0 0 0 3px var(--outer-ring),
+        0 0 0 5px var(--accent-ring),
+        0 8px 22px rgba(211, 74, 9, 0.22);
 }
 
 .theme-btn svg {
     flex-shrink: 0;
 }
 
-/* Theme Toggle - Switch Variant */
+/* ===============================
+   THEME TOGGLE – SWITCH VARIANT
+   =============================== */
 .theme-toggle-container {
     display: flex;
     align-items: center;
@@ -47,7 +71,7 @@
 .theme-toggle-label {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     cursor: pointer;
     user-select: none;
 }
@@ -63,8 +87,8 @@
 
 .theme-toggle-switch {
     position: relative;
-    width: 44px;
-    height: 24px;
+    width: 46px;
+    height: 26px;
 }
 
 .theme-toggle-switch input {
@@ -75,44 +99,47 @@
 
 .theme-slider {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0;
     background: var(--toggle-bg);
-    border-radius: 24px;
-    transition: all 0.3s ease;
-    border: 1px solid var(--border-color);
+    border-radius: 30px;
+
+    border: 1px solid var(--accent-border);
+    box-shadow:
+        0 0 0 3px var(--outer-ring),
+        0 0 0 5px var(--accent-ring),
+        var(--depth-shadow);
+
+    transition: background 0.3s ease, border-color 0.3s ease;
 }
 
-.theme-slider:before {
+.theme-slider::before {
     content: '';
     position: absolute;
     height: 18px;
     width: 18px;
-    left: 3px;
-    bottom: 2px;
+    left: 4px;
+    top: 3px;
     background: var(--toggle-knob);
     border-radius: 50%;
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+    border: 1px solid rgba(211, 74, 9, 0.6);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.28);
+    transition: transform 0.3s ease, background 0.3s ease;
 }
 
 .theme-toggle-switch input:checked+.theme-slider {
-    background: var(--primary-color);
-    border-color: var(--primary-color);
+    background: #D34A09;
+    border-color: rgba(211, 74, 9, 0.95);
 }
 
-.theme-toggle-switch input:checked+.theme-slider:before {
+.theme-toggle-switch input:checked+.theme-slider::before {
     transform: translateX(20px);
-    background: #FFFFFF;
+    background: #ffffff;
 }
 
-.theme-toggle-switch:hover .theme-slider {
-    border-color: var(--primary-color);
-}
-
-/* Mobile Adjustments */
+/* ===============================
+   MOBILE ADJUSTMENTS
+   =============================== */
 @media (max-width: 768px) {
     .theme-toggle-buttons {
         width: 100%;

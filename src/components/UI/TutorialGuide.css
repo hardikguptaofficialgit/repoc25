@@ -31,7 +31,6 @@
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-xl);
     overflow: hidden;
-    transform: scale(0.9) translateY(20px);
     opacity: 0;
     transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1),
         opacity 0.3s ease;
@@ -89,6 +88,32 @@
 /* ===============================
    CONTENT
    =============================== */
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulseBorder {
+    0% {
+        box-shadow: 0 0 0 4px var(--bg-primary), 0 0 0 6px var(--border-color);
+    }
+
+    50% {
+        box-shadow: 0 0 0 6px var(--bg-primary), 0 0 0 8px var(--accent-primary);
+    }
+
+    100% {
+        box-shadow: 0 0 0 4px var(--bg-primary), 0 0 0 6px var(--border-color);
+    }
+}
+
 .tutorial-content {
     padding: 24px 32px 32px;
     text-align: center;
@@ -97,27 +122,37 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .tutorial-icon {
-    width: 72px;
-    height: 72px;
-    /* Removed background gradient, set to transparent */
-    background: transparent;
-    border: 1px solid var(--primary-shadow);
+    width: 80px;
+    height: 80px;
+    background: var(--bg-secondary);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--accent-primary);
+    color: var(--primary-color);
     margin-bottom: 24px;
+
+    border: 1px solid rgba(211, 74, 9, 0.9);
+    box-shadow:
+        0 0 0 3px #ffffff,
+        0 0 0 5px rgba(211, 74, 9, 0.85),
+        0 10px 26px rgba(211, 74, 9, 0.22);
+    /* soft depth */
+
+
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
 .tutorial-title {
     font-size: 24px;
-    font-weight: 600;
+    font-weight: 700;
     color: var(--text-primary);
     margin: 0 0 12px 0;
+    letter-spacing: -0.5px;
 }
 
 .tutorial-description {
@@ -125,7 +160,7 @@
     line-height: 1.6;
     color: var(--text-secondary);
     margin: 0;
-    max-width: 320px;
+    max-width: 340px;
 }
 
 /* ===============================
@@ -156,7 +191,7 @@
 
 .progress-dot.active {
     width: 24px;
-    border-radius: 4px;
+    border-radius: 12px;
     background: var(--accent-gradient);
 }
 
@@ -186,7 +221,7 @@
     font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.2s ease, opacity 0.2s ease;
+    transition: all 0.2s ease;
     border: none;
 }
 
@@ -194,11 +229,13 @@
     flex: 1;
     background: var(--accent-gradient);
     color: white;
-    box-shadow: 0 4px 16px rgba(211, 74, 9, 0.3);
+    /* Standard subtle shadow */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .tutorial-btn.primary:hover {
-    opacity: 0.9;
+    opacity: 0.95;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
 .tutorial-btn.secondary {

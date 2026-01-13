@@ -17,17 +17,27 @@
 }
 
 .install-prompt-content {
-    background: linear-gradient(135deg, rgba(211, 74, 9, 0.95) 0%, rgba(216, 131, 13, 0.95) 100%);
+    background: linear-gradient(135deg,
+            rgba(211, 74, 9, 0.95) 0%,
+            rgba(216, 131, 13, 0.95) 100%);
     backdrop-filter: blur(20px);
     border-radius: 16px;
     padding: 16px 20px;
     display: flex;
     align-items: center;
     gap: 16px;
-    box-shadow: 0 10px 40px rgba(211, 74, 9, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    /* premium double-border treatment */
+    border: 1px solid rgba(211, 74, 9, 0.9);
+    box-shadow:
+        0 0 0 3px #ffffff,
+        0 0 0 5px rgba(211, 74, 9, 0.85),
+        0 10px 26px rgba(211, 74, 9, 0.22);
 }
 
+/* ===============================
+   ICON
+   =============================== */
 .install-icon {
     width: 48px;
     height: 48px;
@@ -35,13 +45,20 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: #ffffff;
     flex-shrink: 0;
-    border: 2px solid #ffffff;
+
+    /* consistent double-ring icon */
     background: transparent;
+    border: 1px solid rgba(211, 74, 9, 0.9);
+    box-shadow:
+        0 0 0 2px #ffffff,
+        0 0 0 3px rgba(211, 74, 9, 0.85);
 }
 
-
+/* ===============================
+   TEXT
+   =============================== */
 .install-text {
     flex: 1;
     min-width: 0;
@@ -51,7 +68,7 @@
     margin: 0;
     font-size: 16px;
     font-weight: 700;
-    color: #fff;
+    color: #ffffff;
     line-height: 1.2;
 }
 
@@ -62,6 +79,9 @@
     line-height: 1.3;
 }
 
+/* ===============================
+   ACTIONS
+   =============================== */
 .install-actions {
     display: flex;
     align-items: center;
@@ -69,43 +89,35 @@
 }
 
 .install-btn {
-    background: rgba(255, 255, 255, 0.95);
+    background: #ffffff;
     color: #D34A09;
-    border: none;
     border-radius: 10px;
     padding: 10px 20px;
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s ease, opacity 0.2s ease;
-}
-
-.install-btn:hover {
-    background: #fff;
-    opacity: 0.9;
-}
-
-.install-btn:active {
-    opacity: 0.8;
+    border: 1px solid rgba(211, 74, 9, 0.6);
+    box-shadow:
+        0 0 0 2px #ffffff,
+        0 6px 16px rgba(0, 0, 0, 0.12);
 }
 
 .dismiss-btn {
     width: 36px;
     height: 36px;
-    background: black;
-    border: 2px solid #ffffff;
-    border-radius: 30px;
-    color: #fff;
+    background: #000000;
+    border-radius: 50%;
+    color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: border-color 0.2s ease;
-}
 
-
-.dismiss-btn:hover {
-    background: rgba(255, 255, 255, 0.25);
+    /* subtle matching ring */
+    border: 1px solid rgba(211, 74, 9, 0.9);
+    box-shadow:
+        0 0 0 2px #ffffff,
+        0 0 0 3px rgba(211, 74, 9, 0.85);
 }
 
 /* ===============================
