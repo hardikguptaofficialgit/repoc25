@@ -408,24 +408,11 @@
     background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
     color: #fff;
     border: none;
-    animation: pulse-phase 2s infinite;
 }
 
 .nav-btn.next-phase:hover {
     transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.5);
-}
-
-@keyframes pulse-phase {
-
-    0%,
-    100% {
-        box-shadow: 0 0 0 0 rgba(249, 115, 22, 0.4);
-    }
-
-    50% {
-        box-shadow: 0 0 0 8px rgba(249, 115, 22, 0);
-    }
+    /* Slight scale for feedback */
 }
 
 /* Transition point icon styling */

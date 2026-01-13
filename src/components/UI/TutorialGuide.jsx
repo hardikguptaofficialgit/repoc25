@@ -81,7 +81,7 @@ const TutorialGuide = ({ onClose }) => {
                 </div>
 
                 {/* Step content */}
-                <div className="tutorial-content">
+                <div className="tutorial-content" key={currentStep}>
                     <div className="tutorial-icon">
                         {step.icon}
                     </div>
@@ -112,7 +112,7 @@ const TutorialGuide = ({ onClose }) => {
                             Skip
                         </button>
                     )}
-                    
+
                     <button className="tutorial-btn primary" onClick={handleNext}>
                         {isLastStep ? "Get Started" : "Next"}
                         {!isLastStep && <ChevronRight size={18} />}

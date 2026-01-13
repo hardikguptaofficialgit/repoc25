@@ -397,7 +397,8 @@
 @media (max-width: 768px) {
   .map-ui-header {
     /* Place controls below the top search bar on mobile */
-    top: calc(var(--safe-area-top) + 130px);
+    top: 130px;
+    /* Aligned with map-tool-layer in App.css */
     left: 10px;
     right: 10px;
     flex-wrap: wrap;

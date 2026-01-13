@@ -41,6 +41,10 @@ export default defineConfig({
         clientsClaim: true,
         skipWaiting: true,
       },
+      devOptions: {
+        enabled: true,
+        type: 'module',
+      },
     }),
   ],
   server: {
