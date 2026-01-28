@@ -403,6 +403,8 @@
     right: 10px;
     flex-wrap: wrap;
     gap: 8px;
+    z-index: 350;
+    /* Higher z-index on mobile to stay above bottom sheet (z-index: 50) */
   }
 
   .ui-group {

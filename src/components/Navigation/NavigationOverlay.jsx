@@ -74,6 +74,15 @@ const NavigationOverlay = ({
         return base;
     }, [path, activeFloor, crossFloorNavigation, crossFloorPhase]);
 
+    // Calculate progress percent - must be before any early returns (hooks rule)
+    const safeStep = Math.max(0, Math.min(currentStep, instructions.length - 1));
+    const progressPercent = useMemo(() => {
+        const base = ((safeStep + 1) / instructions.length) * 100;
+        if (!crossFloorNavigation) return base;
+        if (crossFloorPhase === 1) return base * 0.33;
+        if (crossFloorPhase === 3) return 66 + base * 0.34;
+        return base;
+    }, [safeStep, instructions.length, crossFloorNavigation, crossFloorPhase]);
 
     // No local currentStep state; controlled by parent
 
@@ -110,8 +119,7 @@ const NavigationOverlay = ({
 
     if (!instructions.length) return null;
 
-    // Clamp currentStep to valid range
-    const safeStep = Math.max(0, Math.min(currentStep, instructions.length - 1));
+    // Get current step and check if it's the last one
     const step = instructions[safeStep];
     const isLast = safeStep === instructions.length - 1;
     const isTransitionEnd = crossFloorNavigation && crossFloorPhase === 1 && isLast;
@@ -137,13 +145,6 @@ const NavigationOverlay = ({
     };
 
     const Icon = getIcon(step.type);
-    const progressPercent = useMemo(() => {
-        const base = ((safeStep + 1) / instructions.length) * 100;
-        if (!crossFloorNavigation) return base;
-        if (crossFloorPhase === 1) return base * 0.33;
-        if (crossFloorPhase === 3) return 66 + base * 0.34;
-        return base;
-    }, [safeStep, instructions.length, crossFloorNavigation, crossFloorPhase]);
 
     return (
         <div className={`nav-overlay-integrated ${isMinimized ? 'minimized' : ''}`}>
