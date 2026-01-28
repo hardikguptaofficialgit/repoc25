@@ -1,146 +1,132 @@
 import { nodes } from '../data/buildingData';
 
 /**
- * Get floor-adjusted label for a node
- * @param {Object} node - The node object
- * @param {number} floor - The floor number
- * @returns {string} - The floor-adjusted label
+ * Returns floor-adjusted room label
  */
 const getFloorAdjustedLabel = (node, floor) => {
-    if (!node || !node.label) return '';
-    
-    // Check if label matches pattern like A-001, B-020, etc.
+    if (!node?.label) return '';
+
     const match = node.label.match(/^([A-Z])-(\d{3})$/);
-    if (match && floor !== undefined && floor !== null) {
-        const block = match[1];
-        const roomNumber = parseInt(match[2]);
-        
-        if (floor === 0) {
-            return `${block}-${roomNumber.toString().padStart(3, '0')}`;
-        } else {
-            const newRoomNumber = (floor * 100) + roomNumber;
-            return `${block}-${newRoomNumber.toString().padStart(3, '0')}`;
-        }
-    }
-    
-    return node.label;
+    if (!match || floor == null) return node.label;
+
+    const block = match[1];
+    const baseRoom = parseInt(match[2], 10);
+
+    // Example: floor 2, room 015 → 215
+    const adjustedRoom =
+        floor === 0 ? baseRoom : floor * 100 + (baseRoom % 100);
+
+    return `${block}-${adjustedRoom.toString().padStart(3, '0')}`;
 };
 
 /**
- * Calculates Euclidean distance between two points
+ * Euclidean distance
  */
-const getDistance = (n1, n2) => {
-    const dx = n2.x - n1.x;
-    const dy = n2.y - n1.y;
-    return Math.sqrt(dx * dx + dy * dy);
+const getDistance = (a, b) => {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    return Math.hypot(dx, dy);
 };
 
 /**
- * Calculates the angle change between three points (p1 -> p2 -> p3)
- * Returns value in degrees
- * (+) -> Right Turn
- * (-) -> Left Turn
+ * Angle between vectors (p1 → p2 → p3)
+ * Positive = right, Negative = left
  */
 const getTurnAngle = (p1, p2, p3) => {
-    const a1 = Math.atan2(p2.y - p1.y, p2.x - p1.x);
-    const a2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
-    let diff = a2 - a1;
+    const v1 = Math.atan2(p2.y - p1.y, p2.x - p1.x);
+    const v2 = Math.atan2(p3.y - p2.y, p3.x - p2.x);
 
-    // Normalize to [-PI, PI]
-    while (diff <= -Math.PI) diff += 2 * Math.PI;
-    while (diff > Math.PI) diff -= 2 * Math.PI;
+    let delta = v2 - v1;
+    while (delta <= -Math.PI) delta += 2 * Math.PI;
+    while (delta > Math.PI) delta -= 2 * Math.PI;
 
-    return diff * (180 / Math.PI);
+    return (delta * 180) / Math.PI;
 };
 
 /**
- * Generates textual navigation instructions from a path of node IDs.
- * @param {Array} pathIds - Array of node IDs in the path
- * @param {number} floor - Optional floor number for label adjustment
+ * Generates turn-by-turn navigation instructions
  */
-export const generateNavigationInstructions = (pathIds, floor) => {
-    if (!pathIds || pathIds.length < 2) return [];
+export const generateNavigationInstructions = (pathIds = [], floor) => {
+    if (pathIds.length < 2) return [];
+
+    const path = pathIds.map(id => nodes[id]).filter(Boolean);
+    if (path.length < 2) return [];
 
     const instructions = [];
-    const pathNodes = pathIds.map(id => nodes[id]).filter(Boolean);
+    let distanceBuffer = 0;
 
-    // 1. Initial Instruction
-    const startNode = pathNodes[0];
-    const startLabel = getFloorAdjustedLabel(startNode, floor);
-    let accumulatedDistance = 0;
+    const MIN_STRAIGHT_DISTANCE = 3; // meters
+    const TURN_THRESHOLD = 35; // degrees
+    const STEP_FACTOR = 0.2;
 
+    // START
     instructions.push({
         type: 'start',
-        text: `Start at ${startLabel}`,
-        nodeId: pathIds[0]
+        text: `Start at ${getFloorAdjustedLabel(path[0], floor)}`,
+        nodeId: pathIds[0],
     });
 
-    // Scan for turns and accumulate distances between them
-    for (let i = 0; i < pathNodes.length - 1; i++) {
-        const p1 = pathNodes[i];
-        const p2 = pathNodes[i + 1];
+    for (let i = 0; i < path.length - 1; i++) {
+        const curr = path[i];
+        const next = path[i + 1];
 
-        const dist = getDistance(p1, p2);
-        accumulatedDistance += dist;
+        distanceBuffer += getDistance(curr, next);
 
-        // Check if there's a turn at the next node
-        if (i < pathNodes.length - 2) {
-            const p3 = pathNodes[i + 2];
-            const angle = getTurnAngle(p1, p2, p3);
+        if (i < path.length - 2) {
+            const afterNext = path[i + 2];
+            const angle = getTurnAngle(curr, next, afterNext);
 
-            // Turn Logic (Threshold 35 degrees)
-            let turnType = null;
-            if (angle > 35) turnType = 'right';
-            else if (angle < -35) turnType = 'left';
+            let turn = null;
+            if (angle > TURN_THRESHOLD) turn = 'right';
+            else if (angle < -TURN_THRESHOLD) turn = 'left';
 
-            if (turnType) {
-                // Add straight instruction with accumulated distance
-                if (accumulatedDistance >= 3) {
-                    const steps = Math.round(accumulatedDistance * 0.2);
+            if (turn) {
+                if (distanceBuffer >= MIN_STRAIGHT_DISTANCE) {
                     instructions.push({
                         type: 'straight',
-                        text: `Go straight for approx ${steps} steps`,
-                        nodeId: pathIds[i + 1]
+                        text: `Go straight for approx ${Math.round(
+                            distanceBuffer * STEP_FACTOR
+                        )} steps`,
+                        nodeId: pathIds[i + 1],
                     });
                 }
 
-                // Add turn instruction
-                const turnNode = pathNodes[i + 1];
-                const turnLabel = getFloorAdjustedLabel(turnNode, floor);
-                let locationName = "";
-                if (turnNode.label && !turnNode.type.includes('corridor') && turnNode.label.length > 3) {
-                    locationName = ` at ${turnLabel}`;
-                }
+                const label = getFloorAdjustedLabel(next, floor);
+                const atText =
+                    next.type !== 'corridor' && label
+                        ? ` at ${label}`
+                        : '';
 
                 instructions.push({
-                    type: `turn-${turnType}`,
-                    text: `Turn ${turnType}${locationName}`,
-                    nodeId: pathIds[i + 1]
+                    type: `turn-${turn}`,
+                    text: `Turn ${turn}${atText}`,
+                    nodeId: pathIds[i + 1],
                 });
 
-                // Reset accumulated distance after turn
-                accumulatedDistance = 0;
+                distanceBuffer = 0;
             }
         }
     }
 
-    // Add final straight segment if there's remaining distance
-    if (accumulatedDistance >= 3) {
-        const steps = Math.round(accumulatedDistance * 0.2);
+    // FINAL STRAIGHT (if any)
+    if (distanceBuffer >= MIN_STRAIGHT_DISTANCE) {
         instructions.push({
             type: 'straight',
-            text: `Go straight for approx ${steps} steps`,
-            nodeId: pathIds[pathIds.length - 1]
+            text: `Go straight for approx ${Math.round(
+                distanceBuffer * STEP_FACTOR
+            )} steps`,
+            nodeId: pathIds[pathIds.length - 1],
         });
     }
 
-    // Final arrival
-    const endNode = pathNodes[pathNodes.length - 1];
-    const endLabel = getFloorAdjustedLabel(endNode, floor);
+    // END
     instructions.push({
         type: 'end',
-        text: `Arrive at ${endLabel}`,
-        nodeId: pathIds[pathIds.length - 1]
+        text: `Arrive at ${getFloorAdjustedLabel(
+            path[path.length - 1],
+            floor
+        )}`,
+        nodeId: pathIds[pathIds.length - 1],
     });
 
     return instructions;

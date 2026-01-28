@@ -14,6 +14,7 @@ import { nodes, poiCategories } from './data/buildingData';
 import { ArrowUpDown, Trash2, Edit3, Eye, Menu, ChevronLeft, Building, ChevronDown, LogOut } from 'lucide-react';
 import './App.css';
 
+
 function App({ isAdmin, setIsAdmin }) {
   const [graph, setGraph] = useState(null);
   const [startLocation, setStartLocation] = useState('');
@@ -36,10 +37,17 @@ function App({ isAdmin, setIsAdmin }) {
   const [startFloor, setStartFloor] = useState(null);
   const [endFloor, setEndFloor] = useState(null);
 
+  // Progressive path coloring state
+  const [currentStep, setCurrentStep] = useState(0);
+
   // Tutorial guide state
   const [showTutorial, setShowTutorial] = useState(() => {
     return localStorage.getItem('tutorialShown') !== 'true';
   });
+  // Reset currentStep when path changes
+  useEffect(() => {
+    setCurrentStep(0);
+  }, [path]);
 
   // Check for existing admin session
   useEffect(() => {
@@ -600,6 +608,7 @@ function App({ isAdmin, setIsAdmin }) {
           )}
 
           {/* Navigation Instructions - handles both single-floor and multi-floor navigation */}
+
           {(path.length > 0 || (crossFloorNavigation && navigationPhase === 2)) && (
             <div className="navigation-integrated">
               <NavigationOverlay
@@ -613,6 +622,8 @@ function App({ isAdmin, setIsAdmin }) {
                 onPrevPhase={handlePrevPhase}
                 startFloor={startFloor}
                 endFloor={endFloor}
+                currentStep={currentStep}
+                setCurrentStep={setCurrentStep}
               />
             </div>
           )}
@@ -703,6 +714,7 @@ function App({ isAdmin, setIsAdmin }) {
         </div>
       </div>
 
+
       <div className="map-fullscreen">
         <FloorMap
           path={path}
@@ -713,6 +725,7 @@ function App({ isAdmin, setIsAdmin }) {
           editorMode={editorMode}
           currentFloor={currentFloor}
           centerOnPath={path.length > 0}
+          currentStep={currentStep}
         />
       </div>
 
