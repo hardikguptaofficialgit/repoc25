@@ -628,17 +628,17 @@ function App({ isAdmin, setIsAdmin }) {
             </div>
           )}
 
-          {/* Show QuickActions always when minimized, or full content when expanded */}
-          {sidebarMinimized ? (
-            <QuickActions
-              onQuickAction={handleQuickAction}
-              currentLocation={selectedStart}
-              minimized={false}
-              crossFloorPhase={navigationPhase}
-              isOnNewFloor={crossFloorNavigation !== null}
-            />
-          ) : (
-            <>
+          {/* Show QuickActions only when route is not fully defined */}
+          {!selectedStart || !selectedEnd ? (
+            sidebarMinimized ? (
+              <QuickActions
+                onQuickAction={handleQuickAction}
+                currentLocation={selectedStart}
+                minimized={false}
+                crossFloorPhase={navigationPhase}
+                isOnNewFloor={crossFloorNavigation !== null}
+              />
+            ) : (
               <QuickActions
                 onQuickAction={handleQuickAction}
                 currentLocation={selectedStart}
@@ -646,10 +646,8 @@ function App({ isAdmin, setIsAdmin }) {
                 crossFloorPhase={navigationPhase}
                 isOnNewFloor={crossFloorNavigation !== null}
               />
-
-
-            </>
-          )}
+            )
+          ) : null}
         </div>
 
       </div>
