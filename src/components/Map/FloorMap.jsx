@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { Stage, Layer, Rect, Circle, Line, Text, Group, Image, RegularPolygon } from 'react-konva';
 import { nodes as initialNodes, edges as initialEdges } from '../../data/buildingData';
 import { getNodesByFloor } from '../../utils/graphBuilder';
+import { generateNavigationInstructions } from '../../utils/navigationInstructions';
 import { ZoomIn, ZoomOut, RotateCcw, RotateCw, Download, Grid3X3, X, Plus, Trash2, Link, MousePointer, Upload, Trash, RefreshCw } from 'lucide-react';
 import './FloorMap.css';
 
@@ -1077,6 +1078,24 @@ const FloorMap = ({
     // Internal Palette - REMOVED (using dynamic palette)
 
     // Render Helpers
+    // Generate navigation instructions to get edge ranges
+    const navigationInstructions = React.useMemo(() => {
+        if (path.length < 2) return [];
+        return generateNavigationInstructions(path, currentFloor);
+    }, [path, currentFloor]);
+
+    // Get the current instruction's edge range
+    const currentInstructionEdgeRange = React.useMemo(() => {
+        if (!navigationInstructions.length || currentStep < 0 || currentStep >= navigationInstructions.length) {
+            return { start: -1, end: -1 };
+        }
+        const instruction = navigationInstructions[currentStep];
+        return {
+            start: instruction.startEdgeIndex ?? -1,
+            end: instruction.endEdgeIndex ?? -1
+        };
+    }, [navigationInstructions, currentStep]);
+
     // Determine which edges to show based on currentStep
     const renderedEdges = edges.map((edge, i) => {
         const [n1, n2] = edge;
@@ -1105,12 +1124,12 @@ const FloorMap = ({
             const toNode = isForward ? visibleNodes[n2] : visibleNodes[n1];
             const angle = Math.atan2(toNode.y - fromNode.y, toNode.x - fromNode.x) * 180 / Math.PI;
 
-            // Check if this is the current step
-            // Navigation instructions: [0: Start, 1-N: actual movements, Last: End]
-            // Path edges: [0 to path.length-2]
-            // So we need to map: instruction step 1 -> edge 0, step 2 -> edge 1, etc.
-            const adjustedStep = currentStep > 0 ? currentStep - 1 : -1;
-            const isCurrentStep = typeof currentStep === 'number' && adjustedStep === edgeIndexInPath;
+            // Check if this edge is within the current instruction's edge range
+            const isCurrentStep =
+                currentInstructionEdgeRange.start !== -1 &&
+                currentInstructionEdgeRange.end !== -1 &&
+                edgeIndexInPath >= currentInstructionEdgeRange.start &&
+                edgeIndexInPath <= currentInstructionEdgeRange.end;
 
             // All path edges are blue by default
             const baseColor = palette.highlight; // Blue
@@ -1144,44 +1163,60 @@ const FloorMap = ({
                         rotation={angle + 90}
                     />
 
-                    {/* Pink overlay for current step only */}
+                    {/* Pink overlay for current step - now covers all edges in the instruction range */}
                     {isCurrentStep && (
                         <>
-                            {/* Outer pink glow - brightest */}
+                            {/* Outermost pink glow - widest halo */}
                             <Line
                                 points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
                                 stroke="#FF1493"
-                                strokeWidth={24}
+                                strokeWidth={28}
+                                opacity={0.25}
+                                lineCap="round"
+                            />
+                            {/* Outer pink glow - bright */}
+                            <Line
+                                points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
+                                stroke="#FF1493"
+                                strokeWidth={20}
                                 opacity={0.4}
                                 lineCap="round"
                             />
-                            {/* Middle pink glow */}
+                            {/* Middle pink glow - brighter */}
                             <Line
                                 points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
                                 stroke="#FF1493"
-                                strokeWidth={18}
-                                opacity={0.7}
+                                strokeWidth={14}
+                                opacity={0.65}
+                                lineCap="round"
+                            />
+                            {/* Inner pink glow - brightest */}
+                            <Line
+                                points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
+                                stroke="#FF1493"
+                                strokeWidth={9}
+                                opacity={0.85}
                                 lineCap="round"
                             />
                             {/* Pink animated line overlay - solid and bright */}
                             <Line
                                 points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
                                 stroke="#FF1493"
-                                strokeWidth={10}
+                                strokeWidth={7}
                                 dash={[20, 20]}
                                 dashOffset={-pathOffset}
                                 lineCap="round"
-                                opacity={0.95}
+                                opacity={1}
                             />
                             {/* Pink arrow overlay - larger and brighter */}
                             <RegularPolygon
                                 x={(fromNode.x + toNode.x) / 2}
                                 y={(fromNode.y + toNode.y) / 2}
                                 sides={3}
-                                radius={12}
+                                radius={14}
                                 fill="#FF1493"
                                 rotation={angle + 90}
-                                opacity={0.95}
+                                opacity={1}
                             />
                         </>
                     )}

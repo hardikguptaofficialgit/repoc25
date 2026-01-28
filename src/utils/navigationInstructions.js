@@ -54,6 +54,7 @@ export const generateNavigationInstructions = (pathIds = [], floor) => {
 
     const instructions = [];
     let distanceBuffer = 0;
+    let straightStartIndex = 0; // Track where the current straight segment starts
 
     const MIN_STRAIGHT_DISTANCE = 3; // meters
     const TURN_THRESHOLD = 35; // degrees
@@ -64,7 +65,11 @@ export const generateNavigationInstructions = (pathIds = [], floor) => {
         type: 'start',
         text: `Start at ${getFloorAdjustedLabel(path[0], floor)}`,
         nodeId: pathIds[0],
+        startEdgeIndex: -1, // No edge for start
+        endEdgeIndex: -1,
     });
+
+    straightStartIndex = 0; // Start tracking from first edge
 
     for (let i = 0; i < path.length - 1; i++) {
         const curr = path[i];
@@ -88,6 +93,8 @@ export const generateNavigationInstructions = (pathIds = [], floor) => {
                             distanceBuffer * STEP_FACTOR
                         )} steps`,
                         nodeId: pathIds[i + 1],
+                        startEdgeIndex: straightStartIndex,
+                        endEdgeIndex: i, // Current edge index (i represents edge from path[i] to path[i+1])
                     });
                 }
 
@@ -101,9 +108,12 @@ export const generateNavigationInstructions = (pathIds = [], floor) => {
                     type: `turn-${turn}`,
                     text: `Turn ${turn}${atText}`,
                     nodeId: pathIds[i + 1],
+                    startEdgeIndex: i + 1, // The turn happens at the next edge
+                    endEdgeIndex: i + 1,
                 });
 
                 distanceBuffer = 0;
+                straightStartIndex = i + 1; // Next straight starts after this turn
             }
         }
     }
@@ -116,6 +126,8 @@ export const generateNavigationInstructions = (pathIds = [], floor) => {
                 distanceBuffer * STEP_FACTOR
             )} steps`,
             nodeId: pathIds[pathIds.length - 1],
+            startEdgeIndex: straightStartIndex,
+            endEdgeIndex: pathIds.length - 2, // Last edge
         });
     }
 
@@ -127,6 +139,8 @@ export const generateNavigationInstructions = (pathIds = [], floor) => {
             floor
         )}`,
         nodeId: pathIds[pathIds.length - 1],
+        startEdgeIndex: pathIds.length - 2, // Last edge leads to end
+        endEdgeIndex: pathIds.length - 2,
     });
 
     return instructions;
