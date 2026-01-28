@@ -479,7 +479,8 @@ const FloorMap = ({
     selectedEnd = null,
     editorMode = false,
     currentFloor = 0,
-    centerOnPath = false
+    centerOnPath = false,
+    currentStep = 0
 }) => {
     // Data State
     const [nodes, setNodes] = useState(initialNodes);
@@ -1076,10 +1077,17 @@ const FloorMap = ({
     // Internal Palette - REMOVED (using dynamic palette)
 
     // Render Helpers
+    // Determine which edges to show based on currentStep
     const renderedEdges = edges.map((edge, i) => {
         const [n1, n2] = edge;
         if (!visibleNodes[n1] || !visibleNodes[n2]) return null;
-        const isPathEdge = path.some((id, idx) => idx < path.length - 1 && ((id === n1 && path[idx + 1] === n2) || (id === n2 && path[idx + 1] === n1)));
+
+        // Check if this edge is part of the path
+        const edgeIndexInPath = path.findIndex((id, idx) =>
+            idx < path.length - 1 &&
+            ((id === n1 && path[idx + 1] === n2) || (id === n2 && path[idx + 1] === n1))
+        );
+        const isPathEdge = edgeIndexInPath !== -1;
 
         // Use dynamic palette
         let strokeColor = palette.edgeColor;
@@ -1092,40 +1100,91 @@ const FloorMap = ({
         }
 
         if (isPathEdge) {
-            const edgeIndex = path.findIndex((id, idx) => idx < path.length - 1 && ((id === n1 && path[idx + 1] === n2) || (id === n2 && path[idx + 1] === n1)));
-            const isForward = path[edgeIndex] === n1;
+            const isForward = path[edgeIndexInPath] === n1;
             const fromNode = isForward ? visibleNodes[n1] : visibleNodes[n2];
             const toNode = isForward ? visibleNodes[n2] : visibleNodes[n1];
             const angle = Math.atan2(toNode.y - fromNode.y, toNode.x - fromNode.x) * 180 / Math.PI;
 
+            // Check if this is the current step
+            // Navigation instructions: [0: Start, 1-N: actual movements, Last: End]
+            // Path edges: [0 to path.length-2]
+            // So we need to map: instruction step 1 -> edge 0, step 2 -> edge 1, etc.
+            const adjustedStep = currentStep > 0 ? currentStep - 1 : -1;
+            const isCurrentStep = typeof currentStep === 'number' && adjustedStep === edgeIndexInPath;
+
+            // All path edges are blue by default
+            const baseColor = palette.highlight; // Blue
+
             return (
                 <Group key={`path-${i}`}>
-                    {/* Path glow */}
+                    {/* Base path glow - always blue for all path segments */}
                     <Line
                         points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
-                        stroke={palette.highlight}
+                        stroke={baseColor}
                         strokeWidth={12}
                         opacity={0.2}
                         lineCap="round"
                     />
-                    {/* Animated flow line */}
+                    {/* Base animated flow line - always blue */}
                     <Line
                         points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
-                        stroke={palette.highlight}
+                        stroke={baseColor}
                         strokeWidth={5}
                         dash={[20, 20]}
                         dashOffset={-pathOffset}
                         lineCap="round"
                     />
-                    {/* Direction Arrow */}
+                    {/* Base direction arrow - always blue */}
                     <RegularPolygon
                         x={(fromNode.x + toNode.x) / 2}
                         y={(fromNode.y + toNode.y) / 2}
                         sides={3}
                         radius={6}
-                        fill={palette.highlight}
+                        fill={baseColor}
                         rotation={angle + 90}
                     />
+
+                    {/* Pink overlay for current step only */}
+                    {isCurrentStep && (
+                        <>
+                            {/* Outer pink glow - brightest */}
+                            <Line
+                                points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
+                                stroke="#FF1493"
+                                strokeWidth={24}
+                                opacity={0.4}
+                                lineCap="round"
+                            />
+                            {/* Middle pink glow */}
+                            <Line
+                                points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
+                                stroke="#FF1493"
+                                strokeWidth={18}
+                                opacity={0.7}
+                                lineCap="round"
+                            />
+                            {/* Pink animated line overlay - solid and bright */}
+                            <Line
+                                points={[fromNode.x, fromNode.y, toNode.x, toNode.y]}
+                                stroke="#FF1493"
+                                strokeWidth={10}
+                                dash={[20, 20]}
+                                dashOffset={-pathOffset}
+                                lineCap="round"
+                                opacity={0.95}
+                            />
+                            {/* Pink arrow overlay - larger and brighter */}
+                            <RegularPolygon
+                                x={(fromNode.x + toNode.x) / 2}
+                                y={(fromNode.y + toNode.y) / 2}
+                                sides={3}
+                                radius={12}
+                                fill="#FF1493"
+                                rotation={angle + 90}
+                                opacity={0.95}
+                            />
+                        </>
+                    )}
                 </Group>
             );
         }

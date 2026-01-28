@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
     MapPin,
     ArrowUp,
@@ -14,81 +14,73 @@ import {
     Building,
     ArrowUpDown
 } from 'lucide-react';
+
 import { generateNavigationInstructions } from '../../utils/navigationInstructions';
 import './NavigationOverlay.css';
 
-const NavigationOverlay = ({ 
-    path, 
-    isMinimized, 
-    onToggleMinimize, 
-    crossFloorPhase, 
-    crossFloorNavigation, 
+const NavigationOverlay = ({
+    path = [],
+    isMinimized,
+    onToggleMinimize,
+    crossFloorPhase,
+    crossFloorNavigation,
     currentFloor,
     onNextPhase,
     onPrevPhase,
     startFloor,
-    endFloor
+    endFloor,
+    currentStep = 0,
+    setCurrentStep = () => { }
 }) => {
-    const [instructions, setInstructions] = useState([]);
-    const [currentStep, setCurrentStep] = useState(0);
 
-    useEffect(() => {
-        if (path && path.length > 0) {
-            // Determine which floor to use for labels
-            let floor = currentFloor;
-            if (crossFloorNavigation && crossFloorPhase === 1) {
-                floor = crossFloorNavigation.startFloor;
-            } else if (crossFloorNavigation && crossFloorPhase === 3) {
-                floor = crossFloorNavigation.endFloor;
-            }
-            
-            const steps = generateNavigationInstructions(path, floor);
-            
-            // If cross-floor navigation, modify instructions based on phase
-            if (crossFloorNavigation && crossFloorPhase) {
-                if (crossFloorPhase === 1) {
-                    // Phase 1: Modify destination text to indicate lift/stairs
-                    const modifiedSteps = steps.map((step, idx) => {
-                        if (idx === steps.length - 1 && step.type === 'end') {
-                            return {
-                                ...step,
-                                text: `Arrive at ${crossFloorNavigation.transitionType === 'lift' ? 'Lift' : 'Stairs'}`,
-                                type: 'transition-point'
-                            };
-                        }
-                        return step;
-                    });
-                    setInstructions(modifiedSteps);
-                } else if (crossFloorPhase === 3) {
-                    // Phase 3: Add context that we're on a new floor
-                    const modifiedSteps = steps.map((step, idx) => {
-                        if (idx === 0 && step.type === 'start') {
-                            return {
-                                ...step,
-                                text: `Continue from ${crossFloorNavigation.transitionType === 'lift' ? 'Lift' : 'Stairs'}`,
-                                type: 'continue'
-                            };
-                        }
-                        return step;
-                    });
-                    setInstructions(modifiedSteps);
-                } else {
-                    setInstructions(steps);
-                }
-            } else {
-                setInstructions(steps);
-            }
-            setCurrentStep(0);
-        } else {
-            setInstructions([]);
+    const activeFloor = useMemo(() => {
+        if (!crossFloorNavigation) return currentFloor;
+        if (crossFloorPhase === 1) return crossFloorNavigation.startFloor;
+        if (crossFloorPhase === 3) return crossFloorNavigation.endFloor;
+        return currentFloor;
+    }, [crossFloorNavigation, crossFloorPhase, currentFloor]);
+
+    const instructions = useMemo(() => {
+        if (!path.length) return [];
+
+        let base = generateNavigationInstructions(path, activeFloor);
+
+        if (!crossFloorNavigation) return base;
+
+        if (crossFloorPhase === 1) {
+            return base.map((step, i) =>
+                i === base.length - 1 && step.type === 'end'
+                    ? {
+                        ...step,
+                        type: 'transition-point',
+                        text: `Arrive at ${crossFloorNavigation.transitionType === 'lift' ? 'Lift' : 'Stairs'}`
+                    }
+                    : step
+            );
         }
-    }, [path, crossFloorPhase, crossFloorNavigation, currentFloor]);
 
-    // For phase 2 (transition), show floor change UI
+        if (crossFloorPhase === 3) {
+            return base.map((step, i) =>
+                i === 0 && step.type === 'start'
+                    ? {
+                        ...step,
+                        type: 'continue',
+                        text: `Continue from ${crossFloorNavigation.transitionType === 'lift' ? 'Lift' : 'Stairs'}`
+                    }
+                    : step
+            );
+        }
+
+        return base;
+    }, [path, activeFloor, crossFloorNavigation, crossFloorPhase]);
+
+
+    // No local currentStep state; controlled by parent
+
+    // -------- PHASE 2 (FLOOR TRANSITION UI) --------
     if (crossFloorNavigation && crossFloorPhase === 2) {
-        const srcFloor = crossFloorNavigation.startFloor ?? startFloor;
-        const dstFloor = crossFloorNavigation.endFloor ?? endFloor;
-        
+        const src = crossFloorNavigation.startFloor ?? startFloor;
+        const dst = crossFloorNavigation.endFloor ?? endFloor;
         return (
             <div className={`nav-overlay-integrated ${isMinimized ? 'minimized' : ''}`}>
                 <div className="nav-card-integrated transition-phase">
@@ -101,16 +93,13 @@ const NavigationOverlay = ({
                         </div>
                         <div className="nav-text">
                             <span className="step-count floor-change-label">
-                                Floor {srcFloor === 0 ? 'G' : srcFloor} → Floor {dstFloor === 0 ? 'G' : dstFloor}
+                                Floor {src === 0 ? 'G' : src} → Floor {dst === 0 ? 'G' : dst}
                             </span>
                             <h2 className="instruction-text">
                                 Take {crossFloorNavigation.transitionType === 'lift' ? 'Lift' : 'Stairs'}
                             </h2>
                         </div>
-                        <button 
-                            className="nav-btn floor-reached-btn"
-                            onClick={onNextPhase}
-                        >
+                        <button className="nav-btn floor-reached-btn" onClick={onNextPhase}>
                             <Check size={22} strokeWidth={2.5} />
                         </button>
                     </div>
@@ -121,133 +110,106 @@ const NavigationOverlay = ({
 
     if (!instructions.length) return null;
 
-    const step = instructions[currentStep];
-    const isLastStep = currentStep === instructions.length - 1;
-    
-    // Check if this is the last step of phase 1 (arrived at lift/stairs)
-    const isAtTransitionPoint = crossFloorNavigation && crossFloorPhase === 1 && isLastStep;
-
-    const nextStep = () => {
-        if (currentStep < instructions.length - 1) {
-            setCurrentStep(c => c + 1);
-        }
-    };
-
-    const prevStep = () => {
-        if (currentStep > 0) {
-            setCurrentStep(c => c - 1);
-        }
-    };
+    // Clamp currentStep to valid range
+    const safeStep = Math.max(0, Math.min(currentStep, instructions.length - 1));
+    const step = instructions[safeStep];
+    const isLast = safeStep === instructions.length - 1;
+    const isTransitionEnd = crossFloorNavigation && crossFloorPhase === 1 && isLast;
 
     const getIcon = (type) => {
         switch (type) {
-            case 'start': return MapPin;
-            case 'continue': return MapPin;
-            case 'straight': return ArrowUp;
-            case 'turn-left': return CornerUpLeft;
-            case 'turn-right': return CornerUpRight;
-            case 'end': return CheckCircle;
-            case 'transition-point': return Building;
-            default: return NavIcon;
+            case 'start':
+            case 'continue':
+                return MapPin;
+            case 'straight':
+                return ArrowUp;
+            case 'turn-left':
+                return CornerUpLeft;
+            case 'turn-right':
+                return CornerUpRight;
+            case 'end':
+                return CheckCircle;
+            case 'transition-point':
+                return Building;
+            default:
+                return NavIcon;
         }
     };
 
     const Icon = getIcon(step.type);
-
-    // Calculate progress for multi-floor navigation
-    let progressPercent = ((currentStep + 1) / instructions.length) * 100;
-    if (crossFloorNavigation) {
-        if (crossFloorPhase === 1) {
-            // Phase 1 is 0-33%
-            progressPercent = ((currentStep + 1) / instructions.length) * 33;
-        } else if (crossFloorPhase === 3) {
-            // Phase 3 is 66-100%
-            progressPercent = 66 + ((currentStep + 1) / instructions.length) * 34;
-        }
-    }
+    const progressPercent = useMemo(() => {
+        const base = ((safeStep + 1) / instructions.length) * 100;
+        if (!crossFloorNavigation) return base;
+        if (crossFloorPhase === 1) return base * 0.33;
+        if (crossFloorPhase === 3) return 66 + base * 0.34;
+        return base;
+    }, [safeStep, instructions.length, crossFloorNavigation, crossFloorPhase]);
 
     return (
         <div className={`nav-overlay-integrated ${isMinimized ? 'minimized' : ''}`}>
             <div className={`nav-card-integrated ${step.type} ${crossFloorNavigation ? 'multi-floor' : ''}`}>
-                {/* Floor indicator for multi-floor navigation */}
                 {crossFloorNavigation && (
                     <div className="multi-floor-badge">
-                        <span>
-                            {crossFloorPhase === 1 
-                                ? `Floor ${(crossFloorNavigation.startFloor ?? startFloor) === 0 ? 'G' : (crossFloorNavigation.startFloor ?? startFloor)}`
-                                : `Floor ${(crossFloorNavigation.endFloor ?? endFloor) === 0 ? 'G' : (crossFloorNavigation.endFloor ?? endFloor)}`
-                            }
-                        </span>
+                        Floor {activeFloor === 0 ? 'G' : activeFloor}
                     </div>
                 )}
-                
                 <div className="nav-progress">
                     <div
                         className={`nav-progress-bar ${crossFloorNavigation ? 'multi-floor-progress' : ''}`}
                         style={{ width: `${progressPercent}%` }}
                     />
                 </div>
-
                 <div className="nav-content-integrated">
                     <div className="nav-icon-wrapper">
                         <Icon size={26} strokeWidth={2.5} />
                     </div>
-
                     <div className="nav-text">
-                        <span className="step-count">Step {currentStep + 1} of {instructions.length}</span>
+                        <span className="step-count">
+                            Step {safeStep + 1} of {instructions.length}
+                        </span>
                         <h2 className="instruction-text">{step.text}</h2>
                     </div>
-
                     <div className="nav-controls">
                         <button
                             className="nav-btn prev"
-                            onClick={prevStep}
-                            disabled={currentStep === 0}
+                            onClick={() => setCurrentStep(s => Math.max(0, s - 1))}
+                            disabled={safeStep === 0}
                         >
-                            <ChevronLeft size={22} strokeWidth={2.5} />
+                            <ChevronLeft size={22} />
                         </button>
-                        
-                        {/* Show "Next Phase" button when at transition point */}
-                        {isAtTransitionPoint ? (
-                            <button
-                                className="nav-btn next-phase"
-                                onClick={onNextPhase}
-                                title="Continue to next floor"
-                            >
-                                <ArrowUpDown size={20} strokeWidth={2.5} />
+                        {isTransitionEnd ? (
+                            <button className="nav-btn next-phase" onClick={onNextPhase}>
+                                <ArrowUpDown size={20} />
                             </button>
                         ) : (
                             <button
-                                className={`nav-btn next ${isLastStep ? 'finish' : ''}`}
-                                onClick={nextStep}
-                                disabled={isLastStep && !crossFloorNavigation}
+                                className={`nav-btn next ${isLast ? 'finish' : ''}`}
+                                onClick={() => setCurrentStep(s => Math.min(instructions.length - 1, s + 1))}
+                                disabled={isLast && !crossFloorNavigation || instructions.length === 0}
                             >
-                                {isLastStep ? <Check size={22} strokeWidth={2.5} /> : <ChevronRight size={22} strokeWidth={2.5} />}
+                                {isLast ? <Check size={22} /> : <ChevronRight size={22} />}
                             </button>
                         )}
                     </div>
-
                     {onToggleMinimize && (
-                        <button 
-                            className="nav-minimize-btn"
-                            onClick={onToggleMinimize}
-                            title={isMinimized ? "Expand" : "Minimize"}
-                        >
+                        <button className="nav-minimize-btn" onClick={onToggleMinimize}>
                             {isMinimized ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                         </button>
                     )}
                 </div>
-
-                {/* Skip to floor change option for phase 1 */}
-                {crossFloorNavigation && crossFloorPhase === 1 && !isAtTransitionPoint && (
+                {crossFloorNavigation && crossFloorPhase === 1 && !isTransitionEnd && (
                     <button className="skip-to-transition" onClick={onNextPhase}>
                         <ArrowUpDown size={14} />
-                        <span>Skip to {crossFloorNavigation.transitionType === 'lift' ? 'Lift' : 'Stairs'}</span>
+                        <span>
+                            Skip to {crossFloorNavigation.transitionType === 'lift' ? 'Lift' : 'Stairs'}
+                        </span>
                     </button>
                 )}
             </div>
         </div>
     );
+
 };
+
 
 export default NavigationOverlay;
