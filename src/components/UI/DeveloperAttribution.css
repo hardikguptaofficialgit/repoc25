@@ -1,0 +1,24 @@
+.developer-attribution {
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.developer-logo-link {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 4px;
+    line-height: 0;
+    transition: opacity 0.2s ease;
+}
+
+.developer-logo-link:hover {
+    opacity: 0.85;
+}
+
+.developer-logo {
+    height: 18px;
+    width: auto;
+    display: inline-block;
+    vertical-align: middle;
+    margin-bottom: 2px;
+}

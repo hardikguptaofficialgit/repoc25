@@ -4,7 +4,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import './ThemeToggle.css';
 
 const ThemeToggle = ({ variant = 'default' }) => {
-    const { theme, setLightMode, setDarkMode, isLight } = useTheme();
+    const { setLightMode, setDarkMode, isLight } = useTheme();
 
     if (variant === 'buttons') {
         return (

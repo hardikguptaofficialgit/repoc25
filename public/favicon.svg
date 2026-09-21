@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Campus map navigation">
+  <rect width="64" height="64" rx="14" fill="#D34A09"/>
+  <path fill="#ffffff" d="M32 12c-7.2 0-13 5.8-13 13 0 9.75 13 27 13 27s13-17.25 13-27c0-7.2-5.8-13-13-13zm0 17.5a4.5 4.5 0 1 1 0-9 4.5 4.5 0 0 1 0 9z"/>
+  <path fill="#ffffff" opacity="0.35" d="M14 48h36v4H14z"/>
+  <path fill="#ffffff" opacity="0.55" d="M18 44h12v3H18zm16 0h12v3H34z"/>
+</svg>

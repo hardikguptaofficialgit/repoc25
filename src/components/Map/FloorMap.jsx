@@ -4,6 +4,7 @@ import { nodes as initialNodes, edges as initialEdges } from '../../data/buildin
 import { getNodesByFloor } from '../../utils/graphBuilder';
 import { generateNavigationInstructions } from '../../utils/navigationInstructions';
 import { ZoomIn, ZoomOut, RotateCcw, RotateCw, Download, Grid3X3, X, Plus, Trash2, Link, MousePointer, Upload, Trash, RefreshCw } from 'lucide-react';
+import DeveloperAttribution from '../UI/DeveloperAttribution';
 import './FloorMap.css';
 
 // -----------------------------------------------------------------------------
@@ -509,7 +510,6 @@ const FloorMap = ({
     const [bgImageOpacity, setBgImageOpacity] = useState(0.5);
     const [showGrid, setShowGrid] = useState(editorMode);
     const [isFullscreen, setIsFullscreen] = useState(false);
-    const [is3D, setIs3D] = useState(false);
     const [pathOffset, setPathOffset] = useState(0);
     const [rotation, setRotation] = useState(0);
 
@@ -531,13 +531,6 @@ const FloorMap = ({
 
         return () => observer.disconnect();
     }, []);
-
-    const recenterMap = useCallback(() => {
-        if (stageSize.width > 0 && stageSize.height > 0) {
-            centerMapToFit();
-            setRotation(0); // Reset rotation when recentering
-        }
-    }, [stageSize]);
 
     // Editor Tools State
     const [editorTool, setEditorTool] = useState('select');
@@ -589,6 +582,13 @@ const FloorMap = ({
         setScale(newScale);
         setPosition(newPosition);
     }, [nodes, stageSize]);
+
+    const recenterMap = useCallback(() => {
+        if (stageSize.width > 0 && stageSize.height > 0) {
+            centerMapToFit();
+            setRotation(0);
+        }
+    }, [stageSize, centerMapToFit]);
 
     // -----------------------------------------------------------------------------
     // Effects
@@ -820,7 +820,6 @@ const FloorMap = ({
 
     // Convert radians to degrees
     const toDegrees = (rad) => rad * (180 / Math.PI);
-    const toRadians = (deg) => deg * (Math.PI / 180);
 
     const handleTouchStart = (e) => {
         if (e.evt.touches.length === 2) {
@@ -1234,7 +1233,7 @@ const FloorMap = ({
     }, []);
 
     return (
-        <div className={`floor-map-container ${isFullscreen ? 'fullscreen' : ''} ${is3D ? 'view-3d' : ''}`} ref={containerRef}>
+        <div className={`floor-map-container ${isFullscreen ? 'fullscreen' : ''}`} ref={containerRef}>
 
             {/* Controls Header */}
             <div className="map-ui-header">
@@ -1463,15 +1462,7 @@ const FloorMap = ({
                     </div>
                 </div>
             )}
-            {/* Attribution */}
-            <div className="map-attribution">
-                Developed by
-                <img
-                    src="https://uploads-ssl.webflow.com/629d87f593841156e4e0d9a4/62eeaa9927e6aea4ff13590e_FedLogo.png"
-                    alt="FED Logo"
-                    className="fed-logo"
-                />
-            </div>
+            <DeveloperAttribution className="map-attribution" />
         </div>
     );
 };
