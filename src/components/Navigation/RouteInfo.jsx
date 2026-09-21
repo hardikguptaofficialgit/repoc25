@@ -16,12 +16,7 @@ import './RouteInfo.css';
 const WALKING_SPEED = 1.4; // m/s
 
 const RouteInfo = ({ path = [], distance = 0, startLabel = '', endLabel = '' }) => {
-  if (!Array.isArray(path) || path.length === 0) return null;
-
-  // Time calculation
-  const estimatedTimeSeconds = Math.ceil(distance / WALKING_SPEED);
-  const minutes = Math.floor(estimatedTimeSeconds / 60);
-  const seconds = estimatedTimeSeconds % 60;
+  const safePath = Array.isArray(path) ? path : [];
 
   const getNodeIcon = (type) => {
     switch (type) {
@@ -44,7 +39,7 @@ const RouteInfo = ({ path = [], distance = 0, startLabel = '', endLabel = '' }) 
     const result = [];
     let stepCounter = 1;
 
-    path.forEach((nodeId, index) => {
+    safePath.forEach((nodeId, index) => {
       const node = nodes[nodeId];
       if (!node) return;
 
@@ -58,7 +53,7 @@ const RouteInfo = ({ path = [], distance = 0, startLabel = '', endLabel = '' }) 
         return;
       }
 
-      if (index === path.length - 1) {
+      if (index === safePath.length - 1) {
         result.push({
           step: stepCounter++,
           instruction: endLabel || node.label,
@@ -79,7 +74,13 @@ const RouteInfo = ({ path = [], distance = 0, startLabel = '', endLabel = '' }) 
     });
 
     return result;
-  }, [path, startLabel, endLabel]);
+  }, [safePath, startLabel, endLabel]);
+
+  if (safePath.length === 0) return null;
+
+  const estimatedTimeSeconds = Math.ceil(distance / WALKING_SPEED);
+  const minutes = Math.floor(estimatedTimeSeconds / 60);
+  const seconds = estimatedTimeSeconds % 60;
 
   return (
     <div className="route-info-container">

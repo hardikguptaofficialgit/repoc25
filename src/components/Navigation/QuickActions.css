@@ -182,20 +182,8 @@
 .quick-attribution-mobile {
     display: none;
     text-align: center;
-    font-size: 10px;
     color: var(--text-tertiary);
     margin-top: 12px;
-    font-weight: 500;
-}
-
-.fed-logo {
-    height: 18px;
-    width: auto;
-    display: inline-block;
-    vertical-align: middle;
-    margin-left: 4px;
-    margin-bottom: 2px;
-    /* optical correction */
 }
 
 @media (max-width: 768px) {

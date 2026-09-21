@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import DeveloperAttribution from '../UI/DeveloperAttribution';
 import './QuickActions.css';
 
 const QuickActions = ({ onQuickAction, currentLocation, minimized = false, crossFloorPhase = 0, isOnNewFloor = false }) => {
     const [isExpanded, setIsExpanded] = useState(!minimized);
+    const [prevMinimized, setPrevMinimized] = useState(minimized);
 
-    useEffect(() => {
+    if (minimized !== prevMinimized) {
+        setPrevMinimized(minimized);
         setIsExpanded(!minimized);
-    }, [minimized]);
+    }
 
     // Enable quick actions if user has a start location OR is on a new floor after cross-floor navigation
     const canUseQuickActions = currentLocation || (crossFloorPhase === 3 && isOnNewFloor);
@@ -90,14 +93,7 @@ const QuickActions = ({ onQuickAction, currentLocation, minimized = false, cross
             )}
 
             {isExpanded && (
-                <div className="quick-attribution-mobile">
-                    Developed by
-                    <img
-                        src="https://uploads-ssl.webflow.com/629d87f593841156e4e0d9a4/62eeaa9927e6aea4ff13590e_FedLogo.png"
-                        alt="FED Logo"
-                        className="fed-logo"
-                    />
-                </div>
+                <DeveloperAttribution className="quick-attribution-mobile" />
             )}
         </div>
     );

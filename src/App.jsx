@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import FloorMap from './components/Map/FloorMap';
 import SearchBar from './components/Navigation/SearchBar';
 
@@ -62,12 +62,6 @@ function App({ isAdmin, setIsAdmin }) {
     setGraph(builtGraph);
   }, []);
 
-  useEffect(() => {
-    if (selectedStart && selectedEnd && graph) {
-      calculateRoute(selectedStart.id, selectedEnd.id);
-    }
-  }, [selectedStart, selectedEnd, graph]);
-
   const toggleEditorMode = () => {
     const newEditorState = !editorMode;
     setEditorMode(newEditorState);
@@ -80,7 +74,7 @@ function App({ isAdmin, setIsAdmin }) {
     localStorage.removeItem('adminSession');
   };
 
-  const calculateRoute = (startId, endId) => {
+  const calculateRoute = useCallback((startId, endId) => {
     if (!graph) return;
 
     // Check if start and end are on the same floor
@@ -138,7 +132,13 @@ function App({ isAdmin, setIsAdmin }) {
         setError('');
       }
     }
-  };
+  }, [graph, selectedStart, selectedEnd, currentFloor]);
+
+  useEffect(() => {
+    if (selectedStart && selectedEnd && graph) {
+      calculateRoute(selectedStart.id, selectedEnd.id);
+    }
+  }, [selectedStart, selectedEnd, graph, calculateRoute]);
 
   // Handle selecting a transition type (lift or stairs)
   const handleSelectTransition = (transitionType) => {

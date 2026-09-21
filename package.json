@@ -8,7 +8,8 @@
     "dev:network": "vite --host",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate-icons": "node scripts/generate-map-icons.mjs"
   },
   "dependencies": {
     "@hugeicons/react": "^1.1.4",
