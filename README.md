@@ -10,7 +10,7 @@
 [![PWA](https://img.shields.io/badge/PWA-ready-5A0FC8?style=for-the-badge&logo=pwa&logoColor=white)](https://web.dev/progressive-web-apps/)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue?style=for-the-badge)](./LICENSE)
 
-[Open app](https://campus25fed.vercel.app/) · [Report issue](https://github.com/hardikguptaofficialgit/repoc25/issues)
+[Open app](https://campus25go.vercel.app/) · [Report issue](https://github.com/hardikguptaofficialgit/repoc25/issues)
 
 </div>
 
